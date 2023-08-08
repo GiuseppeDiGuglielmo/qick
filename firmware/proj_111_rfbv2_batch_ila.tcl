@@ -1,6 +1,7 @@
 source proj_111_rfbv2.tcl
 
 ## === BEGIN: ILAs =============================================================
+# TODO: REMOVE THE ABSOLUTE PATH!
 open_bd_design {/extras/home/gdg/research/projects/quantum/qick/firmware/top_111_rfbv2/top_111_rfbv2.srcs/sources_1/bd/d_1/d_1.bd}
 
 set_property HDL_ATTRIBUTE.DEBUG true [get_bd_nets {vect2bits_16_0_dout14 vect2bits_16_0_dout15 }]
