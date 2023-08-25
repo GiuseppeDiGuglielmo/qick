@@ -6,6 +6,7 @@ syn-zcu111-rfbv2:
 # Batch model, create Vivado project, run implementation, copy package remotely
 syn-zcu111-rfbv2-batch:
 	vivado -mode batch -source proj_111_rfbv2_batch.tcl
+	@for _ in `seq 10`; do sleep 1; echo -e "\a"; done
 .PHONY: syn-zcu111-rfbv2-batch
 
 # Batch model, create Vivado project, enable ILA, run implementation, copy package remotely
