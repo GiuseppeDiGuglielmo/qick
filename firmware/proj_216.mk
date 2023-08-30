@@ -3,15 +3,20 @@ syn-zcu216:
 	vivado -source proj_216.tcl
 .PHONY: syn-zcu216
 
-# Batch model, create Vivado project, run implementation, copy package remotely
+# Batch mode: create Vivado project and run implementation
 syn-zcu216-batch:
 	vivado -mode batch -source proj_216_batch.tcl
 .PHONY: syn-zcu216-batch
 
-# Batch model, create Vivado project, enable ILA, run implementation, copy package remotely
+# Batch mode: create Vivado project, enable ILA, and run implementation
 syn-zcu216-batch-ila:
 	vivado -mode batch -source proj_216_batch_ila.tcl
 .PHONY: syn-zcu216-batch-ila
+
+# Batch mode: create Vivado project, use BRAMs + AXI-lite, and run implementation
+syn-zcu216-batch-bram:
+	vivado -mode batch -source proj_216_batch_bram.tcl
+.PHONY: syn-zcu216-batch-bram
 
 # Open GUI of the latest Vivado project
 gui-zcu216:
@@ -30,7 +35,7 @@ package-zcu216:
 # Copy package remotely
 copy-zcu216: package-zcu216
 	@./copy.sh \
-		xilinx@rfsoc216-ml01.dhcp.fnal.gov:~/jupyter_notebooks/qick/ml \
+		xilinx@rfsoc216-ml01.dhcp.fnal.gov:~/jupyter_notebooks/qick/qick_ml \
 		qick_216 \
 		quantum2023.
 .PHONY: package-zcu216

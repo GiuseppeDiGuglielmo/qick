@@ -6,9 +6,14 @@ PACKAGE_DIR=package
 echo "=============================================================="
 echo "Remote dir: $TARGET"
 sshpass -p "$PASSWORD" scp $PACKAGE_DIR/* $TARGET
-FILES=`ls $PACKAGE_DIR`
-for f in $FILES; do
-    echo "File remotely copied: $f"
-done
+if [ $? -eq 0 ]; then
+    FILES=`ls $PACKAGE_DIR`
+    for f in $FILES; do
+        echo "File remotely copied: $f"
+    done
+    echo "Remote copy: PASS"
+else
+    echo "Remote copy: FAIL"
+fi
 echo "=============================================================="
 
