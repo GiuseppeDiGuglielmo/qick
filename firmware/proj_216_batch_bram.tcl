@@ -6,7 +6,8 @@ open_bd_design {${proj_dir}/top_216.srcs/sources_1/bd/d_1/d_1.bd}
 
 # Set neural network IP path
 set OTHER_IP_PATH "[file normalize ${orig_proj_dir}/ip]"
-set NN_IP_PATH "[file normalize ${orig_proj_dir}/../../models_HLS/fcnn/ioParallel/modelv3/fcnn_ioParallel_trigger_rf8]"
+#set NN_IP_PATH "[file normalize ${orig_proj_dir}/../../models_HLS/fcnn/ioParallel/modelv3/fcnn_ioParallel_trigger_rf8]"
+set NN_IP_PATH "[file normalize ${orig_proj_dir}/../../models_HLS/fcnn/ioParallel/dummy/dummy_model]"
 set_property ip_repo_paths "${OTHER_IP_PATH} ${NN_IP_PATH}" [current_project]
 update_ip_catalog
 
@@ -62,6 +63,9 @@ apply_bd_automation -rule xilinx.com:bd_rule:axi4 -config { \
 #set_property name NN_0_axi_bram_ctrl [get_bd_cells axi_bram_ctrl_1]
 
 validate_bd_design
+
+set_property strategy Flow_AreaOptimized_high [get_runs synth_1]
+set_property strategy Congestion_SpreadLogic_high [get_runs impl_1]
 # === END: NN ===============================================================
 
 reset_run impl_1
