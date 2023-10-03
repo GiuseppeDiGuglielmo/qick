@@ -66,6 +66,67 @@ validate_bd_design
 
 set_property strategy Flow_AreaOptimized_high [get_runs synth_1]
 set_property strategy Congestion_SpreadLogic_high [get_runs impl_1]
+
+# Debug
+
+set_property HDL_ATTRIBUTE.DEBUG true [get_bd_intf_nets {axis_readout_v2_0_m1_axis}]
+set_property HDL_ATTRIBUTE.DEBUG true [get_bd_intf_nets {axis_readout_v2_0_m0_axis}]
+set_property HDL_ATTRIBUTE.DEBUG true [get_bd_intf_nets {axis_broadcaster_0_M00_AXIS}]
+set_property HDL_ATTRIBUTE.DEBUG true [get_bd_intf_nets {axis_broadcaster_0_M01_AXIS}]
+apply_bd_automation -rule xilinx.com:bd_rule:debug -dict [
+    list \
+        [get_bd_intf_nets axis_broadcaster_0_M00_AXIS] {AXIS_SIGNALS "Data and Trigger" CLK_SRC "/usp_rf_data_converter_0/clk_adc2" SYSTEM_ILA "Auto" APC_EN "0" } \
+]
+set_property -dict [list CONFIG.C_SLOT {1} CONFIG.C_BRAM_CNT {18} CONFIG.C_NUM_MONITOR_SLOTS {4} CONFIG.C_SLOT_1_INTF_TYPE {xilinx.com:interface:axis_rtl:1.0}] [get_bd_cells system_ila_0]
+set_property -dict [list CONFIG.C_SLOT {3} CONFIG.C_BRAM_CNT {7} CONFIG.C_SLOT_2_INTF_TYPE {xilinx.com:interface:axis_rtl:1.0} CONFIG.C_SLOT_3_INTF_TYPE {xilinx.com:interface:axis_rtl:1.0}] [get_bd_cells system_ila_0]
+connect_bd_intf_net [get_bd_intf_pins system_ila_0/SLOT_1_AXIS] [get_bd_intf_pins axis_avg_buffer_0/s_axis]
+connect_bd_intf_net [get_bd_intf_pins system_ila_0/SLOT_2_AXIS] [get_bd_intf_pins axis_broadcaster_0/S_AXIS]
+connect_bd_intf_net [get_bd_intf_pins system_ila_0/SLOT_3_AXIS] [get_bd_intf_pins axis_terminator_0/s_axis]
+set_property HDL_ATTRIBUTE.DEBUG true [get_bd_intf_nets {NN_0_out_r_PORTA}]
+apply_bd_automation -rule xilinx.com:bd_rule:debug -dict [
+    list \
+        [get_bd_intf_nets NN_0_out_r_PORTA] {NON_AXI_SIGNALS "Data and Trigger" CLK_SRC "/usp_rf_data_converter_0/clk_adc2" SYSTEM_ILA "Auto" } \
+]
+set_property -dict [list CONFIG.C_MON_TYPE {MIX}] [get_bd_cells system_ila_0]
+set_property HDL_ATTRIBUTE.DEBUG true [get_bd_nets {vect2bits_16_0_dout14 }]
+connect_bd_net [get_bd_pins system_ila_0/probe0] [get_bd_pins vect2bits_16_0/dout14]
+
+
+
+set_property HDL_ATTRIBUTE.DEBUG true [get_bd_intf_nets {axis_signal_gen_v6_0_m_axis}]
+apply_bd_automation -rule xilinx.com:bd_rule:debug -dict [list \
+    [get_bd_intf_nets axis_signal_gen_v6_0_m_axis] {AXIS_SIGNALS "Data and Trigger" CLK_SRC "/usp_rf_data_converter_0/clk_dac2" SYSTEM_ILA "Auto" APC_EN "0" } \
+]
+set_property -dict [list CONFIG.C_SLOT {6} CONFIG.C_BRAM_CNT {2.5} CONFIG.C_NUM_MONITOR_SLOTS {7} CONFIG.C_SLOT_1_INTF_TYPE {xilinx.com:interface:axis_rtl:1.0} CONFIG.C_SLOT_2_INTF_TYPE {xilinx.com:interface:axis_rtl:1.0} CONFIG.C_SLOT_3_INTF_TYPE {xilinx.com:interface:axis_rtl:1.0} CONFIG.C_SLOT_4_INTF_TYPE {xilinx.com:interface:axis_rtl:1.0} CONFIG.C_SLOT_5_INTF_TYPE {xilinx.com:interface:axis_rtl:1.0} CONFIG.C_SLOT_6_INTF_TYPE {xilinx.com:interface:axis_rtl:1.0}] [get_bd_cells system_ila_1]
+set_property HDL_ATTRIBUTE.DEBUG true [get_bd_intf_nets {axis_signal_gen_v6_1_m_axis}]
+connect_bd_intf_net [get_bd_intf_pins system_ila_1/SLOT_1_AXIS] [get_bd_intf_pins axis_signal_gen_v6_1/m_axis]
+set_property HDL_ATTRIBUTE.DEBUG true [get_bd_intf_nets {axis_signal_gen_v6_2_m_axis}]
+connect_bd_intf_net [get_bd_intf_pins system_ila_1/SLOT_2_AXIS] [get_bd_intf_pins axis_signal_gen_v6_2/m_axis]
+set_property HDL_ATTRIBUTE.DEBUG true [get_bd_intf_nets {axis_signal_gen_v6_3_m_axis}]
+connect_bd_intf_net [get_bd_intf_pins system_ila_1/SLOT_3_AXIS] [get_bd_intf_pins axis_signal_gen_v6_3/m_axis]
+set_property HDL_ATTRIBUTE.DEBUG true [get_bd_intf_nets {axis_signal_gen_v6_4_m_axis}]
+connect_bd_intf_net [get_bd_intf_pins system_ila_1/SLOT_4_AXIS] [get_bd_intf_pins axis_signal_gen_v6_4/m_axis]
+set_property HDL_ATTRIBUTE.DEBUG true [get_bd_intf_nets {axis_signal_gen_v6_5_m_axis}]
+connect_bd_intf_net [get_bd_intf_pins system_ila_1/SLOT_5_AXIS] [get_bd_intf_pins axis_signal_gen_v6_5/m_axis]
+set_property HDL_ATTRIBUTE.DEBUG true [get_bd_intf_nets {axis_signal_gen_v6_6_m_axis}]
+connect_bd_intf_net [get_bd_intf_pins system_ila_1/SLOT_6_AXIS] [get_bd_intf_pins axis_signal_gen_v6_6/m_axis]
+
+
+disconnect_bd_intf_net [get_bd_intf_net axis_signal_gen_v6_6_m_axis] [get_bd_intf_pins system_ila_1/SLOT_6_AXIS]
+disconnect_bd_intf_net [get_bd_intf_net axis_signal_gen_v6_5_m_axis] [get_bd_intf_pins system_ila_1/SLOT_5_AXIS]
+disconnect_bd_intf_net [get_bd_intf_net axis_signal_gen_v6_4_m_axis] [get_bd_intf_pins system_ila_1/SLOT_4_AXIS]
+set_property -dict [list CONFIG.C_SLOT {0} CONFIG.C_BRAM_CNT {50.5} CONFIG.C_NUM_MONITOR_SLOTS {4}] [get_bd_cells system_ila_1]
+apply_bd_automation -rule xilinx.com:bd_rule:debug -dict [list \
+                                                          [get_bd_intf_nets axis_signal_gen_v6_4_m_axis] {AXIS_SIGNALS "Data and Trigger" CLK_SRC "/usp_rf_data_converter_0/clk_dac3" SYSTEM_ILA "Auto" APC_EN "0" } \
+                                                         ]
+set_property -dict [list CONFIG.C_SLOT {2} CONFIG.C_BRAM_CNT {6.5} CONFIG.C_NUM_MONITOR_SLOTS {3} CONFIG.C_SLOT_1_INTF_TYPE {xilinx.com:interface:axis_rtl:1.0} CONFIG.C_SLOT_2_INTF_TYPE {xilinx.com:interface:axis_rtl:1.0}] [get_bd_cells system_ila_2]
+connect_bd_intf_net [get_bd_intf_pins system_ila_2/SLOT_1_AXIS] [get_bd_intf_pins axis_signal_gen_v6_5/m_axis]
+connect_bd_intf_net [get_bd_intf_pins system_ila_2/SLOT_2_AXIS] [get_bd_intf_pins axis_signal_gen_v6_6/m_axis]
+
+
+
+validate_bd_design
+
 # === END: NN ===============================================================
 
 reset_run impl_1
