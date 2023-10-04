@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
-<EDKSYSTEM EDWVERSION="1.2" TIMESTAMP="Tue Oct  3 14:29:38 2023" VIVADOVERSION="2020.2">
+<EDKSYSTEM EDWVERSION="1.2" TIMESTAMP="Tue Oct  3 16:46:14 2023" VIVADOVERSION="2020.2">
 
   <SYSTEMINFO ARCH="zynquplusRFSOC" BOARD="xilinx.com:zcu216:part0:2.0" DEVICE="xczu49dr" NAME="d_1" PACKAGE="ffvf1760" SPEEDGRADE="-2"/>
 
@@ -251,11 +251,11 @@
   </EXTERNALINTERFACES>
 
   <MODULES>
-    <MODULE COREREVISION="2113234765" FULLNAME="/NN_0" HWVERSION="1.0" INSTANCE="NN_0" IPTYPE="PERIPHERAL" IS_ENABLE="1" MODCLASS="PERIPHERAL" MODTYPE="myproject_axi" VLNV="xilinx.com:hls:myproject_axi:1.0">
+    <MODULE COREREVISION="2113234904" FULLNAME="/NN_0" HWVERSION="1.0" INSTANCE="NN_0" IPTYPE="PERIPHERAL" IS_ENABLE="1" MODCLASS="PERIPHERAL" MODTYPE="myproject_axi" VLNV="xilinx.com:hls:myproject_axi:1.0">
       <DOCUMENTS/>
       <PARAMETERS>
         <PARAMETER NAME="Component_Name" VALUE="d_1_myproject_axi_0_0"/>
-        <PARAMETER NAME="clk_period" VALUE="0.5"/>
+        <PARAMETER NAME="clk_period" VALUE="3.255"/>
         <PARAMETER NAME="machine" VALUE="64"/>
         <PARAMETER NAME="combinational" VALUE="0"/>
         <PARAMETER NAME="latency" VALUE="2"/>
