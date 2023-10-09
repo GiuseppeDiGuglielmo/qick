@@ -43,6 +43,11 @@ module axis_avg_buffer
 		s_axis_tready		,
 		s_axis_tdata		,
 
+        // Forward AXIS Slave for input data.
+        fwd_axis_tvalid	    ,
+		fwd_axis_tready	    ,
+		fwd_axis_tdata	    ,
+
 		// Reset and clock for m0 and m1.
 		m_axis_aclk			,
 		m_axis_aresetn		,
@@ -74,6 +79,12 @@ parameter N_BUF = 10;
 
 // Number of bits.
 parameter B = 16;
+
+// Length (or duration) in clock cycles to keep VALID signal high. This is the
+// number of neural-network inputs (I, Q),
+parameter LENGTH = 100;
+// Delay (in clock cycles) on when to start keeping VALID signal high.
+parameter OFFSET = 2;
 
 /*********/
 /* Ports */
@@ -112,6 +123,10 @@ input				s_axis_aresetn;
 input				s_axis_tvalid;
 output				s_axis_tready;
 input	[2*B-1:0]	s_axis_tdata;
+
+output				fwd_axis_tvalid;
+input				fwd_axis_tready;
+output	[2*B-1:0]	fwd_axis_tdata;
 
 input				m_axis_aclk;
 input				m_axis_aresetn;
@@ -201,6 +216,27 @@ axi_slv axi_slv_i
 		.BUF_DR_ADDR_REG	(BUF_DR_ADDR_REG	),
 		.BUF_DR_LEN_REG		(BUF_DR_LEN_REG		)
 	);
+
+// Forward AXIS stream.
+// TVALID and TDATA are connected.
+// TREADY is not connected (thus no push-back).
+axis_fwd
+    #(  .B      (B     ),
+        .LENGTH (LENGTH),
+        .OFFSET (OFFSET)
+    )
+    axis_fwd_i
+    (
+        .s_axis_aclk        (s_axis_aclk        ),
+        .s_axis_aresetn     (s_axis_aresetn     ),
+        .s_axis_tvalid      (s_axis_tvalid      ),
+        .s_axis_tready      (s_axis_tready      ),
+        .s_axis_tdata       (s_axis_tdata       ),
+        .trigger            (trigger            ),
+        .fwd_axis_tvalid    (fwd_axis_tvalid    ),
+        .fwd_axis_tready    (fwd_axis_tready    ),
+        .fwd_axis_tdata     (fwd_axis_tdata     )
+    );
 
 // Averager + Buffer Top.
 avg_buffer

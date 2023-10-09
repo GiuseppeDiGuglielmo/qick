@@ -1,6 +1,6 @@
 source proj_216.tcl
 
-# === BEGIN: NN ===============================================================
+## === BEGIN: NN ===============================================================
 # Open block diagram
 open_bd_design {${proj_dir}/top_216.srcs/sources_1/bd/d_1/d_1.bd}
 
@@ -15,26 +15,31 @@ update_ip_catalog
 create_bd_cell -type ip -vlnv xilinx.com:hls:myproject_axi:1.0 myproject_axi_0
 set_property name NN_0 [get_bd_cells myproject_axi_0]
 
-# Add AXI-stream broadcaster IPs
-create_bd_cell -type ip -vlnv xilinx.com:ip:axis_broadcaster:1.1 axis_broadcaster_0
-connect_bd_net [get_bd_pins axis_broadcaster_0/aclk] [get_bd_pins usp_rf_data_converter_0/clk_adc2]
-connect_bd_net [get_bd_pins axis_broadcaster_0/aresetn] [get_bd_pins rst_adc/peripheral_aresetn]
+# Connect NN IP to average block that just forward the input AXIS
+connect_bd_intf_net [get_bd_intf_pins axis_avg_buffer_0/fwd_axis] [get_bd_intf_pins NN_0/in_V]
 
-# Wire broadcaster, average block, NN, readout IPs
-delete_bd_objs [get_bd_intf_nets axis_readout_v2_0_m1_axis]
-connect_bd_intf_net [get_bd_intf_pins axis_readout_v2_0/m1_axis] [get_bd_intf_pins axis_broadcaster_0/S_AXIS]
-#connect_bd_intf_net [get_bd_intf_pins axis_broadcaster_0/M00_AXIS] [get_bd_intf_pins NN_0/in_r]
-connect_bd_intf_net [get_bd_intf_pins axis_broadcaster_0/M01_AXIS] [get_bd_intf_pins axis_avg_buffer_0/s_axis]
-
+## Add AXI-stream broadcaster IPs
+#create_bd_cell -type ip -vlnv xilinx.com:ip:axis_broadcaster:1.1 axis_broadcaster_0
+#connect_bd_net [get_bd_pins axis_broadcaster_0/aclk] [get_bd_pins usp_rf_data_converter_0/clk_adc2]
+#connect_bd_net [get_bd_pins axis_broadcaster_0/aresetn] [get_bd_pins rst_adc/peripheral_aresetn]
+#
+## Wire broadcaster, average block, NN, readout IPs
+#delete_bd_objs [get_bd_intf_nets axis_readout_v2_0_m1_axis]
+#connect_bd_intf_net [get_bd_intf_pins axis_readout_v2_0/m1_axis] [get_bd_intf_pins axis_broadcaster_0/S_AXIS]
+##connect_bd_intf_net [get_bd_intf_pins axis_broadcaster_0/M00_AXIS] [get_bd_intf_pins NN_0/in_r]
+#connect_bd_intf_net [get_bd_intf_pins axis_broadcaster_0/M01_AXIS] [get_bd_intf_pins axis_avg_buffer_0/s_axis]
+#
 # Connect NN IP and trigger
-connect_bd_net [get_bd_pins axis_broadcaster_0/m_axis_tdata] [get_bd_pins NN_0/in_V_TDATA]
-create_bd_cell -type ip -vlnv xilinx.com:ip:xlconstant:1.1 xlconstant_5
-set_property name NN_0_always_ready [get_bd_cells xlconstant_5]
-connect_bd_net [get_bd_pins NN_0_always_ready/dout] [get_bd_pins axis_broadcaster_0/m_axis_tready]
-connect_bd_net [get_bd_pins NN_0/in_V_TVALID] [get_bd_pins vect2bits_16_0/dout14]
+#connect_bd_net [get_bd_pins axis_broadcaster_0/m_axis_tdata] [get_bd_pins NN_0/in_V_TDATA]
+#create_bd_cell -type ip -vlnv xilinx.com:ip:xlconstant:1.1 xlconstant_5
+#set_property name NN_0_always_ready [get_bd_cells xlconstant_5]
+#connect_bd_net [get_bd_pins NN_0_always_ready/dout] [get_bd_pins axis_broadcaster_0/m_axis_tready]
+#connect_bd_net [get_bd_pins NN_0/in_V_TVALID] [get_bd_pins vect2bits_16_0/dout14]
+
+set_property CONFIG.FREQ_HZ 307200000 [get_bd_intf_pins /axis_avg_buffer_0/fwd_axis]
 connect_bd_net [get_bd_pins NN_0/ap_clk] [get_bd_pins usp_rf_data_converter_0/clk_adc2]
 connect_bd_net [get_bd_pins NN_0/ap_rst_n] [get_bd_pins rst_adc/peripheral_aresetn]
-
+#
 # Add two-port BRAMs (NN 0)
 create_bd_cell -type ip -vlnv xilinx.com:ip:blk_mem_gen:8.4 blk_mem_gen_0
 set_property -dict [list \
@@ -75,24 +80,37 @@ set_property strategy Congestion_SpreadLogic_high [get_runs impl_1]
 # === END: NN ===============================================================
 
 # === BEGIN: ILA ===============================================================
-
-set_property HDL_ATTRIBUTE.DEBUG true [get_bd_nets {axis_broadcaster_0_m_axis_tdata }]
-set_property HDL_ATTRIBUTE.DEBUG true [get_bd_nets {NN_0_always_ready_dout }]
-set_property HDL_ATTRIBUTE.DEBUG true [get_bd_intf_nets {axis_broadcaster_0_M01_AXIS}]
+set_property HDL_ATTRIBUTE.DEBUG true [get_bd_intf_nets {axis_avg_buffer_0_fwd_axis}]
 set_property HDL_ATTRIBUTE.DEBUG true [get_bd_intf_nets {axis_readout_v2_0_m1_axis}]
 set_property HDL_ATTRIBUTE.DEBUG true [get_bd_nets {vect2bits_16_0_dout14 }]
+set_property HDL_ATTRIBUTE.DEBUG true [get_bd_intf_nets {NN_0_out_r_PORTA}]
+
 apply_bd_automation -rule xilinx.com:bd_rule:debug -dict [list \
-    [get_bd_intf_nets axis_broadcaster_0_M01_AXIS] \
-    {AXIS_SIGNALS "Data and Trigger" CLK_SRC "/usp_rf_data_converter_0/clk_adc2" SYSTEM_ILA "Auto" APC_EN "0" } \
+    [get_bd_intf_nets axis_readout_v2_0_m1_axis] {AXIS_SIGNALS "Data and Trigger" CLK_SRC "/usp_rf_data_converter_0/clk_adc2" SYSTEM_ILA "Auto" APC_EN "0" } \
 ]
-set_property -dict [list CONFIG.C_BRAM_CNT {0.5} CONFIG.C_NUM_OF_PROBES {2} CONFIG.C_MON_TYPE {MIX}] [get_bd_cells system_ila_0]
-connect_bd_net [get_bd_pins system_ila_0/probe0] [get_bd_pins axis_broadcaster_0/m_axis_tdata]
-connect_bd_net [get_bd_pins system_ila_0/probe1] [get_bd_pins NN_0_always_ready/dout]
-set_property -dict [list CONFIG.C_NUM_MONITOR_SLOTS {2}] [get_bd_cells system_ila_0]
-set_property -dict [list CONFIG.C_SLOT {1} CONFIG.C_BRAM_CNT {6.5} CONFIG.C_SLOT_1_INTF_TYPE {xilinx.com:interface:axis_rtl:1.0}] [get_bd_cells system_ila_0]
-connect_bd_intf_net [get_bd_intf_pins system_ila_0/SLOT_1_AXIS] [get_bd_intf_pins axis_broadcaster_0/S_AXIS]
-set_property -dict [list CONFIG.C_BRAM_CNT {1} CONFIG.C_NUM_OF_PROBES {3}] [get_bd_cells system_ila_0]
-connect_bd_net [get_bd_pins system_ila_0/probe2] [get_bd_pins vect2bits_16_0/dout14]
+set_property -dict [list CONFIG.C_BRAM_CNT {12} CONFIG.C_NUM_MONITOR_SLOTS {3} CONFIG.C_MON_TYPE {MIX}] [get_bd_cells system_ila_0]
+set_property -dict [list CONFIG.C_SLOT {2} CONFIG.C_BRAM_CNT {6.5} CONFIG.C_SLOT_1_INTF_TYPE {xilinx.com:interface:axis_rtl:1.0} CONFIG.C_SLOT_2_INTF_TYPE {xilinx.com:interface:bram_rtl:1.0}] [get_bd_cells system_ila_0]
+connect_bd_intf_net [get_bd_intf_pins system_ila_0/SLOT_1_AXIS] [get_bd_intf_pins NN_0/in_V]
+connect_bd_intf_net [get_bd_intf_pins system_ila_0/SLOT_2_BRAM] [get_bd_intf_pins NN_0/out_r_PORTA]
+connect_bd_net [get_bd_pins system_ila_0/probe0] [get_bd_pins vect2bits_16_0/dout14]
+
+#set_property HDL_ATTRIBUTE.DEBUG true [get_bd_nets {axis_broadcaster_0_m_axis_tdata }]
+#set_property HDL_ATTRIBUTE.DEBUG true [get_bd_nets {NN_0_always_ready_dout }]
+#set_property HDL_ATTRIBUTE.DEBUG true [get_bd_intf_nets {axis_broadcaster_0_M01_AXIS}]
+#set_property HDL_ATTRIBUTE.DEBUG true [get_bd_intf_nets {axis_readout_v2_0_m1_axis}]
+#set_property HDL_ATTRIBUTE.DEBUG true [get_bd_nets {vect2bits_16_0_dout14 }]
+#apply_bd_automation -rule xilinx.com:bd_rule:debug -dict [list \
+#    [get_bd_intf_nets axis_broadcaster_0_M01_AXIS] \
+#    {AXIS_SIGNALS "Data and Trigger" CLK_SRC "/usp_rf_data_converter_0/clk_adc2" SYSTEM_ILA "Auto" APC_EN "0" } \
+#]
+#set_property -dict [list CONFIG.C_BRAM_CNT {0.5} CONFIG.C_NUM_OF_PROBES {2} CONFIG.C_MON_TYPE {MIX}] [get_bd_cells system_ila_0]
+#connect_bd_net [get_bd_pins system_ila_0/probe0] [get_bd_pins axis_broadcaster_0/m_axis_tdata]
+#connect_bd_net [get_bd_pins system_ila_0/probe1] [get_bd_pins NN_0_always_ready/dout]
+#set_property -dict [list CONFIG.C_NUM_MONITOR_SLOTS {2}] [get_bd_cells system_ila_0]
+#set_property -dict [list CONFIG.C_SLOT {1} CONFIG.C_BRAM_CNT {6.5} CONFIG.C_SLOT_1_INTF_TYPE {xilinx.com:interface:axis_rtl:1.0}] [get_bd_cells system_ila_0]
+#connect_bd_intf_net [get_bd_intf_pins system_ila_0/SLOT_1_AXIS] [get_bd_intf_pins axis_broadcaster_0/S_AXIS]
+#set_property -dict [list CONFIG.C_BRAM_CNT {1} CONFIG.C_NUM_OF_PROBES {3}] [get_bd_cells system_ila_0]
+#connect_bd_net [get_bd_pins system_ila_0/probe2] [get_bd_pins vect2bits_16_0/dout14]
 
 validate_bd_design
 
