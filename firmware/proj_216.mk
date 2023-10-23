@@ -3,10 +3,15 @@ syn-zcu216:
 	vivado -source proj_216.tcl
 .PHONY: syn-zcu216
 
+# Batch mode: create Vivado, QICK, project and run implementation
+syn-zcu216-batch-orig:
+	vivado -mode batch -source proj_216_batch_orig.tcl
+.PHONY: syn-zcu216-batch-orig
+
 # Batch mode: create Vivado, QICK, ILAs, project and run implementation
-syn-zcu216-batch:
-	vivado -mode batch -source proj_216_batch.tcl
-.PHONY: syn-zcu216-batch
+syn-zcu216-batch-ila:
+	vivado -mode batch -source proj_216_batch_ila.tcl
+.PHONY: syn-zcu216-batch-ila
 
 # Batch mode: create Vivado project, QICK+NN, use BRAMs + AXI-lite for NN, ILAs, and run implementation
 syn-zcu216-batch-nn:
