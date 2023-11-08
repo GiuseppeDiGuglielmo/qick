@@ -16,6 +16,13 @@ set_property HDL_ATTRIBUTE.DEBUG true [get_bd_nets {vect2bits_16_0_dout14 }]
 set_property -dict [list CONFIG.C_BRAM_CNT {1} CONFIG.C_MON_TYPE {MIX}] [get_bd_cells system_ila_0]
 connect_bd_net [get_bd_pins system_ila_0/probe0] [get_bd_pins vect2bits_16_0/dout14]
 
+# Validation
+validate_bd_design
+
+# Improve synthesis and implementation to avoid timing violations
+set_property strategy Flow_AreaOptimized_high [get_runs synth_1]
+set_property strategy Congestion_SpreadLogic_high [get_runs impl_1]
+
 # === END: DEBUG ===============================================================
 
 reset_run impl_1
