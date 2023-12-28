@@ -47,6 +47,17 @@ apply_bd_automation -rule xilinx.com:bd_rule:axi4 -config { \
     intc_ip {/ps8_0_axi_periph} \
     master_apm {0}} [get_bd_intf_pins axi_bram_ctrl_1/S_AXI]
 
+# Add AXI-lite scaler port on NN
+apply_bd_automation -rule xilinx.com:bd_rule:axi4 -config { \
+    Clk_master {/zynq_ultra_ps_e_0/pl_clk0 (99 MHz)} \
+    Clk_slave {/usp_rf_data_converter_0/clk_adc2 (307 MHz)} \
+    Clk_xbar {/zynq_ultra_ps_e_0/pl_clk0 (99 MHz)} \
+    Master {/zynq_ultra_ps_e_0/M_AXI_HPM0_FPD} \
+    Slave {/NN_0/s_axi_AXILiteS} \
+    ddr_seg {Auto} \
+    intc_ip {/ps8_0_axi_periph} \
+    master_apm {0}} [get_bd_intf_pins NN_0/s_axi_AXILiteS]
+
 validate_bd_design
 
 set_property strategy Flow_AreaOptimized_high [get_runs synth_1]
@@ -71,6 +82,11 @@ connect_bd_intf_net [get_bd_intf_pins system_ila_0/SLOT_1_AXIS] [get_bd_intf_pin
 connect_bd_intf_net [get_bd_intf_pins system_ila_0/SLOT_2_AXIS] [get_bd_intf_pins NN_0/in_V]
 connect_bd_intf_net [get_bd_intf_pins system_ila_0/SLOT_3_BRAM] [get_bd_intf_pins blk_mem_gen_0/BRAM_PORTB]
 connect_bd_net [get_bd_pins system_ila_0/probe0] [get_bd_pins vect2bits_16_0/dout14]
+
+# debug scaler
+set_property HDL_ATTRIBUTE.DEBUG true [get_bd_intf_nets {ps8_0_axi_periph_M28_AXI}]
+set_property -dict [list CONFIG.C_NUM_MONITOR_SLOTS {5}] [get_bd_cells system_ila_0]
+connect_bd_intf_net [get_bd_intf_pins system_ila_0/SLOT_4_AXI] [get_bd_intf_pins NN_0/s_axi_AXILiteS]
 
 validate_bd_design
 
