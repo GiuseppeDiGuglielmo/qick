@@ -12,7 +12,7 @@ import functools
 from tqdm.auto import tqdm
 
 from qick import obtain, get_version
-from .helpers import cosine, gauss, triang, DRAG
+from .helpers import to_int, cosine, gauss, triang, DRAG
 
 logger = logging.getLogger(__name__)
 
@@ -57,6 +57,27 @@ class QickConfig():
     def __setitem__(self, key, val):
         self._cfg[key] = val
 
+    def _describe_dac(self, dacname):
+        tile, block = [int(c) for c in dacname]
+        if self['board']=='ZCU111':
+            label = "DAC%d_T%d_CH%d or RF board output %d" % (tile + 228, tile, block, tile*4 + block)
+        elif self['board']=='ZCU216':
+            label = "%d_%d, on JHC%d" % (block, tile + 228, 1 + (block%2) + 2*(tile//2))
+        elif self['board']=='RFSoC4x2':
+            label = {'00': 'DAC_B', '20': 'DAC_A'}[dacname]
+        return "DAC tile %d, blk %d is %s" % (tile, block, label)
+
+    def _describe_adc(self, adcname):
+        tile, block = [int(c) for c in adcname]
+        if self['board']=='ZCU111':
+            rfbtype = "DC" if tile > 1 else "AC"
+            label = "ADC%d_T%d_CH%d or RF board %s input %d" % (tile + 224, tile, block, rfbtype, (tile%2)*2 + block)
+        elif self['board']=='ZCU216':
+            label = "%d_%d, on JHC%d" % (block, tile + 224, 5 + (block%2) + 2*(tile//2))
+        elif self['board']=='RFSoC4x2':
+            label = {'00': 'ADC_D', '01': 'ADC_C', '20': 'ADC_B', '21': 'ADC_A'}[adcname]
+        return "ADC tile %d, blk %d is %s" % (tile, block, label)
+
     def description(self):
         """Generate a printable description of the QICK configuration.
 
@@ -80,58 +101,44 @@ class QickConfig():
 
         lines.append("\n\t%d signal generator channels:" % (len(self['gens'])))
         for iGen, gen in enumerate(self['gens']):
-            lines.append("\t%d:\t%s - tProc output %d, envelope memory %d samples" %
-                         (iGen, gen['type'], gen['tproc_ch'], gen['maxlen']))
-            lines.append("\t\tDAC tile %s, blk %s, %d-bit DDS, fabric=%.3f MHz, f_dds=%.3f MHz" %
-                         (*gen['dac'], gen['b_dds'], gen['f_fabric'], gen['f_dds']))
+            dacname = gen['dac']
+            dac = self['dacs'][dacname]
+            buflen = gen['maxlen']/(gen['samps_per_clk']*gen['f_fabric'])
+            lines.append("\t%d:\t%s - envelope memory %d samples (%.3f us)" %
+                         (iGen, gen['type'], gen['maxlen'], buflen))
+            lines.append("\t\tfs=%.3f MHz, fabric=%.3f MHz, %d-bit DDS, range=%.3f MHz" %
+                         (dac['fs'], gen['f_fabric'], gen['b_dds'], gen['f_dds']))
+            lines.append("\t\t" + self._describe_dac(dacname))
 
         if self['iqs']:
             lines.append("\n\t%d constant-IQ outputs:" % (len(self['iqs'])))
             for iIQ, iq in enumerate(self['iqs']):
-                lines.append("\t%d:\tDAC tile %s, blk %s, fs=%.3f MHz" %
-                             (iIQ, *iq['dac'], iq['fs']))
+                dacname = iq['dac']
+                dac = self['dacs'][dacname]
+                lines.append("\t%d:\tfs=%.3f MHz" % (iIQ, *dacname, iq['fs']))
+                lines.append("\t\t" + self._describe_dac(dacname))
 
         lines.append("\n\t%d readout channels:" % (len(self['readouts'])))
         for iReadout, readout in enumerate(self['readouts']):
+            adcname = readout['adc']
+            adc = self['adcs'][adcname]
+            buflen = readout['buf_maxlen']/readout['f_fabric']
             if 'tproc_ctrl' in readout:
                 lines.append("\t%d:\t%s - controlled by tProc output %d" % (iReadout, readout['ro_type'], readout['tproc_ctrl']))
             else:
                 lines.append("\t%d:\t%s - controlled by PYNQ" % (iReadout, readout['ro_type']))
-            lines.append("\t\tADC tile %s, blk %s, %d-bit DDS, fabric=%.3f MHz, f_dds=%.3f MHz" %
-                         (*readout['adc'], readout['b_dds'], readout['f_fabric'], readout['f_dds']))
-            lines.append("\t\tmaxlen %d (avg) %d (decimated)" % (
-                readout['avg_maxlen'], readout['buf_maxlen']))
+            lines.append("\t\tfs=%.3f MHz, fabric=%.3f MHz, %d-bit DDS, range=%.3f MHz" %
+                         (adc['fs'], readout['f_fabric'], readout['b_dds'], readout['f_dds']))
+            lines.append("\t\tmaxlen %d accumulated, %d decimated (%.3f us)" % (
+                readout['avg_maxlen'], readout['buf_maxlen'], buflen))
             lines.append("\t\ttriggered by %s %d, pin %d, feedback to tProc input %d" % (
                 readout['trigger_type'], readout['trigger_port'], readout['trigger_bit'], readout['tproc_ch']))
-
-        lines.append("\n\t%d DACs:" % (len(self['dacs'])))
-        for dac in self['dacs']:
-            tile, block = [int(c) for c in dac]
-            if self['board']=='ZCU111':
-                label = "DAC%d_T%d_CH%d or RF board output %d" % (tile + 228, tile, block, tile*4 + block)
-            elif self['board']=='ZCU216':
-                label = "%d_%d, on JHC%d" % (block, tile + 228, 1 + (block%2) + 2*(tile//2))
-            elif self['board']=='RFSoC4x2':
-                label = {'00': 'DAC_B', '20': 'DAC_A'}[dac]
-            lines.append("\t\tDAC tile %d, blk %d is %s" %
-                         (tile, block, label))
-
-        lines.append("\n\t%d ADCs:" % (len(self['adcs'])))
-        for adc in self['adcs']:
-            tile, block = [int(c) for c in adc]
-            if self['board']=='ZCU111':
-                rfbtype = "DC" if tile > 1 else "AC"
-                label = "ADC%d_T%d_CH%d or RF board %s input %d" % (tile + 224, tile, block, rfbtype, (tile%2)*2 + block)
-            elif self['board']=='ZCU216':
-                label = "%d_%d, on JHC%d" % (block, tile + 224, 5 + (block%2) + 2*(tile//2))
-            elif self['board']=='RFSoC4x2':
-                label = {'00': 'ADC_D', '01': 'ADC_C', '20': 'ADC_B', '21': 'ADC_A'}[adc]
-            lines.append("\t\tADC tile %d, blk %d is %s" %
-                         (tile, block, label))
+            lines.append("\t\t" + self._describe_adc(adcname))
 
         lines.append("\n\t%d digital output pins:" % (len(tproc['output_pins'])))
         for iPin, (porttype, port, pin, name) in enumerate(tproc['output_pins']):
-            lines.append("\t%d:\t%s (%s %d, pin %d)" % (iPin, name, porttype, port, pin))
+            lines.append("\t%d:\t%s" % (iPin, name))
+            #lines.append("\t%d:\t%s (%s %d, pin %d)" % (iPin, name, porttype, port, pin))
 
         lines.append("\n\ttProc %s: program memory %d words, data memory %d words" %
                 (tproc['type'], tproc['pmem_size'], tproc['dmem_size']))
@@ -141,17 +148,20 @@ class QickConfig():
         if "ddr4_buf" in self._cfg:
             buf = self['ddr4_buf']
             buflist = [bufnames.index(x) for x in buf['readouts']]
-            lines.append("\n\tDDR4 memory buffer: %d samples, %d samples/transfer" % (buf['maxlen'], buf['burst_len']))
-            lines.append("\t\twired to readouts %s, triggered by %s %d, pin %d" % (
-                buflist, buf['trigger_type'], buf['trigger_port'], buf['trigger_bit']))
+            buflen = buf['maxlen']/self['readouts'][buflist[0]]['f_fabric']
+            lines.append("\n\tDDR4 memory buffer: %d samples (%.3f sec), %d samples/transfer" % (buf['maxlen'], buflen/1e6, buf['burst_len']))
+            lines.append("\t\twired to readouts %s" % (buflist))
+            #lines.append("\t\twired to readouts %s, triggered by %s %d, pin %d" % (
+            #    buflist, buf['trigger_type'], buf['trigger_port'], buf['trigger_bit']))
 
         if "mr_buf" in self._cfg:
             buf = self['mr_buf']
             buflist = [bufnames.index(x) for x in buf['readouts']]
-            lines.append("\n\tMR buffer: %d samples, wired to readouts %s, triggered by %s %d, pin %d" % (
-                buf['maxlen'], buflist, buf['trigger_type'], buf['trigger_port'], buf['trigger_bit']))
-            #lines.append("\t\twired to readouts %s, triggered by %s %d, pin %d" % (
-            #    buflist, buf['trigger_type'], buf['trigger_port'], buf['trigger_bit']))
+            buflen = buf['maxlen']/self['adcs'][self['readouts'][buflist[0]]['adc']]['fs']
+            lines.append("\n\tMR buffer: %d samples (%.3f us), wired to readouts %s" % (
+                buf['maxlen'], buflen, buflist))
+            #lines.append("\n\tMR buffer: %d samples, wired to readouts %s, triggered by %s %d, pin %d" % (
+            #    buf['maxlen'], buflist, buf['trigger_type'], buf['trigger_port'], buf['trigger_bit']))
 
         return "\nQICK configuration:\n"+"\n".join(lines)
 
@@ -185,13 +195,65 @@ class QickConfig():
         """
         return json.dumps(self._cfg, indent=4)
 
-    def calc_fstep(self, dict1, dict2):
-        """Finds the least common multiple of the frequency steps of two channels (typically a generator and readout)
+    def calc_fstep_int(self, dict1, dict2):
+        """Finds the multiplier that needs to be applied to a channel's frequency step size to allow this channel to be frequency-matched with another channel.
+
+        Parameters
+        ----------
+        dict1 : dict
+            config dict for this channel
+        dict2 : dict
+            config dict for the other channel
+
+        Returns
+        -------
+        int
+            frequency step multiplier for the first channel
+        """
+        refclk = self['refclk_freq']
+        # Calculate least common multiple of sampling frequencies.
+
+        # The DDS ranges are related to the refclk by fs_mult and fdds_div, both integers: f_dds = refclk*fs_mult/fdds_div
+        # So we can find a common div:
+        max_div = np.lcm(dict1['fdds_div'], dict2['fdds_div'])
+        # and the max of the bit resolutions:
+        b_max = max(dict1['b_dds'], dict2['b_dds'])
+
+        # so the frequency steps are both divisible by a "common divisor" of refclk/max_div/2**b_max
+        # and these multipliers from the common divisor to the channel steps are always integer
+        fsmult1 = dict1['fs_mult'] * (max_div//dict1['fdds_div']) * 2**(b_max - dict1['b_dds'])
+        fsmult2 = dict2['fs_mult'] * (max_div//dict2['fdds_div']) * 2**(b_max - dict2['b_dds'])
+
+        # the LCM of those multipliers will give us a common multiple of the channel steps
+        mult_lcm = np.lcm(fsmult1, fsmult2)
+        # so mult_lcm times the common divisor gives us a common step size that is divisible by both channel steps
+        # we want the common step divided by the channel 1 step:
+        return mult_lcm//fsmult1
+
+    def ch_fstep(self, dict1):
+        """Finds the frequency step size of a single channel (generator or readout).
 
         Parameters
         ----------
         dict1 : dict
             config dict for one channel
+
+        Returns
+        -------
+        float
+            frequency step for this channel
+        """
+        return dict1['fs_mult'] * (self['refclk_freq']/dict1['fdds_div']) / 2**dict1['b_dds']
+
+    def calc_fstep(self, dict1, dict2):
+        """Finds the least common multiple of the frequency steps of two channels (typically a generator and readout)
+        For proper frequency matching, you should only use frequencies that are evenly divisible by this value.
+        The order of the parameters does not matter.
+
+        Parameters
+        ----------
+        dict1 : dict
+            config dict for this channel
         dict2 : dict
             config dict for the other channel
 
@@ -200,27 +262,10 @@ class QickConfig():
         float
             frequency step common to the two channels
         """
-        refclk = self['refclk_freq']
-        # Calculate least common multiple of sampling frequencies.
-
-        # The DDS ranges are related to the refclk by fs_mult and fdds_div, both integers.
-        # So we can find a common div:
-        max_div = np.lcm(dict1['fdds_div'], dict2['fdds_div'])
-        # and the max of the bit resolutions:
-        b_max = max(dict1['b_dds'], dict2['b_dds'])
-
-        # so the frequency steps are both divisible by a common divisor of refclk/max_div/2**b_max
-
-        # multipliers from common divisor to the channel steps - always integer
-        fsmult1 = dict1['fs_mult'] * (max_div//dict1['fdds_div']) * 2**(b_max - dict1['b_dds'])
-        fsmult2 = dict2['fs_mult'] * (max_div//dict2['fdds_div']) * 2**(b_max - dict2['b_dds'])
-
-        # the LCM of those multipliers will give us a common multiple of the channel steps
-        mult_lcm = np.lcm(fsmult1, fsmult2)
-        # Calculate a common fstep_lcm, which is divisible by both step sizes of both channels.
-        # We should only use frequencies that are evenly divisible by fstep_lcm.
-        # now multiply the common divisor by the LCM to get the common step
-        return (refclk/max_div) * mult_lcm / 2**b_max
+        # find the multiplier from channel 1's minimum step size to the common step size
+        step_int1 = self.calc_fstep_int(dict1, dict2)
+        # multiply channel 1's step size by the multiplier
+        return step_int1 * self.ch_fstep(dict1)
 
     def roundfreq(self, f, dict1, dict2):
         """Round a frequency to the LCM of the frequency steps of two channels (typically a generator and readout).
@@ -264,11 +309,10 @@ class QickConfig():
 
         """
         if otherch is None:
-            f_round = f
+            step_int = 1
         else:
-            f_round = self.roundfreq(f, thisch, otherch)
-        k_i = np.round(f_round*(2**thisch['b_dds'])/thisch['f_dds'])
-        return np.int64(k_i)
+            step_int = self.calc_fstep_int(thisch, otherch)
+        return to_int(f, 1/self.ch_fstep(thisch), parname='freq', quantize=step_int)
 
     def int2freq(self, r, thisch):
         """Converts register value to MHz.
@@ -420,7 +464,7 @@ class QickConfig():
             b_phase = 16
         else:
             b_phase = 32
-        return int(deg*2**b_phase//360) % 2**b_phase
+        return to_int(deg, 2**b_phase/360, parname='phase') % 2**b_phase
 
     def reg2deg(self, reg, gen_ch=0):
         """Converts phase register values into degrees.
@@ -503,7 +547,8 @@ class QickConfig():
             fclk = self['readouts'][ro_ch]['f_fabric']
         else:
             fclk = self['tprocs'][0]['f_time']
-        return np.int64(np.round(obtain(us)*fclk))
+        #return np.int64(np.round(obtain(us)*fclk))
+        return to_int(obtain(us), fclk, parname='length')
 
 
 class DummyIp:
