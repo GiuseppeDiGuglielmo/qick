@@ -1230,7 +1230,7 @@
       <spirit:modelParameter spirit:dataType="integer">
         <spirit:name>LENGTH</spirit:name>
         <spirit:displayName>LENGTH</spirit:displayName>
-        <spirit:value spirit:format="long" spirit:resolve="generated" spirit:id="MODELPARAM_VALUE.LENGTH">100</spirit:value>
+        <spirit:value spirit:format="long" spirit:resolve="generated" spirit:id="MODELPARAM_VALUE.LENGTH">770</spirit:value>
       </spirit:modelParameter>
       <spirit:modelParameter spirit:dataType="integer">
         <spirit:name>OFFSET</spirit:name>
@@ -1444,7 +1444,7 @@
     <spirit:parameter>
       <spirit:name>LENGTH</spirit:name>
       <spirit:displayName>LENGTH</spirit:displayName>
-      <spirit:value spirit:format="long" spirit:resolve="user" spirit:id="PARAM_VALUE.LENGTH">100</spirit:value>
+      <spirit:value spirit:format="long" spirit:resolve="user" spirit:id="PARAM_VALUE.LENGTH">770</spirit:value>
     </spirit:parameter>
     <spirit:parameter>
       <spirit:name>OFFSET</spirit:name>

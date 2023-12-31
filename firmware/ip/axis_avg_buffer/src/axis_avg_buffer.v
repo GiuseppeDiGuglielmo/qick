@@ -82,7 +82,7 @@ parameter B = 16;
 
 // Length (or duration) in clock cycles to keep VALID signal high. This is the
 // number of neural-network inputs (I, Q),
-parameter LENGTH = 100;
+parameter LENGTH = 770;
 // Delay (in clock cycles) on when to start keeping VALID signal high.
 parameter OFFSET = 2;
 
