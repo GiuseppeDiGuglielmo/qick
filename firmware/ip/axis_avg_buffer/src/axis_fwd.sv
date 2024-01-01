@@ -1,5 +1,5 @@
 module axis_fwd
-    #(parameter B = 16, LENGTH = 770, OFFSET = 2)
+    #(parameter B = 16, LENGTH = 770, OFFSET = 1)
     (
         input   logic               s_axis_aclk,
         input   logic               s_axis_aresetn,
@@ -31,7 +31,7 @@ endmodule
 
 module data_counter #(
     parameter LENGTH = 770, // Maximum counter value
-    parameter OFFSET = 2    // Number of clock cycles to wait before counting
+    parameter OFFSET = 1    // Number of clock cycles to wait before counting
 ) (
     input  logic clk,      // Clock
     input  logic rst_n,    // Active low reset
