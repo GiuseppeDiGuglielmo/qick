@@ -16,12 +16,16 @@ create_bd_cell -type ip -vlnv xilinx.com:hls:myproject_axi:1.0 myproject_axi_0
 set_property name NN_0 [get_bd_cells myproject_axi_0]
 
 # Connect NN IP to average block that just forward the input AXIS
-connect_bd_intf_net [get_bd_intf_pins axis_avg_buffer_0/fwd_axis] [get_bd_intf_pins NN_0/in_V]
+#connect_bd_intf_net [get_bd_intf_pins axis_avg_buffer_0/fwd_axis] [get_bd_intf_pins NN_0/in_V]
+connect_bd_intf_net [get_bd_intf_pins axis_avg_buffer_0/fwd_axis] [get_bd_intf_pins NN_0/in_V_V]
+
 
 set_property CONFIG.FREQ_HZ 307200000 [get_bd_intf_pins /axis_avg_buffer_0/fwd_axis]
 connect_bd_net [get_bd_pins NN_0/ap_clk] [get_bd_pins usp_rf_data_converter_0/clk_adc2]
 connect_bd_net [get_bd_pins NN_0/ap_rst_n] [get_bd_pins rst_adc/peripheral_aresetn]
 
+#set_property -dict [list CONFIG.LENGTH {770}] [get_bd_cells axis_avg_buffer_0]
+#
 # Add two-port BRAMs (NN 0)
 create_bd_cell -type ip -vlnv xilinx.com:ip:blk_mem_gen:8.4 blk_mem_gen_0
 set_property -dict [list \
@@ -79,7 +83,8 @@ set_property -dict [list CONFIG.C_BRAM_CNT {12} CONFIG.C_NUM_MONITOR_SLOTS {3} C
 set_property -dict [list CONFIG.C_SLOT {2} CONFIG.C_BRAM_CNT {6.5} CONFIG.C_SLOT_1_INTF_TYPE {xilinx.com:interface:axis_rtl:1.0} CONFIG.C_SLOT_2_INTF_TYPE {xilinx.com:interface:bram_rtl:1.0}] [get_bd_cells system_ila_0]
 set_property -dict [list CONFIG.C_SLOT {2} CONFIG.C_NUM_MONITOR_SLOTS {4} CONFIG.C_SLOT_2_INTF_TYPE {xilinx.com:interface:axis_rtl:1.0} CONFIG.C_SLOT_3_INTF_TYPE {xilinx.com:interface:bram_rtl:1.0}] [get_bd_cells system_ila_0]
 connect_bd_intf_net [get_bd_intf_pins system_ila_0/SLOT_1_AXIS] [get_bd_intf_pins axis_broadcaster_0/M00_AXIS]
-connect_bd_intf_net [get_bd_intf_pins system_ila_0/SLOT_2_AXIS] [get_bd_intf_pins NN_0/in_V]
+#connect_bd_intf_net [get_bd_intf_pins system_ila_0/SLOT_2_AXIS] [get_bd_intf_pins NN_0/in_V]
+connect_bd_intf_net [get_bd_intf_pins system_ila_0/SLOT_2_AXIS] [get_bd_intf_pins NN_0/in_V_V]
 connect_bd_intf_net [get_bd_intf_pins system_ila_0/SLOT_3_BRAM] [get_bd_intf_pins blk_mem_gen_0/BRAM_PORTB]
 connect_bd_net [get_bd_pins system_ila_0/probe0] [get_bd_pins vect2bits_16_0/dout14]
 
