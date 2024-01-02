@@ -84,7 +84,7 @@ parameter B = 16;
 // number of neural-network inputs (I, Q),
 parameter LENGTH = 770;
 // Delay (in clock cycles) on when to start keeping VALID signal high.
-parameter OFFSET = 1;
+parameter OFFSET = 2;
 
 /*********/
 /* Ports */
