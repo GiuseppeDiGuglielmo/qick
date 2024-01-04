@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
-<EDKSYSTEM EDWVERSION="1.2" TIMESTAMP="Tue Nov  7 15:03:06 2023" VIVADOVERSION="2022.1">
+<EDKSYSTEM EDWVERSION="1.2" TIMESTAMP="Wed Jan  3 19:52:10 2024" VIVADOVERSION="2022.1">
 
   <SYSTEMINFO ARCH="zynquplusRFSOC" BOARD="xilinx.com:zcu216:part0:2.0" DEVICE="xczu49dr" NAME="d_1" PACKAGE="ffvf1760" SPEEDGRADE="-2"/>
 
@@ -11072,7 +11072,7 @@
         <PARAMETER NAME="N_AVG" VALUE="14"/>
         <PARAMETER NAME="N_BUF" VALUE="10"/>
         <PARAMETER NAME="B" VALUE="16"/>
-        <PARAMETER NAME="LENGTH" VALUE="100"/>
+        <PARAMETER NAME="LENGTH" VALUE="770"/>
         <PARAMETER NAME="OFFSET" VALUE="2"/>
         <PARAMETER NAME="Component_Name" VALUE="d_1_axis_avg_buffer_0_0"/>
         <PARAMETER NAME="EDK_IPTYPE" VALUE="PERIPHERAL"/>
@@ -11448,7 +11448,7 @@
         <PARAMETER NAME="N_AVG" VALUE="14"/>
         <PARAMETER NAME="N_BUF" VALUE="10"/>
         <PARAMETER NAME="B" VALUE="16"/>
-        <PARAMETER NAME="LENGTH" VALUE="100"/>
+        <PARAMETER NAME="LENGTH" VALUE="770"/>
         <PARAMETER NAME="OFFSET" VALUE="2"/>
         <PARAMETER NAME="Component_Name" VALUE="d_1_axis_avg_buffer_1_0"/>
         <PARAMETER NAME="EDK_IPTYPE" VALUE="PERIPHERAL"/>
@@ -31095,7 +31095,7 @@
         <PARAMETER NAME="EN_BRAM_DRC" VALUE="TRUE"/>
         <PARAMETER NAME="ALL_PROBE_SAME_MU" VALUE="TRUE"/>
         <PARAMETER NAME="ALL_PROBE_SAME_MU_CNT" VALUE="1"/>
-        <PARAMETER NAME="C_NUM_MONITOR_SLOTS" VALUE="1"/>
+        <PARAMETER NAME="C_NUM_MONITOR_SLOTS" VALUE="2"/>
         <PARAMETER NAME="C_SLOT_0_AXI_ARUSER_WIDTH" VALUE="1"/>
         <PARAMETER NAME="C_SLOT_0_AXI_RUSER_WIDTH" VALUE="1"/>
         <PARAMETER NAME="C_SLOT_0_AXI_AWUSER_WIDTH" VALUE="1"/>
@@ -31123,7 +31123,7 @@
         <PARAMETER NAME="C_SLOT_1_AXIS_TUSER_WIDTH" VALUE="AUTO"/>
         <PARAMETER NAME="C_SLOT_1_AXIS_TDEST_WIDTH" VALUE="AUTO"/>
         <PARAMETER NAME="C_SLOT_0_INTF_TYPE" VALUE="xilinx.com:interface:axis_rtl:1.0"/>
-        <PARAMETER NAME="C_SLOT_1_INTF_TYPE" VALUE="xilinx.com:interface:aximm_rtl:1.0"/>
+        <PARAMETER NAME="C_SLOT_1_INTF_TYPE" VALUE="xilinx.com:interface:axis_rtl:1.0"/>
         <PARAMETER NAME="C_SLOT_2_INTF_TYPE" VALUE="xilinx.com:interface:aximm_rtl:1.0"/>
         <PARAMETER NAME="C_SLOT_3_INTF_TYPE" VALUE="xilinx.com:interface:aximm_rtl:1.0"/>
         <PARAMETER NAME="C_SLOT_4_INTF_TYPE" VALUE="xilinx.com:interface:aximm_rtl:1.0"/>
@@ -31345,6 +31345,9 @@
             <CONNECTION INSTANCE="vect2bits_16_0" PORT="dout14"/>
           </CONNECTIONS>
         </PORT>
+        <PORT DIR="I" LEFT="31" NAME="SLOT_1_AXIS_tdata" RIGHT="0" SIGIS="undef"/>
+        <PORT DIR="I" NAME="SLOT_1_AXIS_tlast" SIGIS="undef"/>
+        <PORT DIR="I" NAME="SLOT_1_AXIS_tvalid" SIGIS="undef"/>
       </PORTS>
       <BUSINTERFACES>
         <BUSINTERFACE BUSNAME="axis_readout_v2_0_m1_axis" NAME="SLOT_0_AXIS" TYPE="MONITOR" VLNV="xilinx.com:interface:axis:1.0">
@@ -31366,6 +31369,26 @@
             <PORTMAP LOGICAL="TLAST" PHYSICAL="SLOT_0_AXIS_tlast"/>
             <PORTMAP LOGICAL="TVALID" PHYSICAL="SLOT_0_AXIS_tvalid"/>
             <PORTMAP LOGICAL="TREADY" PHYSICAL="SLOT_0_AXIS_tready"/>
+          </PORTMAPS>
+        </BUSINTERFACE>
+        <BUSINTERFACE BUSNAME="axis_broadcaster_0_M00_AXIS" NAME="SLOT_1_AXIS" TYPE="MONITOR" VLNV="xilinx.com:interface:axis:1.0">
+          <PARAMETER NAME="TDATA_NUM_BYTES" VALUE="4"/>
+          <PARAMETER NAME="TDEST_WIDTH" VALUE="0"/>
+          <PARAMETER NAME="TID_WIDTH" VALUE="0"/>
+          <PARAMETER NAME="TUSER_WIDTH" VALUE="0"/>
+          <PARAMETER NAME="HAS_TREADY" VALUE="0"/>
+          <PARAMETER NAME="HAS_TSTRB" VALUE="0"/>
+          <PARAMETER NAME="HAS_TKEEP" VALUE="0"/>
+          <PARAMETER NAME="HAS_TLAST" VALUE="0"/>
+          <PARAMETER NAME="FREQ_HZ" VALUE="307200000"/>
+          <PARAMETER NAME="PHASE" VALUE="0.0"/>
+          <PARAMETER NAME="CLK_DOMAIN" VALUE="d_1_usp_rf_data_converter_0_0_clk_adc2"/>
+          <PARAMETER NAME="LAYERED_METADATA" VALUE="undef"/>
+          <PARAMETER NAME="INSERT_VIP" VALUE="0"/>
+          <PORTMAPS>
+            <PORTMAP LOGICAL="TDATA" PHYSICAL="SLOT_1_AXIS_tdata"/>
+            <PORTMAP LOGICAL="TLAST" PHYSICAL="SLOT_1_AXIS_tlast"/>
+            <PORTMAP LOGICAL="TVALID" PHYSICAL="SLOT_1_AXIS_tvalid"/>
           </PORTMAPS>
         </BUSINTERFACE>
       </BUSINTERFACES>
