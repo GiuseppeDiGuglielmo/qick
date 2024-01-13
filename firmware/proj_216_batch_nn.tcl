@@ -97,8 +97,55 @@ validate_bd_design
 
 # === END: ILA ===============================================================
 
-reset_run impl_1
+# === BEGIN: RTL ILA =========================================================
+launch_runs synth_1 -jobs 20
+wait_on_run -timeout 360 synth_1
+
+open_run synth_1 -name synth_1
+update_compile_order -fileset sources_1
+for {set i 0} {$i < 14*2} {incr i} {
+    set_property mark_debug true [get_nets [list d_1_i/NN_0/inst/in_local_V_fu_160[$i]]]
+}
+set_property mark_debug true [get_nets [list d_1_i/NN_0/inst/grp_myproject_fu_206_ap_start]]
+set_property mark_debug true [get_nets [list d_1_i/NN_0/inst/grp_myproject_fu_206_ap_done]]
+file mkdir ${proj_dir}/top_216.srcs/constrs_1/new
+close [ open ${proj_dir}/top_216.srcs/constrs_1/new/dbg_constraints.xdc w ]
+add_files -fileset constrs_1 ${proj_dir}/top_216.srcs/constrs_1/new/dbg_constraints.xdc
+set_property target_constrs_file ${proj_dir}/top_216.srcs/constrs_1/new/dbg_constraints.xdc [current_fileset -constrset]
+save_constraints -force
+create_debug_core u_ila_0 ila
+set_property C_DATA_DEPTH 1024 [get_debug_cores u_ila_0]
+set_property C_TRIGIN_EN false [get_debug_cores u_ila_0]
+set_property C_TRIGOUT_EN false [get_debug_cores u_ila_0]
+set_property C_ADV_TRIGGER false [get_debug_cores u_ila_0]
+set_property C_INPUT_PIPE_STAGES 0 [get_debug_cores u_ila_0]
+set_property C_EN_STRG_QUAL false [get_debug_cores u_ila_0]
+set_property ALL_PROBE_SAME_MU true [get_debug_cores u_ila_0]
+set_property ALL_PROBE_SAME_MU_CNT 1 [get_debug_cores u_ila_0]
+connect_debug_port u_ila_0/clk [get_nets [list d_1_i/usp_rf_data_converter_0/inst/i_d_1_usp_rf_data_converter_0_0_bufg_gt_ctrl/clk_adc2 ]]
+set_property port_width 56 [get_debug_ports u_ila_0/probe0]
+set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe0]
+for {set i 0} {$i < 14*2} {incr i} {
+    connect_debug_port u_ila_0/probe0 [get_nets [list d_1_i/NN_0/inst/in_local_V_fu_160[$i]]]
+}
+create_debug_port u_ila_0 probe
+set_property port_width 1 [get_debug_ports u_ila_0/probe1]
+set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe1]
+connect_debug_port u_ila_0/probe1 [get_nets [list d_1_i/NN_0/inst/grp_myproject_fu_206_ap_done ]]
+create_debug_port u_ila_0 probe
+set_property port_width 1 [get_debug_ports u_ila_0/probe2]
+set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe2]
+connect_debug_port u_ila_0/probe2 [get_nets [list d_1_i/NN_0/inst/grp_myproject_fu_206_ap_start ]]
+save_constraints
+reset_run d_1_axi_smc_0_synth_1
+reset_run d_1_axi_smc_1_0_synth_1
+reset_run d_1_system_ila_0_0_synth_1
+save_bd_design
 reset_run synth_1
+
+# === END: RTL ILA ===========================================================
+
+reset_run impl_1
 launch_runs impl_1 -to_step write_bitstream -jobs 20
 wait_on_run -timeout 360 impl_1
 
