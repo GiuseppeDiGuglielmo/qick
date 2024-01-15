@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
-<EDKSYSTEM EDWVERSION="1.2" TIMESTAMP="Mon Jan 15 08:38:21 2024" VIVADOVERSION="2022.1">
+<EDKSYSTEM EDWVERSION="1.2" TIMESTAMP="Mon Jan 15 13:14:58 2024" VIVADOVERSION="2022.1">
 
   <SYSTEMINFO ARCH="zynquplusRFSOC" BOARD="xilinx.com:zcu216:part0:2.0" DEVICE="xczu49dr" NAME="d_1" PACKAGE="ffvf1760" SPEEDGRADE="-2"/>
 
@@ -371,10 +371,10 @@
   </EXTERNALINTERFACES>
 
   <MODULES>
-    <MODULE COREREVISION="2113383478" FULLNAME="/NN_0" HWVERSION="1.0" INSTANCE="NN_0" IPTYPE="PERIPHERAL" IS_ENABLE="1" MODCLASS="PERIPHERAL" MODTYPE="myproject_axi" VLNV="xilinx.com:hls:myproject_axi:1.0">
+    <MODULE COREREVISION="2113384492" FULLNAME="/NN_0" HWVERSION="1.0" INSTANCE="NN_0" IPTYPE="PERIPHERAL" IS_ENABLE="1" MODCLASS="PERIPHERAL" MODTYPE="myproject_axi" VLNV="xilinx.com:hls:myproject_axi:1.0">
       <DOCUMENTS/>
       <ADDRESSBLOCKS>
-        <ADDRESSBLOCK ACCESS="read-write" INTERFACE="s_axi_AXILiteS" NAME="Reg" RANGE="65536" USAGE="register">
+        <ADDRESSBLOCK ACCESS="read-write" INTERFACE="s_axi_scaler" NAME="Reg" RANGE="65536" USAGE="register">
           <REGISTERS>
             <REGISTER NAME="scaler">
               <PROPERTY NAME="DESCRIPTION" VALUE="Data signal of scaler"/>
@@ -400,100 +400,100 @@
         </ADDRESSBLOCK>
       </ADDRESSBLOCKS>
       <PARAMETERS>
-        <PARAMETER NAME="C_S_AXI_AXILITES_ADDR_WIDTH" VALUE="5"/>
-        <PARAMETER NAME="C_S_AXI_AXILITES_DATA_WIDTH" VALUE="32"/>
+        <PARAMETER NAME="C_S_AXI_SCALER_ADDR_WIDTH" VALUE="5"/>
+        <PARAMETER NAME="C_S_AXI_SCALER_DATA_WIDTH" VALUE="32"/>
         <PARAMETER NAME="Component_Name" VALUE="d_1_myproject_axi_0_0"/>
         <PARAMETER NAME="clk_period" VALUE="3.255"/>
         <PARAMETER NAME="machine" VALUE="64"/>
         <PARAMETER NAME="combinational" VALUE="0"/>
-        <PARAMETER NAME="latency" VALUE="781"/>
+        <PARAMETER NAME="latency" VALUE="783"/>
         <PARAMETER NAME="II" VALUE="x"/>
         <PARAMETER NAME="EDK_IPTYPE" VALUE="PERIPHERAL"/>
-        <PARAMETER NAME="C_S_AXI_AXILITES_BASEADDR" VALUE="0xA0020000"/>
-        <PARAMETER NAME="C_S_AXI_AXILITES_HIGHADDR" VALUE="0xA002FFFF"/>
+        <PARAMETER NAME="C_S_AXI_SCALER_BASEADDR" VALUE="0xA0020000"/>
+        <PARAMETER NAME="C_S_AXI_SCALER_HIGHADDR" VALUE="0xA002FFFF"/>
       </PARAMETERS>
       <PORTS>
-        <PORT DIR="I" LEFT="4" NAME="s_axi_AXILiteS_AWADDR" RIGHT="0" SIGIS="undef" SIGNAME="NN_0_s_axi_AXILiteS_AWADDR">
+        <PORT DIR="I" LEFT="4" NAME="s_axi_scaler_AWADDR" RIGHT="0" SIGIS="undef" SIGNAME="NN_0_s_axi_scaler_AWADDR">
           <CONNECTIONS>
             <CONNECTION INSTANCE="ps8_0_axi_periph" PORT="M28_AXI_awaddr"/>
           </CONNECTIONS>
         </PORT>
-        <PORT DIR="I" NAME="s_axi_AXILiteS_AWVALID" SIGIS="undef" SIGNAME="NN_0_s_axi_AXILiteS_AWVALID">
+        <PORT DIR="I" NAME="s_axi_scaler_AWVALID" SIGIS="undef" SIGNAME="NN_0_s_axi_scaler_AWVALID">
           <CONNECTIONS>
             <CONNECTION INSTANCE="ps8_0_axi_periph" PORT="M28_AXI_awvalid"/>
           </CONNECTIONS>
         </PORT>
-        <PORT DIR="O" NAME="s_axi_AXILiteS_AWREADY" SIGIS="undef" SIGNAME="NN_0_s_axi_AXILiteS_AWREADY">
+        <PORT DIR="O" NAME="s_axi_scaler_AWREADY" SIGIS="undef" SIGNAME="NN_0_s_axi_scaler_AWREADY">
           <CONNECTIONS>
             <CONNECTION INSTANCE="ps8_0_axi_periph" PORT="M28_AXI_awready"/>
           </CONNECTIONS>
         </PORT>
-        <PORT DIR="I" LEFT="31" NAME="s_axi_AXILiteS_WDATA" RIGHT="0" SIGIS="undef" SIGNAME="NN_0_s_axi_AXILiteS_WDATA">
+        <PORT DIR="I" LEFT="31" NAME="s_axi_scaler_WDATA" RIGHT="0" SIGIS="undef" SIGNAME="NN_0_s_axi_scaler_WDATA">
           <CONNECTIONS>
             <CONNECTION INSTANCE="ps8_0_axi_periph" PORT="M28_AXI_wdata"/>
           </CONNECTIONS>
         </PORT>
-        <PORT DIR="I" LEFT="3" NAME="s_axi_AXILiteS_WSTRB" RIGHT="0" SIGIS="undef" SIGNAME="NN_0_s_axi_AXILiteS_WSTRB">
+        <PORT DIR="I" LEFT="3" NAME="s_axi_scaler_WSTRB" RIGHT="0" SIGIS="undef" SIGNAME="NN_0_s_axi_scaler_WSTRB">
           <CONNECTIONS>
             <CONNECTION INSTANCE="ps8_0_axi_periph" PORT="M28_AXI_wstrb"/>
           </CONNECTIONS>
         </PORT>
-        <PORT DIR="I" NAME="s_axi_AXILiteS_WVALID" SIGIS="undef" SIGNAME="NN_0_s_axi_AXILiteS_WVALID">
+        <PORT DIR="I" NAME="s_axi_scaler_WVALID" SIGIS="undef" SIGNAME="NN_0_s_axi_scaler_WVALID">
           <CONNECTIONS>
             <CONNECTION INSTANCE="ps8_0_axi_periph" PORT="M28_AXI_wvalid"/>
           </CONNECTIONS>
         </PORT>
-        <PORT DIR="O" NAME="s_axi_AXILiteS_WREADY" SIGIS="undef" SIGNAME="NN_0_s_axi_AXILiteS_WREADY">
+        <PORT DIR="O" NAME="s_axi_scaler_WREADY" SIGIS="undef" SIGNAME="NN_0_s_axi_scaler_WREADY">
           <CONNECTIONS>
             <CONNECTION INSTANCE="ps8_0_axi_periph" PORT="M28_AXI_wready"/>
           </CONNECTIONS>
         </PORT>
-        <PORT DIR="O" LEFT="1" NAME="s_axi_AXILiteS_BRESP" RIGHT="0" SIGIS="undef" SIGNAME="NN_0_s_axi_AXILiteS_BRESP">
+        <PORT DIR="O" LEFT="1" NAME="s_axi_scaler_BRESP" RIGHT="0" SIGIS="undef" SIGNAME="NN_0_s_axi_scaler_BRESP">
           <CONNECTIONS>
             <CONNECTION INSTANCE="ps8_0_axi_periph" PORT="M28_AXI_bresp"/>
           </CONNECTIONS>
         </PORT>
-        <PORT DIR="O" NAME="s_axi_AXILiteS_BVALID" SIGIS="undef" SIGNAME="NN_0_s_axi_AXILiteS_BVALID">
+        <PORT DIR="O" NAME="s_axi_scaler_BVALID" SIGIS="undef" SIGNAME="NN_0_s_axi_scaler_BVALID">
           <CONNECTIONS>
             <CONNECTION INSTANCE="ps8_0_axi_periph" PORT="M28_AXI_bvalid"/>
           </CONNECTIONS>
         </PORT>
-        <PORT DIR="I" NAME="s_axi_AXILiteS_BREADY" SIGIS="undef" SIGNAME="NN_0_s_axi_AXILiteS_BREADY">
+        <PORT DIR="I" NAME="s_axi_scaler_BREADY" SIGIS="undef" SIGNAME="NN_0_s_axi_scaler_BREADY">
           <CONNECTIONS>
             <CONNECTION INSTANCE="ps8_0_axi_periph" PORT="M28_AXI_bready"/>
           </CONNECTIONS>
         </PORT>
-        <PORT DIR="I" LEFT="4" NAME="s_axi_AXILiteS_ARADDR" RIGHT="0" SIGIS="undef" SIGNAME="NN_0_s_axi_AXILiteS_ARADDR">
+        <PORT DIR="I" LEFT="4" NAME="s_axi_scaler_ARADDR" RIGHT="0" SIGIS="undef" SIGNAME="NN_0_s_axi_scaler_ARADDR">
           <CONNECTIONS>
             <CONNECTION INSTANCE="ps8_0_axi_periph" PORT="M28_AXI_araddr"/>
           </CONNECTIONS>
         </PORT>
-        <PORT DIR="I" NAME="s_axi_AXILiteS_ARVALID" SIGIS="undef" SIGNAME="NN_0_s_axi_AXILiteS_ARVALID">
+        <PORT DIR="I" NAME="s_axi_scaler_ARVALID" SIGIS="undef" SIGNAME="NN_0_s_axi_scaler_ARVALID">
           <CONNECTIONS>
             <CONNECTION INSTANCE="ps8_0_axi_periph" PORT="M28_AXI_arvalid"/>
           </CONNECTIONS>
         </PORT>
-        <PORT DIR="O" NAME="s_axi_AXILiteS_ARREADY" SIGIS="undef" SIGNAME="NN_0_s_axi_AXILiteS_ARREADY">
+        <PORT DIR="O" NAME="s_axi_scaler_ARREADY" SIGIS="undef" SIGNAME="NN_0_s_axi_scaler_ARREADY">
           <CONNECTIONS>
             <CONNECTION INSTANCE="ps8_0_axi_periph" PORT="M28_AXI_arready"/>
           </CONNECTIONS>
         </PORT>
-        <PORT DIR="O" LEFT="31" NAME="s_axi_AXILiteS_RDATA" RIGHT="0" SIGIS="undef" SIGNAME="NN_0_s_axi_AXILiteS_RDATA">
+        <PORT DIR="O" LEFT="31" NAME="s_axi_scaler_RDATA" RIGHT="0" SIGIS="undef" SIGNAME="NN_0_s_axi_scaler_RDATA">
           <CONNECTIONS>
             <CONNECTION INSTANCE="ps8_0_axi_periph" PORT="M28_AXI_rdata"/>
           </CONNECTIONS>
         </PORT>
-        <PORT DIR="O" LEFT="1" NAME="s_axi_AXILiteS_RRESP" RIGHT="0" SIGIS="undef" SIGNAME="NN_0_s_axi_AXILiteS_RRESP">
+        <PORT DIR="O" LEFT="1" NAME="s_axi_scaler_RRESP" RIGHT="0" SIGIS="undef" SIGNAME="NN_0_s_axi_scaler_RRESP">
           <CONNECTIONS>
             <CONNECTION INSTANCE="ps8_0_axi_periph" PORT="M28_AXI_rresp"/>
           </CONNECTIONS>
         </PORT>
-        <PORT DIR="O" NAME="s_axi_AXILiteS_RVALID" SIGIS="undef" SIGNAME="NN_0_s_axi_AXILiteS_RVALID">
+        <PORT DIR="O" NAME="s_axi_scaler_RVALID" SIGIS="undef" SIGNAME="NN_0_s_axi_scaler_RVALID">
           <CONNECTIONS>
             <CONNECTION INSTANCE="ps8_0_axi_periph" PORT="M28_AXI_rvalid"/>
           </CONNECTIONS>
         </PORT>
-        <PORT DIR="I" NAME="s_axi_AXILiteS_RREADY" SIGIS="undef" SIGNAME="NN_0_s_axi_AXILiteS_RREADY">
+        <PORT DIR="I" NAME="s_axi_scaler_RREADY" SIGIS="undef" SIGNAME="NN_0_s_axi_scaler_RREADY">
           <CONNECTIONS>
             <CONNECTION INSTANCE="ps8_0_axi_periph" PORT="M28_AXI_rready"/>
           </CONNECTIONS>
@@ -560,7 +560,7 @@
         </PORT>
       </PORTS>
       <BUSINTERFACES>
-        <BUSINTERFACE BUSNAME="ps8_0_axi_periph_M28_AXI" DATAWIDTH="32" NAME="s_axi_AXILiteS" TYPE="SLAVE" VLNV="xilinx.com:interface:aximm:1.0">
+        <BUSINTERFACE BUSNAME="ps8_0_axi_periph_M28_AXI" DATAWIDTH="32" NAME="s_axi_scaler" TYPE="SLAVE" VLNV="xilinx.com:interface:aximm:1.0">
           <PARAMETER NAME="ADDR_WIDTH" VALUE="5"/>
           <PARAMETER NAME="DATA_WIDTH" VALUE="32"/>
           <PARAMETER NAME="PROTOCOL" VALUE="AXI4LITE"/>
@@ -593,23 +593,23 @@
           <PARAMETER NAME="WUSER_BITS_PER_BYTE" VALUE="0"/>
           <PARAMETER NAME="INSERT_VIP" VALUE="0"/>
           <PORTMAPS>
-            <PORTMAP LOGICAL="AWADDR" PHYSICAL="s_axi_AXILiteS_AWADDR"/>
-            <PORTMAP LOGICAL="AWVALID" PHYSICAL="s_axi_AXILiteS_AWVALID"/>
-            <PORTMAP LOGICAL="AWREADY" PHYSICAL="s_axi_AXILiteS_AWREADY"/>
-            <PORTMAP LOGICAL="WDATA" PHYSICAL="s_axi_AXILiteS_WDATA"/>
-            <PORTMAP LOGICAL="WSTRB" PHYSICAL="s_axi_AXILiteS_WSTRB"/>
-            <PORTMAP LOGICAL="WVALID" PHYSICAL="s_axi_AXILiteS_WVALID"/>
-            <PORTMAP LOGICAL="WREADY" PHYSICAL="s_axi_AXILiteS_WREADY"/>
-            <PORTMAP LOGICAL="BRESP" PHYSICAL="s_axi_AXILiteS_BRESP"/>
-            <PORTMAP LOGICAL="BVALID" PHYSICAL="s_axi_AXILiteS_BVALID"/>
-            <PORTMAP LOGICAL="BREADY" PHYSICAL="s_axi_AXILiteS_BREADY"/>
-            <PORTMAP LOGICAL="ARADDR" PHYSICAL="s_axi_AXILiteS_ARADDR"/>
-            <PORTMAP LOGICAL="ARVALID" PHYSICAL="s_axi_AXILiteS_ARVALID"/>
-            <PORTMAP LOGICAL="ARREADY" PHYSICAL="s_axi_AXILiteS_ARREADY"/>
-            <PORTMAP LOGICAL="RDATA" PHYSICAL="s_axi_AXILiteS_RDATA"/>
-            <PORTMAP LOGICAL="RRESP" PHYSICAL="s_axi_AXILiteS_RRESP"/>
-            <PORTMAP LOGICAL="RVALID" PHYSICAL="s_axi_AXILiteS_RVALID"/>
-            <PORTMAP LOGICAL="RREADY" PHYSICAL="s_axi_AXILiteS_RREADY"/>
+            <PORTMAP LOGICAL="AWADDR" PHYSICAL="s_axi_scaler_AWADDR"/>
+            <PORTMAP LOGICAL="AWVALID" PHYSICAL="s_axi_scaler_AWVALID"/>
+            <PORTMAP LOGICAL="AWREADY" PHYSICAL="s_axi_scaler_AWREADY"/>
+            <PORTMAP LOGICAL="WDATA" PHYSICAL="s_axi_scaler_WDATA"/>
+            <PORTMAP LOGICAL="WSTRB" PHYSICAL="s_axi_scaler_WSTRB"/>
+            <PORTMAP LOGICAL="WVALID" PHYSICAL="s_axi_scaler_WVALID"/>
+            <PORTMAP LOGICAL="WREADY" PHYSICAL="s_axi_scaler_WREADY"/>
+            <PORTMAP LOGICAL="BRESP" PHYSICAL="s_axi_scaler_BRESP"/>
+            <PORTMAP LOGICAL="BVALID" PHYSICAL="s_axi_scaler_BVALID"/>
+            <PORTMAP LOGICAL="BREADY" PHYSICAL="s_axi_scaler_BREADY"/>
+            <PORTMAP LOGICAL="ARADDR" PHYSICAL="s_axi_scaler_ARADDR"/>
+            <PORTMAP LOGICAL="ARVALID" PHYSICAL="s_axi_scaler_ARVALID"/>
+            <PORTMAP LOGICAL="ARREADY" PHYSICAL="s_axi_scaler_ARREADY"/>
+            <PORTMAP LOGICAL="RDATA" PHYSICAL="s_axi_scaler_RDATA"/>
+            <PORTMAP LOGICAL="RRESP" PHYSICAL="s_axi_scaler_RRESP"/>
+            <PORTMAP LOGICAL="RVALID" PHYSICAL="s_axi_scaler_RVALID"/>
+            <PORTMAP LOGICAL="RREADY" PHYSICAL="s_axi_scaler_RREADY"/>
           </PORTMAPS>
         </BUSINTERFACE>
         <BUSINTERFACE BUSNAME="axis_avg_buffer_0_fwd_axis" NAME="in_V_V" TYPE="TARGET" VLNV="xilinx.com:interface:axis:1.0">
@@ -27419,9 +27419,9 @@
             <CONNECTION INSTANCE="rst_adc" PORT="peripheral_aresetn"/>
           </CONNECTIONS>
         </PORT>
-        <PORT DIR="O" LEFT="39" NAME="M28_AXI_awaddr" RIGHT="0" SIGIS="undef" SIGNAME="NN_0_s_axi_AXILiteS_AWADDR">
+        <PORT DIR="O" LEFT="39" NAME="M28_AXI_awaddr" RIGHT="0" SIGIS="undef" SIGNAME="NN_0_s_axi_scaler_AWADDR">
           <CONNECTIONS>
-            <CONNECTION INSTANCE="NN_0" PORT="s_axi_AXILiteS_AWADDR"/>
+            <CONNECTION INSTANCE="NN_0" PORT="s_axi_scaler_AWADDR"/>
           </CONNECTIONS>
         </PORT>
         <PORT DIR="O" NAME="M28_AXI_awlen" SIGIS="undef"/>
@@ -27432,55 +27432,55 @@
         <PORT DIR="O" NAME="M28_AXI_awprot" SIGIS="undef"/>
         <PORT DIR="O" NAME="M28_AXI_awregion" SIGIS="undef"/>
         <PORT DIR="O" NAME="M28_AXI_awqos" SIGIS="undef"/>
-        <PORT DIR="O" NAME="M28_AXI_awvalid" SIGIS="undef" SIGNAME="NN_0_s_axi_AXILiteS_AWVALID">
+        <PORT DIR="O" NAME="M28_AXI_awvalid" SIGIS="undef" SIGNAME="NN_0_s_axi_scaler_AWVALID">
           <CONNECTIONS>
-            <CONNECTION INSTANCE="NN_0" PORT="s_axi_AXILiteS_AWVALID"/>
+            <CONNECTION INSTANCE="NN_0" PORT="s_axi_scaler_AWVALID"/>
           </CONNECTIONS>
         </PORT>
-        <PORT DIR="I" NAME="M28_AXI_awready" SIGIS="undef" SIGNAME="NN_0_s_axi_AXILiteS_AWREADY">
+        <PORT DIR="I" NAME="M28_AXI_awready" SIGIS="undef" SIGNAME="NN_0_s_axi_scaler_AWREADY">
           <CONNECTIONS>
-            <CONNECTION INSTANCE="NN_0" PORT="s_axi_AXILiteS_AWREADY"/>
+            <CONNECTION INSTANCE="NN_0" PORT="s_axi_scaler_AWREADY"/>
           </CONNECTIONS>
         </PORT>
-        <PORT DIR="O" LEFT="31" NAME="M28_AXI_wdata" RIGHT="0" SIGIS="undef" SIGNAME="NN_0_s_axi_AXILiteS_WDATA">
+        <PORT DIR="O" LEFT="31" NAME="M28_AXI_wdata" RIGHT="0" SIGIS="undef" SIGNAME="NN_0_s_axi_scaler_WDATA">
           <CONNECTIONS>
-            <CONNECTION INSTANCE="NN_0" PORT="s_axi_AXILiteS_WDATA"/>
+            <CONNECTION INSTANCE="NN_0" PORT="s_axi_scaler_WDATA"/>
           </CONNECTIONS>
         </PORT>
-        <PORT DIR="O" LEFT="3" NAME="M28_AXI_wstrb" RIGHT="0" SIGIS="undef" SIGNAME="NN_0_s_axi_AXILiteS_WSTRB">
+        <PORT DIR="O" LEFT="3" NAME="M28_AXI_wstrb" RIGHT="0" SIGIS="undef" SIGNAME="NN_0_s_axi_scaler_WSTRB">
           <CONNECTIONS>
-            <CONNECTION INSTANCE="NN_0" PORT="s_axi_AXILiteS_WSTRB"/>
+            <CONNECTION INSTANCE="NN_0" PORT="s_axi_scaler_WSTRB"/>
           </CONNECTIONS>
         </PORT>
         <PORT DIR="O" NAME="M28_AXI_wlast" SIGIS="undef"/>
-        <PORT DIR="O" NAME="M28_AXI_wvalid" SIGIS="undef" SIGNAME="NN_0_s_axi_AXILiteS_WVALID">
+        <PORT DIR="O" NAME="M28_AXI_wvalid" SIGIS="undef" SIGNAME="NN_0_s_axi_scaler_WVALID">
           <CONNECTIONS>
-            <CONNECTION INSTANCE="NN_0" PORT="s_axi_AXILiteS_WVALID"/>
+            <CONNECTION INSTANCE="NN_0" PORT="s_axi_scaler_WVALID"/>
           </CONNECTIONS>
         </PORT>
-        <PORT DIR="I" NAME="M28_AXI_wready" SIGIS="undef" SIGNAME="NN_0_s_axi_AXILiteS_WREADY">
+        <PORT DIR="I" NAME="M28_AXI_wready" SIGIS="undef" SIGNAME="NN_0_s_axi_scaler_WREADY">
           <CONNECTIONS>
-            <CONNECTION INSTANCE="NN_0" PORT="s_axi_AXILiteS_WREADY"/>
+            <CONNECTION INSTANCE="NN_0" PORT="s_axi_scaler_WREADY"/>
           </CONNECTIONS>
         </PORT>
-        <PORT DIR="I" LEFT="1" NAME="M28_AXI_bresp" RIGHT="0" SIGIS="undef" SIGNAME="NN_0_s_axi_AXILiteS_BRESP">
+        <PORT DIR="I" LEFT="1" NAME="M28_AXI_bresp" RIGHT="0" SIGIS="undef" SIGNAME="NN_0_s_axi_scaler_BRESP">
           <CONNECTIONS>
-            <CONNECTION INSTANCE="NN_0" PORT="s_axi_AXILiteS_BRESP"/>
+            <CONNECTION INSTANCE="NN_0" PORT="s_axi_scaler_BRESP"/>
           </CONNECTIONS>
         </PORT>
-        <PORT DIR="I" NAME="M28_AXI_bvalid" SIGIS="undef" SIGNAME="NN_0_s_axi_AXILiteS_BVALID">
+        <PORT DIR="I" NAME="M28_AXI_bvalid" SIGIS="undef" SIGNAME="NN_0_s_axi_scaler_BVALID">
           <CONNECTIONS>
-            <CONNECTION INSTANCE="NN_0" PORT="s_axi_AXILiteS_BVALID"/>
+            <CONNECTION INSTANCE="NN_0" PORT="s_axi_scaler_BVALID"/>
           </CONNECTIONS>
         </PORT>
-        <PORT DIR="O" NAME="M28_AXI_bready" SIGIS="undef" SIGNAME="NN_0_s_axi_AXILiteS_BREADY">
+        <PORT DIR="O" NAME="M28_AXI_bready" SIGIS="undef" SIGNAME="NN_0_s_axi_scaler_BREADY">
           <CONNECTIONS>
-            <CONNECTION INSTANCE="NN_0" PORT="s_axi_AXILiteS_BREADY"/>
+            <CONNECTION INSTANCE="NN_0" PORT="s_axi_scaler_BREADY"/>
           </CONNECTIONS>
         </PORT>
-        <PORT DIR="O" LEFT="39" NAME="M28_AXI_araddr" RIGHT="0" SIGIS="undef" SIGNAME="NN_0_s_axi_AXILiteS_ARADDR">
+        <PORT DIR="O" LEFT="39" NAME="M28_AXI_araddr" RIGHT="0" SIGIS="undef" SIGNAME="NN_0_s_axi_scaler_ARADDR">
           <CONNECTIONS>
-            <CONNECTION INSTANCE="NN_0" PORT="s_axi_AXILiteS_ARADDR"/>
+            <CONNECTION INSTANCE="NN_0" PORT="s_axi_scaler_ARADDR"/>
           </CONNECTIONS>
         </PORT>
         <PORT DIR="O" NAME="M28_AXI_arlen" SIGIS="undef"/>
@@ -27491,35 +27491,35 @@
         <PORT DIR="O" NAME="M28_AXI_arprot" SIGIS="undef"/>
         <PORT DIR="O" NAME="M28_AXI_arregion" SIGIS="undef"/>
         <PORT DIR="O" NAME="M28_AXI_arqos" SIGIS="undef"/>
-        <PORT DIR="O" NAME="M28_AXI_arvalid" SIGIS="undef" SIGNAME="NN_0_s_axi_AXILiteS_ARVALID">
+        <PORT DIR="O" NAME="M28_AXI_arvalid" SIGIS="undef" SIGNAME="NN_0_s_axi_scaler_ARVALID">
           <CONNECTIONS>
-            <CONNECTION INSTANCE="NN_0" PORT="s_axi_AXILiteS_ARVALID"/>
+            <CONNECTION INSTANCE="NN_0" PORT="s_axi_scaler_ARVALID"/>
           </CONNECTIONS>
         </PORT>
-        <PORT DIR="I" NAME="M28_AXI_arready" SIGIS="undef" SIGNAME="NN_0_s_axi_AXILiteS_ARREADY">
+        <PORT DIR="I" NAME="M28_AXI_arready" SIGIS="undef" SIGNAME="NN_0_s_axi_scaler_ARREADY">
           <CONNECTIONS>
-            <CONNECTION INSTANCE="NN_0" PORT="s_axi_AXILiteS_ARREADY"/>
+            <CONNECTION INSTANCE="NN_0" PORT="s_axi_scaler_ARREADY"/>
           </CONNECTIONS>
         </PORT>
-        <PORT DIR="I" LEFT="31" NAME="M28_AXI_rdata" RIGHT="0" SIGIS="undef" SIGNAME="NN_0_s_axi_AXILiteS_RDATA">
+        <PORT DIR="I" LEFT="31" NAME="M28_AXI_rdata" RIGHT="0" SIGIS="undef" SIGNAME="NN_0_s_axi_scaler_RDATA">
           <CONNECTIONS>
-            <CONNECTION INSTANCE="NN_0" PORT="s_axi_AXILiteS_RDATA"/>
+            <CONNECTION INSTANCE="NN_0" PORT="s_axi_scaler_RDATA"/>
           </CONNECTIONS>
         </PORT>
-        <PORT DIR="I" LEFT="1" NAME="M28_AXI_rresp" RIGHT="0" SIGIS="undef" SIGNAME="NN_0_s_axi_AXILiteS_RRESP">
+        <PORT DIR="I" LEFT="1" NAME="M28_AXI_rresp" RIGHT="0" SIGIS="undef" SIGNAME="NN_0_s_axi_scaler_RRESP">
           <CONNECTIONS>
-            <CONNECTION INSTANCE="NN_0" PORT="s_axi_AXILiteS_RRESP"/>
+            <CONNECTION INSTANCE="NN_0" PORT="s_axi_scaler_RRESP"/>
           </CONNECTIONS>
         </PORT>
         <PORT DIR="I" NAME="M28_AXI_rlast" SIGIS="undef"/>
-        <PORT DIR="I" NAME="M28_AXI_rvalid" SIGIS="undef" SIGNAME="NN_0_s_axi_AXILiteS_RVALID">
+        <PORT DIR="I" NAME="M28_AXI_rvalid" SIGIS="undef" SIGNAME="NN_0_s_axi_scaler_RVALID">
           <CONNECTIONS>
-            <CONNECTION INSTANCE="NN_0" PORT="s_axi_AXILiteS_RVALID"/>
+            <CONNECTION INSTANCE="NN_0" PORT="s_axi_scaler_RVALID"/>
           </CONNECTIONS>
         </PORT>
-        <PORT DIR="O" NAME="M28_AXI_rready" SIGIS="undef" SIGNAME="NN_0_s_axi_AXILiteS_RREADY">
+        <PORT DIR="O" NAME="M28_AXI_rready" SIGIS="undef" SIGNAME="NN_0_s_axi_scaler_RREADY">
           <CONNECTIONS>
-            <CONNECTION INSTANCE="NN_0" PORT="s_axi_AXILiteS_RREADY"/>
+            <CONNECTION INSTANCE="NN_0" PORT="s_axi_scaler_RREADY"/>
           </CONNECTIONS>
         </PORT>
       </PORTS>
@@ -38555,7 +38555,7 @@
         <MEMRANGE ADDRESSBLOCK="Reg" BASENAME="C_BASEADDR" BASEVALUE="0xA0016000" HIGHNAME="C_HIGHADDR" HIGHVALUE="0xA0016FFF" INSTANCE="axis_switch_mr" IS_DATA="TRUE" IS_INSTRUCTION="TRUE" MASTERBUSINTERFACE="M_AXI_HPM0_FPD" MEMTYPE="REGISTER" SLAVEBUSINTERFACE="S_AXI_CTRL"/>
         <MEMRANGE ADDRESSBLOCK="reg0" BASENAME="C_BASEADDR" BASEVALUE="0xA0017000" HIGHNAME="C_HIGHADDR" HIGHVALUE="0xA0017FFF" INSTANCE="mr_buffer_et_0" IS_DATA="TRUE" IS_INSTRUCTION="TRUE" MASTERBUSINTERFACE="M_AXI_HPM0_FPD" MEMTYPE="REGISTER" SLAVEBUSINTERFACE="s00_axi"/>
         <MEMRANGE ADDRESSBLOCK="Mem0" BASENAME="C_S_AXI_BASEADDR" BASEVALUE="0xA0018000" HIGHNAME="C_S_AXI_HIGHADDR" HIGHVALUE="0xA0019FFF" INSTANCE="axi_bram_ctrl_1" IS_DATA="TRUE" IS_INSTRUCTION="TRUE" MASTERBUSINTERFACE="M_AXI_HPM0_FPD" MEMTYPE="MEMORY" SLAVEBUSINTERFACE="S_AXI"/>
-        <MEMRANGE ADDRESSBLOCK="Reg" BASENAME="C_S_AXI_AXILITES_BASEADDR" BASEVALUE="0xA0020000" HIGHNAME="C_S_AXI_AXILITES_HIGHADDR" HIGHVALUE="0xA002FFFF" INSTANCE="NN_0" IS_DATA="TRUE" IS_INSTRUCTION="TRUE" MASTERBUSINTERFACE="M_AXI_HPM0_FPD" MEMTYPE="REGISTER" SLAVEBUSINTERFACE="s_axi_AXILiteS"/>
+        <MEMRANGE ADDRESSBLOCK="Reg" BASENAME="C_S_AXI_SCALER_BASEADDR" BASEVALUE="0xA0020000" HIGHNAME="C_S_AXI_SCALER_HIGHADDR" HIGHVALUE="0xA002FFFF" INSTANCE="NN_0" IS_DATA="TRUE" IS_INSTRUCTION="TRUE" MASTERBUSINTERFACE="M_AXI_HPM0_FPD" MEMTYPE="REGISTER" SLAVEBUSINTERFACE="s_axi_scaler"/>
         <MEMRANGE ADDRESSBLOCK="Reg" BASENAME="C_BASEADDR" BASEVALUE="0xA0140000" HIGHNAME="C_HIGHADDR" HIGHVALUE="0xA017FFFF" INSTANCE="usp_rf_data_converter_0" IS_DATA="TRUE" IS_INSTRUCTION="TRUE" MASTERBUSINTERFACE="M_AXI_HPM0_FPD" MEMTYPE="REGISTER" SLAVEBUSINTERFACE="s_axi"/>
         <MEMRANGE ADDRESSBLOCK="Mem0" BASENAME="C_S_AXI_BASEADDR" BASEVALUE="0xA0200000" HIGHNAME="C_S_AXI_HIGHADDR" HIGHVALUE="0xA020FFFF" INSTANCE="axi_bram_ctrl_0" IS_DATA="TRUE" IS_INSTRUCTION="TRUE" MASTERBUSINTERFACE="M_AXI_HPM0_FPD" MEMTYPE="MEMORY" SLAVEBUSINTERFACE="S_AXI"/>
         <MEMRANGE ADDRESSBLOCK="reg0" BASENAME="C_BASEADDR" BASEVALUE="0x400000000" HIGHNAME="C_HIGHADDR" HIGHVALUE="0x4FFFFFFFF" INSTANCE="axis_tproc64x32_x8_0" IS_DATA="TRUE" IS_INSTRUCTION="TRUE" MASTERBUSINTERFACE="M_AXI_HPM0_FPD" MEMTYPE="REGISTER" SLAVEBUSINTERFACE="s_axi"/>
