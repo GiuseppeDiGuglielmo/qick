@@ -26,6 +26,7 @@ module axis_fwd
 
     assign fwd_axis_tvalid = s_axis_tvalid && valid;
     assign fwd_axis_tdata = s_axis_tdata;
+    assign s_axis_tready = fwd_axis_tready;
 
 endmodule
 
@@ -47,7 +48,7 @@ module data_counter #(
     } state_t;
 
     state_t current_state, next_state;
-    logic [$clog2(LENGTH):0] counter;     // Counter up to LENGTH value
+    logic [$clog2(LENGTH):0] counter; // Counter up to LENGTH value
     logic [$clog2(OFFSET):0] wait_counter; // Wait counter
 
     // FSM state transition and output logic
@@ -66,7 +67,13 @@ module data_counter #(
             wait_counter <= 0;
         end else begin
             case(next_state)
-                WAITING: wait_counter <= wait_counter + 1;
+                IDLE: begin
+                    counter <= 0;
+                    wait_counter <= 0;
+                end
+                WAITING: begin
+                    wait_counter <= wait_counter + 1;
+                end
                 COUNTING: begin
                     if (counter < LENGTH) begin
                         counter <= counter + 1;
