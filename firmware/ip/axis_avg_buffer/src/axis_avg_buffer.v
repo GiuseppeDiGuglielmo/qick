@@ -67,7 +67,16 @@ module axis_avg_buffer
 		// AXIS Master for register output.
 		m2_axis_tvalid		,
 		m2_axis_tready		,
-		m2_axis_tdata
+		m2_axis_tdata       ,
+
+        // Forward AXIS Slave control BRAM
+        bram_addr           ,
+        bram_clk            ,
+        bram_din            ,
+        bram_dout           ,
+        bram_en             ,
+        bram_rst            ,
+        bram_we
 	);
 
 /**************/
@@ -145,6 +154,13 @@ output				m2_axis_tvalid;
 input				m2_axis_tready;
 output	[4*B-1:0]	m2_axis_tdata;
 
+output  [31:0]      bram_addr;
+output              bram_clk;
+output  [31:0]      bram_din;
+input   [31:0]      bram_dout;
+output              bram_en;
+output              bram_rst;
+output  [3:0]       bram_we;
 
 /********************/
 /* Internal signals */
@@ -235,7 +251,14 @@ axis_fwd
         .trigger            (trigger            ),
         .fwd_axis_tvalid    (fwd_axis_tvalid    ),
         .fwd_axis_tready    (fwd_axis_tready    ),
-        .fwd_axis_tdata     (fwd_axis_tdata     )
+        .fwd_axis_tdata     (fwd_axis_tdata     )//,
+//        .bram_add           (bram_addr          ),
+//        //.bram_clk           (bram_clk           ),
+//        .bram_din           (bram_din           ),
+//        .bram_dou           (bram_dout          ),
+//        .bram_en            (bram_en            ),
+//        //.bram_rst           (bram_rst           ),
+//        .bram_we            (bram_we            )
     );
 
 // Averager + Buffer Top.

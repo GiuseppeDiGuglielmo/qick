@@ -13,6 +13,13 @@ module axis_fwd
         output  logic               fwd_axis_tvalid,
         input   logic               fwd_axis_tready,
         output  logic   [2*B-1:0]   fwd_axis_tdata
+//        output  logic   [31:0]      bram_addr,
+//        //output  logic               bram_clk,
+//        output  logic   [31:0]      bram_din,
+//        input   logic   [31:0]      bram_dout,
+//        output  logic               bram_en,
+//        //output  logic               bram_rst,
+//        output  logic   [3:0]       bram_we
     );
 
     logic valid;
@@ -26,7 +33,7 @@ module axis_fwd
 
     assign fwd_axis_tvalid = s_axis_tvalid && valid;
     assign fwd_axis_tdata = s_axis_tdata;
-    assign s_axis_tready = fwd_axis_tready;
+    //assign s_axis_tready = fwd_axis_tready;
 
 endmodule
 
