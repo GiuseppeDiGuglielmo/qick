@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
-<EDKSYSTEM EDWVERSION="1.2" TIMESTAMP="Wed Jan 17 15:28:35 2024" VIVADOVERSION="2022.1">
+<EDKSYSTEM EDWVERSION="1.2" TIMESTAMP="Wed Jan 17 19:13:10 2024" VIVADOVERSION="2022.1">
 
   <SYSTEMINFO ARCH="zynquplusRFSOC" BOARD="xilinx.com:zcu216:part0:2.0" DEVICE="xczu49dr" NAME="d_1" PACKAGE="ffvf1760" SPEEDGRADE="-2"/>
 
@@ -12841,33 +12841,33 @@
         </PORT>
         <PORT DIR="O" LEFT="31" NAME="bram_addr" RIGHT="0" SIGIS="undef" SIGNAME="axis_avg_buffer_0_bram_addr">
           <CONNECTIONS>
-            <CONNECTION INSTANCE="blk_mem_gen_2" PORT="addra"/>
+            <CONNECTION INSTANCE="blk_mem_gen_1" PORT="addrb"/>
           </CONNECTIONS>
         </PORT>
         <PORT CLKFREQUENCY="100000000" DIR="O" NAME="bram_clk" SIGIS="clk" SIGNAME="axis_avg_buffer_0_bram_clk">
           <CONNECTIONS>
-            <CONNECTION INSTANCE="blk_mem_gen_2" PORT="clka"/>
+            <CONNECTION INSTANCE="blk_mem_gen_1" PORT="clkb"/>
           </CONNECTIONS>
         </PORT>
         <PORT DIR="O" LEFT="31" NAME="bram_din" RIGHT="0" SIGIS="undef" SIGNAME="axis_avg_buffer_0_bram_din">
           <CONNECTIONS>
-            <CONNECTION INSTANCE="blk_mem_gen_2" PORT="dina"/>
+            <CONNECTION INSTANCE="blk_mem_gen_1" PORT="dinb"/>
           </CONNECTIONS>
         </PORT>
         <PORT DIR="I" LEFT="31" NAME="bram_dout" RIGHT="0" SIGIS="undef" SIGNAME="axis_avg_buffer_0_bram_dout">
           <CONNECTIONS>
-            <CONNECTION INSTANCE="blk_mem_gen_2" PORT="douta"/>
+            <CONNECTION INSTANCE="blk_mem_gen_1" PORT="doutb"/>
           </CONNECTIONS>
         </PORT>
         <PORT DIR="O" NAME="bram_en" SIGIS="undef" SIGNAME="axis_avg_buffer_0_bram_en">
           <CONNECTIONS>
-            <CONNECTION INSTANCE="blk_mem_gen_2" PORT="ena"/>
+            <CONNECTION INSTANCE="blk_mem_gen_1" PORT="enb"/>
           </CONNECTIONS>
         </PORT>
         <PORT DIR="O" NAME="bram_rst" POLARITY="ACTIVE_LOW" SIGIS="rst"/>
         <PORT DIR="O" LEFT="3" NAME="bram_we" RIGHT="0" SIGIS="undef" SIGNAME="axis_avg_buffer_0_bram_we">
           <CONNECTIONS>
-            <CONNECTION INSTANCE="blk_mem_gen_2" PORT="wea"/>
+            <CONNECTION INSTANCE="blk_mem_gen_1" PORT="web"/>
           </CONNECTIONS>
         </PORT>
       </PORTS>
@@ -13265,33 +13265,33 @@
         </PORT>
         <PORT DIR="O" LEFT="31" NAME="bram_addr" RIGHT="0" SIGIS="undef" SIGNAME="axis_avg_buffer_1_bram_addr">
           <CONNECTIONS>
-            <CONNECTION INSTANCE="blk_mem_gen_1" PORT="addrb"/>
+            <CONNECTION INSTANCE="blk_mem_gen_2" PORT="addra"/>
           </CONNECTIONS>
         </PORT>
         <PORT CLKFREQUENCY="100000000" DIR="O" NAME="bram_clk" SIGIS="clk" SIGNAME="axis_avg_buffer_1_bram_clk">
           <CONNECTIONS>
-            <CONNECTION INSTANCE="blk_mem_gen_1" PORT="clkb"/>
+            <CONNECTION INSTANCE="blk_mem_gen_2" PORT="clka"/>
           </CONNECTIONS>
         </PORT>
         <PORT DIR="O" LEFT="31" NAME="bram_din" RIGHT="0" SIGIS="undef" SIGNAME="axis_avg_buffer_1_bram_din">
           <CONNECTIONS>
-            <CONNECTION INSTANCE="blk_mem_gen_1" PORT="dinb"/>
+            <CONNECTION INSTANCE="blk_mem_gen_2" PORT="dina"/>
           </CONNECTIONS>
         </PORT>
         <PORT DIR="I" LEFT="31" NAME="bram_dout" RIGHT="0" SIGIS="undef" SIGNAME="axis_avg_buffer_1_bram_dout">
           <CONNECTIONS>
-            <CONNECTION INSTANCE="blk_mem_gen_1" PORT="doutb"/>
+            <CONNECTION INSTANCE="blk_mem_gen_2" PORT="douta"/>
           </CONNECTIONS>
         </PORT>
         <PORT DIR="O" NAME="bram_en" SIGIS="undef" SIGNAME="axis_avg_buffer_1_bram_en">
           <CONNECTIONS>
-            <CONNECTION INSTANCE="blk_mem_gen_1" PORT="enb"/>
+            <CONNECTION INSTANCE="blk_mem_gen_2" PORT="ena"/>
           </CONNECTIONS>
         </PORT>
         <PORT DIR="O" NAME="bram_rst" POLARITY="ACTIVE_LOW" SIGIS="rst"/>
         <PORT DIR="O" LEFT="3" NAME="bram_we" RIGHT="0" SIGIS="undef" SIGNAME="axis_avg_buffer_1_bram_we">
           <CONNECTIONS>
-            <CONNECTION INSTANCE="blk_mem_gen_1" PORT="web"/>
+            <CONNECTION INSTANCE="blk_mem_gen_2" PORT="wea"/>
           </CONNECTIONS>
         </PORT>
       </PORTS>
@@ -23331,9 +23331,9 @@
         <PARAMETER NAME="C_WRITE_MODE_A" VALUE="WRITE_FIRST"/>
         <PARAMETER NAME="C_WRITE_WIDTH_A" VALUE="32"/>
         <PARAMETER NAME="C_READ_WIDTH_A" VALUE="32"/>
-        <PARAMETER NAME="C_WRITE_DEPTH_A" VALUE="2048"/>
-        <PARAMETER NAME="C_READ_DEPTH_A" VALUE="2048"/>
-        <PARAMETER NAME="C_ADDRA_WIDTH" VALUE="11"/>
+        <PARAMETER NAME="C_WRITE_DEPTH_A" VALUE="8192"/>
+        <PARAMETER NAME="C_READ_DEPTH_A" VALUE="8192"/>
+        <PARAMETER NAME="C_ADDRA_WIDTH" VALUE="13"/>
         <PARAMETER NAME="C_HAS_RSTB" VALUE="0"/>
         <PARAMETER NAME="C_RST_PRIORITY_B" VALUE="CE"/>
         <PARAMETER NAME="C_RSTRAM_B" VALUE="0"/>
@@ -23345,9 +23345,9 @@
         <PARAMETER NAME="C_WRITE_MODE_B" VALUE="WRITE_FIRST"/>
         <PARAMETER NAME="C_WRITE_WIDTH_B" VALUE="32"/>
         <PARAMETER NAME="C_READ_WIDTH_B" VALUE="32"/>
-        <PARAMETER NAME="C_WRITE_DEPTH_B" VALUE="2048"/>
-        <PARAMETER NAME="C_READ_DEPTH_B" VALUE="2048"/>
-        <PARAMETER NAME="C_ADDRB_WIDTH" VALUE="11"/>
+        <PARAMETER NAME="C_WRITE_DEPTH_B" VALUE="8192"/>
+        <PARAMETER NAME="C_READ_DEPTH_B" VALUE="8192"/>
+        <PARAMETER NAME="C_ADDRB_WIDTH" VALUE="13"/>
         <PARAMETER NAME="C_HAS_MEM_OUTPUT_REGS_A" VALUE="1"/>
         <PARAMETER NAME="C_HAS_MEM_OUTPUT_REGS_B" VALUE="1"/>
         <PARAMETER NAME="C_HAS_MUX_OUTPUT_REGS_A" VALUE="0"/>
@@ -23372,9 +23372,9 @@
         <PARAMETER NAME="C_EN_SHUTDOWN_PIN" VALUE="0"/>
         <PARAMETER NAME="C_EN_SAFETY_CKT" VALUE="0"/>
         <PARAMETER NAME="C_DISABLE_WARN_BHV_RANGE" VALUE="0"/>
-        <PARAMETER NAME="C_COUNT_36K_BRAM" VALUE="2"/>
-        <PARAMETER NAME="C_COUNT_18K_BRAM" VALUE="0"/>
-        <PARAMETER NAME="C_EST_POWER_SUMMARY" VALUE="Estimated Power for IP     :     7.524303 mW"/>
+        <PARAMETER NAME="C_COUNT_36K_BRAM" VALUE="7"/>
+        <PARAMETER NAME="C_COUNT_18K_BRAM" VALUE="1"/>
+        <PARAMETER NAME="C_EST_POWER_SUMMARY" VALUE="Estimated Power for IP     :     18.363474 mW"/>
         <PARAMETER NAME="Component_Name" VALUE="d_1_blk_mem_gen_1_0"/>
         <PARAMETER NAME="Interface_Type" VALUE="Native"/>
         <PARAMETER NAME="AXI_Type" VALUE="AXI4_Full"/>
@@ -23401,7 +23401,7 @@
         <PARAMETER NAME="Primitive" VALUE="8kx2"/>
         <PARAMETER NAME="Assume_Synchronous_Clk" VALUE="false"/>
         <PARAMETER NAME="Write_Width_A" VALUE="32"/>
-        <PARAMETER NAME="Write_Depth_A" VALUE="2048"/>
+        <PARAMETER NAME="Write_Depth_A" VALUE="8192"/>
         <PARAMETER NAME="Read_Width_A" VALUE="32"/>
         <PARAMETER NAME="Operating_Mode_A" VALUE="WRITE_FIRST"/>
         <PARAMETER NAME="Enable_A" VALUE="Use_ENA_Pin"/>
@@ -23465,7 +23465,7 @@
             <CONNECTION INSTANCE="axi_bram_ctrl_2" PORT="bram_we_a"/>
           </CONNECTIONS>
         </PORT>
-        <PORT DIR="I" LEFT="10" NAME="addra" RIGHT="0" SIGIS="undef" SIGNAME="axi_bram_ctrl_2_bram_addr_a">
+        <PORT DIR="I" LEFT="12" NAME="addra" RIGHT="0" SIGIS="undef" SIGNAME="axi_bram_ctrl_2_bram_addr_a">
           <CONNECTIONS>
             <CONNECTION INSTANCE="axi_bram_ctrl_2" PORT="bram_addr_a"/>
           </CONNECTIONS>
@@ -23480,34 +23480,34 @@
             <CONNECTION INSTANCE="axi_bram_ctrl_2" PORT="bram_rddata_a"/>
           </CONNECTIONS>
         </PORT>
-        <PORT DIR="I" NAME="clkb" SIGIS="clk" SIGNAME="axis_avg_buffer_1_bram_clk">
+        <PORT DIR="I" NAME="clkb" SIGIS="clk" SIGNAME="axis_avg_buffer_0_bram_clk">
           <CONNECTIONS>
-            <CONNECTION INSTANCE="axis_avg_buffer_1" PORT="bram_clk"/>
+            <CONNECTION INSTANCE="axis_avg_buffer_0" PORT="bram_clk"/>
           </CONNECTIONS>
         </PORT>
-        <PORT DIR="I" NAME="enb" SIGIS="undef" SIGNAME="axis_avg_buffer_1_bram_en">
+        <PORT DIR="I" NAME="enb" SIGIS="undef" SIGNAME="axis_avg_buffer_0_bram_en">
           <CONNECTIONS>
-            <CONNECTION INSTANCE="axis_avg_buffer_1" PORT="bram_en"/>
+            <CONNECTION INSTANCE="axis_avg_buffer_0" PORT="bram_en"/>
           </CONNECTIONS>
         </PORT>
-        <PORT DIR="I" LEFT="0" NAME="web" RIGHT="0" SIGIS="undef" SIGNAME="axis_avg_buffer_1_bram_we">
+        <PORT DIR="I" LEFT="0" NAME="web" RIGHT="0" SIGIS="undef" SIGNAME="axis_avg_buffer_0_bram_we">
           <CONNECTIONS>
-            <CONNECTION INSTANCE="axis_avg_buffer_1" PORT="bram_we"/>
+            <CONNECTION INSTANCE="axis_avg_buffer_0" PORT="bram_we"/>
           </CONNECTIONS>
         </PORT>
-        <PORT DIR="I" LEFT="10" NAME="addrb" RIGHT="0" SIGIS="undef" SIGNAME="axis_avg_buffer_1_bram_addr">
+        <PORT DIR="I" LEFT="12" NAME="addrb" RIGHT="0" SIGIS="undef" SIGNAME="axis_avg_buffer_0_bram_addr">
           <CONNECTIONS>
-            <CONNECTION INSTANCE="axis_avg_buffer_1" PORT="bram_addr"/>
+            <CONNECTION INSTANCE="axis_avg_buffer_0" PORT="bram_addr"/>
           </CONNECTIONS>
         </PORT>
-        <PORT DIR="I" LEFT="31" NAME="dinb" RIGHT="0" SIGIS="undef" SIGNAME="axis_avg_buffer_1_bram_din">
+        <PORT DIR="I" LEFT="31" NAME="dinb" RIGHT="0" SIGIS="undef" SIGNAME="axis_avg_buffer_0_bram_din">
           <CONNECTIONS>
-            <CONNECTION INSTANCE="axis_avg_buffer_1" PORT="bram_din"/>
+            <CONNECTION INSTANCE="axis_avg_buffer_0" PORT="bram_din"/>
           </CONNECTIONS>
         </PORT>
-        <PORT DIR="O" LEFT="31" NAME="doutb" RIGHT="0" SIGIS="undef" SIGNAME="axis_avg_buffer_1_bram_dout">
+        <PORT DIR="O" LEFT="31" NAME="doutb" RIGHT="0" SIGIS="undef" SIGNAME="axis_avg_buffer_0_bram_dout">
           <CONNECTIONS>
-            <CONNECTION INSTANCE="axis_avg_buffer_1" PORT="bram_dout"/>
+            <CONNECTION INSTANCE="axis_avg_buffer_0" PORT="bram_dout"/>
           </CONNECTIONS>
         </PORT>
       </PORTS>
@@ -23528,7 +23528,7 @@
             <PORTMAP LOGICAL="WE" PHYSICAL="wea"/>
           </PORTMAPS>
         </BUSINTERFACE>
-        <BUSINTERFACE BUSNAME="axis_avg_buffer_1_bram" NAME="BRAM_PORTB" TYPE="TARGET" VLNV="xilinx.com:interface:bram:1.0">
+        <BUSINTERFACE BUSNAME="axis_avg_buffer_0_bram" NAME="BRAM_PORTB" TYPE="TARGET" VLNV="xilinx.com:interface:bram:1.0">
           <PARAMETER NAME="MEM_SIZE" VALUE="8192"/>
           <PARAMETER NAME="MEM_WIDTH" VALUE="32"/>
           <PARAMETER NAME="MEM_ECC" VALUE="NONE"/>
@@ -23582,9 +23582,9 @@
         <PARAMETER NAME="C_WRITE_MODE_A" VALUE="WRITE_FIRST"/>
         <PARAMETER NAME="C_WRITE_WIDTH_A" VALUE="32"/>
         <PARAMETER NAME="C_READ_WIDTH_A" VALUE="32"/>
-        <PARAMETER NAME="C_WRITE_DEPTH_A" VALUE="2048"/>
-        <PARAMETER NAME="C_READ_DEPTH_A" VALUE="2048"/>
-        <PARAMETER NAME="C_ADDRA_WIDTH" VALUE="11"/>
+        <PARAMETER NAME="C_WRITE_DEPTH_A" VALUE="8192"/>
+        <PARAMETER NAME="C_READ_DEPTH_A" VALUE="8192"/>
+        <PARAMETER NAME="C_ADDRA_WIDTH" VALUE="13"/>
         <PARAMETER NAME="C_HAS_RSTB" VALUE="0"/>
         <PARAMETER NAME="C_RST_PRIORITY_B" VALUE="CE"/>
         <PARAMETER NAME="C_RSTRAM_B" VALUE="0"/>
@@ -23596,9 +23596,9 @@
         <PARAMETER NAME="C_WRITE_MODE_B" VALUE="WRITE_FIRST"/>
         <PARAMETER NAME="C_WRITE_WIDTH_B" VALUE="32"/>
         <PARAMETER NAME="C_READ_WIDTH_B" VALUE="32"/>
-        <PARAMETER NAME="C_WRITE_DEPTH_B" VALUE="2048"/>
-        <PARAMETER NAME="C_READ_DEPTH_B" VALUE="2048"/>
-        <PARAMETER NAME="C_ADDRB_WIDTH" VALUE="11"/>
+        <PARAMETER NAME="C_WRITE_DEPTH_B" VALUE="8192"/>
+        <PARAMETER NAME="C_READ_DEPTH_B" VALUE="8192"/>
+        <PARAMETER NAME="C_ADDRB_WIDTH" VALUE="13"/>
         <PARAMETER NAME="C_HAS_MEM_OUTPUT_REGS_A" VALUE="1"/>
         <PARAMETER NAME="C_HAS_MEM_OUTPUT_REGS_B" VALUE="0"/>
         <PARAMETER NAME="C_HAS_MUX_OUTPUT_REGS_A" VALUE="0"/>
@@ -23623,9 +23623,9 @@
         <PARAMETER NAME="C_EN_SHUTDOWN_PIN" VALUE="0"/>
         <PARAMETER NAME="C_EN_SAFETY_CKT" VALUE="0"/>
         <PARAMETER NAME="C_DISABLE_WARN_BHV_RANGE" VALUE="0"/>
-        <PARAMETER NAME="C_COUNT_36K_BRAM" VALUE="2"/>
-        <PARAMETER NAME="C_COUNT_18K_BRAM" VALUE="0"/>
-        <PARAMETER NAME="C_EST_POWER_SUMMARY" VALUE="Estimated Power for IP     :     3.762151 mW"/>
+        <PARAMETER NAME="C_COUNT_36K_BRAM" VALUE="7"/>
+        <PARAMETER NAME="C_COUNT_18K_BRAM" VALUE="1"/>
+        <PARAMETER NAME="C_EST_POWER_SUMMARY" VALUE="Estimated Power for IP     :     9.181737 mW"/>
         <PARAMETER NAME="Component_Name" VALUE="d_1_blk_mem_gen_2_0"/>
         <PARAMETER NAME="Interface_Type" VALUE="Native"/>
         <PARAMETER NAME="AXI_Type" VALUE="AXI4_Full"/>
@@ -23652,7 +23652,7 @@
         <PARAMETER NAME="Primitive" VALUE="8kx2"/>
         <PARAMETER NAME="Assume_Synchronous_Clk" VALUE="false"/>
         <PARAMETER NAME="Write_Width_A" VALUE="32"/>
-        <PARAMETER NAME="Write_Depth_A" VALUE="2048"/>
+        <PARAMETER NAME="Write_Depth_A" VALUE="8192"/>
         <PARAMETER NAME="Read_Width_A" VALUE="32"/>
         <PARAMETER NAME="Operating_Mode_A" VALUE="WRITE_FIRST"/>
         <PARAMETER NAME="Enable_A" VALUE="Use_ENA_Pin"/>
@@ -23701,39 +23701,39 @@
         <PARAMETER NAME="EDK_IPTYPE" VALUE="PERIPHERAL"/>
       </PARAMETERS>
       <PORTS>
-        <PORT DIR="I" NAME="clka" SIGIS="clk" SIGNAME="axis_avg_buffer_0_bram_clk">
+        <PORT DIR="I" NAME="clka" SIGIS="clk" SIGNAME="axis_avg_buffer_1_bram_clk">
           <CONNECTIONS>
-            <CONNECTION INSTANCE="axis_avg_buffer_0" PORT="bram_clk"/>
+            <CONNECTION INSTANCE="axis_avg_buffer_1" PORT="bram_clk"/>
           </CONNECTIONS>
         </PORT>
-        <PORT DIR="I" NAME="ena" SIGIS="undef" SIGNAME="axis_avg_buffer_0_bram_en">
+        <PORT DIR="I" NAME="ena" SIGIS="undef" SIGNAME="axis_avg_buffer_1_bram_en">
           <CONNECTIONS>
-            <CONNECTION INSTANCE="axis_avg_buffer_0" PORT="bram_en"/>
+            <CONNECTION INSTANCE="axis_avg_buffer_1" PORT="bram_en"/>
           </CONNECTIONS>
         </PORT>
-        <PORT DIR="I" LEFT="0" NAME="wea" RIGHT="0" SIGIS="undef" SIGNAME="axis_avg_buffer_0_bram_we">
+        <PORT DIR="I" LEFT="0" NAME="wea" RIGHT="0" SIGIS="undef" SIGNAME="axis_avg_buffer_1_bram_we">
           <CONNECTIONS>
-            <CONNECTION INSTANCE="axis_avg_buffer_0" PORT="bram_we"/>
+            <CONNECTION INSTANCE="axis_avg_buffer_1" PORT="bram_we"/>
           </CONNECTIONS>
         </PORT>
-        <PORT DIR="I" LEFT="10" NAME="addra" RIGHT="0" SIGIS="undef" SIGNAME="axis_avg_buffer_0_bram_addr">
+        <PORT DIR="I" LEFT="12" NAME="addra" RIGHT="0" SIGIS="undef" SIGNAME="axis_avg_buffer_1_bram_addr">
           <CONNECTIONS>
-            <CONNECTION INSTANCE="axis_avg_buffer_0" PORT="bram_addr"/>
+            <CONNECTION INSTANCE="axis_avg_buffer_1" PORT="bram_addr"/>
           </CONNECTIONS>
         </PORT>
-        <PORT DIR="I" LEFT="31" NAME="dina" RIGHT="0" SIGIS="undef" SIGNAME="axis_avg_buffer_0_bram_din">
+        <PORT DIR="I" LEFT="31" NAME="dina" RIGHT="0" SIGIS="undef" SIGNAME="axis_avg_buffer_1_bram_din">
           <CONNECTIONS>
-            <CONNECTION INSTANCE="axis_avg_buffer_0" PORT="bram_din"/>
+            <CONNECTION INSTANCE="axis_avg_buffer_1" PORT="bram_din"/>
           </CONNECTIONS>
         </PORT>
-        <PORT DIR="O" LEFT="31" NAME="douta" RIGHT="0" SIGIS="undef" SIGNAME="axis_avg_buffer_0_bram_dout">
+        <PORT DIR="O" LEFT="31" NAME="douta" RIGHT="0" SIGIS="undef" SIGNAME="axis_avg_buffer_1_bram_dout">
           <CONNECTIONS>
-            <CONNECTION INSTANCE="axis_avg_buffer_0" PORT="bram_dout"/>
+            <CONNECTION INSTANCE="axis_avg_buffer_1" PORT="bram_dout"/>
           </CONNECTIONS>
         </PORT>
       </PORTS>
       <BUSINTERFACES>
-        <BUSINTERFACE BUSNAME="axis_avg_buffer_0_bram" NAME="BRAM_PORTA" TYPE="TARGET" VLNV="xilinx.com:interface:bram:1.0">
+        <BUSINTERFACE BUSNAME="axis_avg_buffer_1_bram" NAME="BRAM_PORTA" TYPE="TARGET" VLNV="xilinx.com:interface:bram:1.0">
           <PARAMETER NAME="MEM_SIZE" VALUE="8192"/>
           <PARAMETER NAME="MEM_WIDTH" VALUE="32"/>
           <PARAMETER NAME="MEM_ECC" VALUE="NONE"/>
