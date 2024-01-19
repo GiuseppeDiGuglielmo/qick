@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
-<EDKSYSTEM EDWVERSION="1.2" TIMESTAMP="Thu Jan 18 17:44:30 2024" VIVADOVERSION="2022.1">
+<EDKSYSTEM EDWVERSION="1.2" TIMESTAMP="Thu Jan 18 21:01:46 2024" VIVADOVERSION="2022.1">
 
   <SYSTEMINFO ARCH="zynquplusRFSOC" BOARD="xilinx.com:zcu216:part0:2.0" DEVICE="xczu49dr" NAME="d_1" PACKAGE="ffvf1760" SPEEDGRADE="-2"/>
 
@@ -34085,7 +34085,7 @@
         <PARAMETER NAME="C_SLOT_13_INTF_TYPE" VALUE="xilinx.com:interface:aximm_rtl:1.0"/>
         <PARAMETER NAME="C_SLOT_14_INTF_TYPE" VALUE="xilinx.com:interface:aximm_rtl:1.0"/>
         <PARAMETER NAME="C_SLOT_15_INTF_TYPE" VALUE="xilinx.com:interface:aximm_rtl:1.0"/>
-        <PARAMETER NAME="C_MON_TYPE" VALUE="MIX"/>
+        <PARAMETER NAME="C_MON_TYPE" VALUE="INTERFACE"/>
         <PARAMETER NAME="C_SLOT_2_AXI_ARUSER_WIDTH" VALUE="1"/>
         <PARAMETER NAME="C_SLOT_2_AXI_RUSER_WIDTH" VALUE="1"/>
         <PARAMETER NAME="C_SLOT_2_AXI_AWUSER_WIDTH" VALUE="1"/>
@@ -34285,11 +34285,6 @@
         <PORT DIR="I" LEFT="12" NAME="SLOT_0_BRAM_addr" RIGHT="0" SIGIS="undef"/>
         <PORT DIR="I" NAME="SLOT_0_BRAM_clk" SIGIS="clk"/>
         <PORT DIR="I" NAME="SLOT_0_BRAM_rst" SIGIS="rst"/>
-        <PORT DIR="I" LEFT="0" NAME="probe0" RIGHT="0" SIGIS="undef" SIGNAME="vect2bits_16_0_dout14">
-          <CONNECTIONS>
-            <CONNECTION INSTANCE="vect2bits_16_0" PORT="dout14"/>
-          </CONNECTIONS>
-        </PORT>
       </PORTS>
       <BUSINTERFACES>
         <BUSINTERFACE BUSNAME="axi_bram_ctrl_2_BRAM_PORTA" NAME="SLOT_0_BRAM" TYPE="MONITOR" VLNV="xilinx.com:interface:bram:1.0">
@@ -37961,7 +37956,7 @@
         <PARAMETER NAME="C_SLOT_13_INTF_TYPE" VALUE="xilinx.com:interface:aximm_rtl:1.0"/>
         <PARAMETER NAME="C_SLOT_14_INTF_TYPE" VALUE="xilinx.com:interface:aximm_rtl:1.0"/>
         <PARAMETER NAME="C_SLOT_15_INTF_TYPE" VALUE="xilinx.com:interface:aximm_rtl:1.0"/>
-        <PARAMETER NAME="C_MON_TYPE" VALUE="INTERFACE"/>
+        <PARAMETER NAME="C_MON_TYPE" VALUE="MIX"/>
         <PARAMETER NAME="C_SLOT_2_AXI_ARUSER_WIDTH" VALUE="1"/>
         <PARAMETER NAME="C_SLOT_2_AXI_RUSER_WIDTH" VALUE="1"/>
         <PARAMETER NAME="C_SLOT_2_AXI_AWUSER_WIDTH" VALUE="1"/>
@@ -38161,6 +38156,11 @@
         <PORT DIR="I" NAME="resetn" POLARITY="ACTIVE_LOW" SIGIS="rst" SIGNAME="rst_adc_peripheral_aresetn">
           <CONNECTIONS>
             <CONNECTION INSTANCE="rst_adc" PORT="peripheral_aresetn"/>
+          </CONNECTIONS>
+        </PORT>
+        <PORT DIR="I" LEFT="0" NAME="probe0" RIGHT="0" SIGIS="undef" SIGNAME="vect2bits_16_0_dout14">
+          <CONNECTIONS>
+            <CONNECTION INSTANCE="vect2bits_16_0" PORT="dout14"/>
           </CONNECTIONS>
         </PORT>
       </PORTS>
@@ -40655,7 +40655,7 @@
         <PORT DIR="O" NAME="dout14" SIGIS="undef" SIGNAME="vect2bits_16_0_dout14">
           <CONNECTIONS>
             <CONNECTION INSTANCE="axis_avg_buffer_0" PORT="trigger"/>
-            <CONNECTION INSTANCE="system_ila_0" PORT="probe0"/>
+            <CONNECTION INSTANCE="system_ila_1" PORT="probe0"/>
           </CONNECTIONS>
         </PORT>
         <PORT DIR="O" NAME="dout15" SIGIS="undef" SIGNAME="vect2bits_16_0_dout15">
