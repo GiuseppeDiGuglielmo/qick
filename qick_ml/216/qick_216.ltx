@@ -42,10 +42,26 @@
                                 "id": 0,
                                 "type": "DATA_TRIGGER",
                                 "direction": "IN",
+                                "isVector": false,
+                                "leftIndex": 0,
+                                "rightIndex": 0,
+                                "portIndex": 0,
+                                "nets": [
+                                    {
+                                        "name": "d_1_i/system_ila_0/inst/probe0_1",
+                                        "isBus": false
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "probe1",
+                                "id": 1,
+                                "type": "DATA_TRIGGER",
+                                "direction": "IN",
                                 "isVector": true,
                                 "leftIndex": 0,
                                 "rightIndex": 12,
-                                "portIndex": 0,
+                                "portIndex": 1,
                                 "nets": [
                                     {
                                         "name": "d_1_i/system_ila_0/inst/SLOT_0_BRAM_addr_1",
@@ -95,14 +111,14 @@
                                 ]
                             },
                             {
-                                "name": "probe1",
-                                "id": 1,
+                                "name": "probe2",
+                                "id": 2,
                                 "type": "DATA_TRIGGER",
                                 "direction": "IN",
                                 "isVector": true,
                                 "leftIndex": 0,
                                 "rightIndex": 31,
-                                "portIndex": 1,
+                                "portIndex": 2,
                                 "nets": [
                                     {
                                         "name": "d_1_i/system_ila_0/inst/SLOT_0_BRAM_din_1",
@@ -209,14 +225,14 @@
                                 ]
                             },
                             {
-                                "name": "probe2",
-                                "id": 2,
+                                "name": "probe3",
+                                "id": 3,
                                 "type": "DATA_TRIGGER",
                                 "direction": "IN",
                                 "isVector": true,
                                 "leftIndex": 0,
                                 "rightIndex": 31,
-                                "portIndex": 2,
+                                "portIndex": 3,
                                 "nets": [
                                     {
                                         "name": "d_1_i/system_ila_0/inst/SLOT_0_BRAM_dout_1",
@@ -323,22 +339,6 @@
                                 ]
                             },
                             {
-                                "name": "probe3",
-                                "id": 3,
-                                "type": "DATA_TRIGGER",
-                                "direction": "IN",
-                                "isVector": false,
-                                "leftIndex": 0,
-                                "rightIndex": 0,
-                                "portIndex": 3,
-                                "nets": [
-                                    {
-                                        "name": "d_1_i/system_ila_0/inst/SLOT_0_BRAM_en_1",
-                                        "isBus": false
-                                    }
-                                ]
-                            },
-                            {
                                 "name": "probe4",
                                 "id": 4,
                                 "type": "DATA_TRIGGER",
@@ -349,7 +349,7 @@
                                 "portIndex": 4,
                                 "nets": [
                                     {
-                                        "name": "d_1_i/system_ila_0/inst/SLOT_0_BRAM_rst_1",
+                                        "name": "d_1_i/system_ila_0/inst/SLOT_0_BRAM_en_1",
                                         "isBus": false
                                     }
                                 ]
@@ -359,10 +359,26 @@
                                 "id": 5,
                                 "type": "DATA_TRIGGER",
                                 "direction": "IN",
+                                "isVector": false,
+                                "leftIndex": 0,
+                                "rightIndex": 0,
+                                "portIndex": 5,
+                                "nets": [
+                                    {
+                                        "name": "d_1_i/system_ila_0/inst/SLOT_0_BRAM_rst_1",
+                                        "isBus": false
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "probe6",
+                                "id": 6,
+                                "type": "DATA_TRIGGER",
+                                "direction": "IN",
                                 "isVector": true,
                                 "leftIndex": 0,
                                 "rightIndex": 3,
-                                "portIndex": 5,
+                                "portIndex": 6,
                                 "nets": [
                                     {
                                         "name": "d_1_i/system_ila_0/inst/SLOT_0_BRAM_we_1",
@@ -394,23 +410,14 @@
                                     {
                                         "logical_port": "ADDR",
                                         "physical_pin": {
-                                            "id": 0,
-                                            "name": "probe0",
+                                            "id": 1,
+                                            "name": "probe1",
                                             "leftBit": 0,
                                             "width": 13
                                         }
                                     },
                                     {
                                         "logical_port": "DIN",
-                                        "physical_pin": {
-                                            "id": 1,
-                                            "name": "probe1",
-                                            "leftBit": 0,
-                                            "width": 32
-                                        }
-                                    },
-                                    {
-                                        "logical_port": "DOUT",
                                         "physical_pin": {
                                             "id": 2,
                                             "name": "probe2",
@@ -419,16 +426,16 @@
                                         }
                                     },
                                     {
-                                        "logical_port": "EN",
+                                        "logical_port": "DOUT",
                                         "physical_pin": {
                                             "id": 3,
                                             "name": "probe3",
                                             "leftBit": 0,
-                                            "width": 1
+                                            "width": 32
                                         }
                                     },
                                     {
-                                        "logical_port": "RST",
+                                        "logical_port": "EN",
                                         "physical_pin": {
                                             "id": 4,
                                             "name": "probe4",
@@ -437,12 +444,39 @@
                                         }
                                     },
                                     {
-                                        "logical_port": "WE",
+                                        "logical_port": "RST",
                                         "physical_pin": {
                                             "id": 5,
                                             "name": "probe5",
                                             "leftBit": 0,
+                                            "width": 1
+                                        }
+                                    },
+                                    {
+                                        "logical_port": "WE",
+                                        "physical_pin": {
+                                            "id": 6,
+                                            "name": "probe6",
+                                            "leftBit": 0,
                                             "width": 4
+                                        }
+                                    }
+                                ]
+                            }
+                        ],
+                        "native_ports": [
+                            {
+                                "name": "probe0",
+                                "connectedBus": "vect2bits_16_0_dout14",
+                                "protocol": "PROBE",
+                                "port_maps": [
+                                    {
+                                        "logical_port": "probe0",
+                                        "physical_pin": {
+                                            "id": 0,
+                                            "name": "probe0",
+                                            "leftBit": 0,
+                                            "width": 1
                                         }
                                     }
                                 ]
@@ -463,7 +497,7 @@
                         "pins": [
                             {
                                 "name": "probe0",
-                                "id": 6,
+                                "id": 7,
                                 "type": "DATA_TRIGGER",
                                 "direction": "IN",
                                 "isVector": true,
@@ -577,7 +611,7 @@
                             },
                             {
                                 "name": "probe1",
-                                "id": 7,
+                                "id": 8,
                                 "type": "DATA_TRIGGER",
                                 "direction": "IN",
                                 "isVector": false,
@@ -593,7 +627,7 @@
                             },
                             {
                                 "name": "probe2",
-                                "id": 8,
+                                "id": 9,
                                 "type": "DATA_TRIGGER",
                                 "direction": "IN",
                                 "isVector": false,
@@ -609,7 +643,7 @@
                             },
                             {
                                 "name": "probe3",
-                                "id": 9,
+                                "id": 10,
                                 "type": "DATA_TRIGGER",
                                 "direction": "IN",
                                 "isVector": false,
@@ -633,7 +667,7 @@
                                     {
                                         "logical_port": "TDATA",
                                         "physical_pin": {
-                                            "id": 6,
+                                            "id": 7,
                                             "name": "probe0",
                                             "leftBit": 0,
                                             "width": 32
@@ -642,7 +676,7 @@
                                     {
                                         "logical_port": "TLAST",
                                         "physical_pin": {
-                                            "id": 9,
+                                            "id": 10,
                                             "name": "probe3",
                                             "leftBit": 0,
                                             "width": 1
@@ -651,7 +685,7 @@
                                     {
                                         "logical_port": "TREADY",
                                         "physical_pin": {
-                                            "id": 8,
+                                            "id": 9,
                                             "name": "probe2",
                                             "leftBit": 0,
                                             "width": 1
@@ -660,7 +694,7 @@
                                     {
                                         "logical_port": "TVALID",
                                         "physical_pin": {
-                                            "id": 7,
+                                            "id": 8,
                                             "name": "probe1",
                                             "leftBit": 0,
                                             "width": 1
