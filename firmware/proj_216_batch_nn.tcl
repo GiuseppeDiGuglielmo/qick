@@ -57,10 +57,10 @@ apply_bd_automation -rule xilinx.com:bd_rule:axi4 -config { \
     Clk_slave {/usp_rf_data_converter_0/clk_adc2 (307 MHz)} \
     Clk_xbar {/zynq_ultra_ps_e_0/pl_clk0 (99 MHz)} \
     Master {/zynq_ultra_ps_e_0/M_AXI_HPM0_FPD} \
-    Slave {/NN_0/s_axi_AXILiteS} \
+    Slave {/NN_0/s_axi_scaler} \
     ddr_seg {Auto} \
     intc_ip {/ps8_0_axi_periph} \
-    master_apm {0}} [get_bd_intf_pins NN_0/s_axi_AXILiteS]
+    master_apm {0}} [get_bd_intf_pins NN_0/s_axi_scaler]
 
 validate_bd_design
 
@@ -70,80 +70,71 @@ set_property strategy Congestion_SpreadLogic_high [get_runs impl_1]
 # === END: NN ===============================================================
 
 # === BEGIN: ILA ===============================================================
-set_property HDL_ATTRIBUTE.DEBUG true [get_bd_intf_nets {axis_avg_buffer_0_fwd_axis}]
-set_property HDL_ATTRIBUTE.DEBUG true [get_bd_intf_nets {axis_readout_v2_0_m1_axis}]
-set_property HDL_ATTRIBUTE.DEBUG true [get_bd_intf_nets {axis_broadcaster_0_M00_AXIS}]
-set_property HDL_ATTRIBUTE.DEBUG true [get_bd_nets {vect2bits_16_0_dout14 }]
-set_property HDL_ATTRIBUTE.DEBUG true [get_bd_intf_nets {NN_0_out_r_PORTA}]
-
+set_property HDL_ATTRIBUTE.DEBUG true [get_bd_intf_nets {ps8_0_axi_periph_M28_AXI axis_avg_buffer_0_fwd_axis NN_0_out_r_PORTA}]
 apply_bd_automation -rule xilinx.com:bd_rule:debug -dict [list \
-    [get_bd_intf_nets axis_readout_v2_0_m1_axis] {AXIS_SIGNALS "Data and Trigger" CLK_SRC "/usp_rf_data_converter_0/clk_adc2" SYSTEM_ILA "Auto" APC_EN "0" } \
+    [get_bd_intf_nets axis_avg_buffer_0_fwd_axis] {AXIS_SIGNALS "Data and Trigger" CLK_SRC "/usp_rf_data_converter_0/clk_adc2" SYSTEM_ILA "Auto" APC_EN "0" } \
+    [get_bd_intf_nets NN_0_out_r_PORTA] {NON_AXI_SIGNALS "Data and Trigger" CLK_SRC "/usp_rf_data_converter_0/clk_adc2" SYSTEM_ILA "Auto" } \
+    [get_bd_intf_nets ps8_0_axi_periph_M28_AXI] {AXI_R_ADDRESS "Data and Trigger" AXI_R_DATA "Data and Trigger" AXI_W_ADDRESS "Data and Trigger" AXI_W_DATA "Data and Trigger" AXI_W_RESPONSE "Data and Trigger" CLK_SRC "/usp_rf_data_converter_0/clk_adc2" SYSTEM_ILA "Auto" APC_EN "0" } \
 ]
-set_property -dict [list CONFIG.C_BRAM_CNT {12} CONFIG.C_NUM_MONITOR_SLOTS {3} CONFIG.C_MON_TYPE {MIX}] [get_bd_cells system_ila_0]
-set_property -dict [list CONFIG.C_SLOT {2} CONFIG.C_BRAM_CNT {6.5} CONFIG.C_SLOT_1_INTF_TYPE {xilinx.com:interface:axis_rtl:1.0} CONFIG.C_SLOT_2_INTF_TYPE {xilinx.com:interface:bram_rtl:1.0}] [get_bd_cells system_ila_0]
-set_property -dict [list CONFIG.C_SLOT {2} CONFIG.C_NUM_MONITOR_SLOTS {4} CONFIG.C_SLOT_2_INTF_TYPE {xilinx.com:interface:axis_rtl:1.0} CONFIG.C_SLOT_3_INTF_TYPE {xilinx.com:interface:bram_rtl:1.0}] [get_bd_cells system_ila_0]
-connect_bd_intf_net [get_bd_intf_pins system_ila_0/SLOT_1_AXIS] [get_bd_intf_pins axis_broadcaster_0/M00_AXIS]
-#connect_bd_intf_net [get_bd_intf_pins system_ila_0/SLOT_2_AXIS] [get_bd_intf_pins NN_0/in_V]
-connect_bd_intf_net [get_bd_intf_pins system_ila_0/SLOT_2_AXIS] [get_bd_intf_pins NN_0/in_V_V]
-connect_bd_intf_net [get_bd_intf_pins system_ila_0/SLOT_3_BRAM] [get_bd_intf_pins blk_mem_gen_0/BRAM_PORTB]
+
+# Trigger
+set_property -dict [list CONFIG.C_MON_TYPE {MIX}] [get_bd_cells system_ila_0]
+set_property HDL_ATTRIBUTE.DEBUG true [get_bd_nets {vect2bits_16_0_dout14 }]
 connect_bd_net [get_bd_pins system_ila_0/probe0] [get_bd_pins vect2bits_16_0/dout14]
 
-# debug scaler
-set_property HDL_ATTRIBUTE.DEBUG true [get_bd_intf_nets {ps8_0_axi_periph_M28_AXI}]
-set_property -dict [list CONFIG.C_NUM_MONITOR_SLOTS {5}] [get_bd_cells system_ila_0]
-connect_bd_intf_net [get_bd_intf_pins system_ila_0/SLOT_4_AXI] [get_bd_intf_pins NN_0/s_axi_AXILiteS]
 
 validate_bd_design
-
 # === END: ILA ===============================================================
 
-# === BEGIN: RTL ILA =========================================================
+update_compile_order -fileset sources_1
 launch_runs synth_1 -jobs 20
 wait_on_run -timeout 360 synth_1
 
-open_run synth_1 -name synth_1
-update_compile_order -fileset sources_1
-for {set i 0} {$i < 14*2} {incr i} {
-    set_property mark_debug true [get_nets [list d_1_i/NN_0/inst/in_local_V_fu_160[$i]]]
-}
-set_property mark_debug true [get_nets [list d_1_i/NN_0/inst/grp_myproject_fu_206_ap_start]]
-set_property mark_debug true [get_nets [list d_1_i/NN_0/inst/grp_myproject_fu_206_ap_done]]
-file mkdir ${proj_dir}/top_216.srcs/constrs_1/new
-close [ open ${proj_dir}/top_216.srcs/constrs_1/new/dbg_constraints.xdc w ]
-add_files -fileset constrs_1 ${proj_dir}/top_216.srcs/constrs_1/new/dbg_constraints.xdc
-set_property target_constrs_file ${proj_dir}/top_216.srcs/constrs_1/new/dbg_constraints.xdc [current_fileset -constrset]
-save_constraints -force
-create_debug_core u_ila_0 ila
-set_property C_DATA_DEPTH 1024 [get_debug_cores u_ila_0]
-set_property C_TRIGIN_EN false [get_debug_cores u_ila_0]
-set_property C_TRIGOUT_EN false [get_debug_cores u_ila_0]
-set_property C_ADV_TRIGGER false [get_debug_cores u_ila_0]
-set_property C_INPUT_PIPE_STAGES 0 [get_debug_cores u_ila_0]
-set_property C_EN_STRG_QUAL false [get_debug_cores u_ila_0]
-set_property ALL_PROBE_SAME_MU true [get_debug_cores u_ila_0]
-set_property ALL_PROBE_SAME_MU_CNT 1 [get_debug_cores u_ila_0]
-connect_debug_port u_ila_0/clk [get_nets [list d_1_i/usp_rf_data_converter_0/inst/i_d_1_usp_rf_data_converter_0_0_bufg_gt_ctrl/clk_adc2 ]]
-set_property port_width 56 [get_debug_ports u_ila_0/probe0]
-set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe0]
-for {set i 0} {$i < 14*2} {incr i} {
-    connect_debug_port u_ila_0/probe0 [get_nets [list d_1_i/NN_0/inst/in_local_V_fu_160[$i]]]
-}
-create_debug_port u_ila_0 probe
-set_property port_width 1 [get_debug_ports u_ila_0/probe1]
-set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe1]
-connect_debug_port u_ila_0/probe1 [get_nets [list d_1_i/NN_0/inst/grp_myproject_fu_206_ap_done ]]
-create_debug_port u_ila_0 probe
-set_property port_width 1 [get_debug_ports u_ila_0/probe2]
-set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe2]
-connect_debug_port u_ila_0/probe2 [get_nets [list d_1_i/NN_0/inst/grp_myproject_fu_206_ap_start ]]
-save_constraints
-reset_run d_1_axi_smc_0_synth_1
-reset_run d_1_axi_smc_1_0_synth_1
-reset_run d_1_system_ila_0_0_synth_1
-save_bd_design
-reset_run synth_1
-
-# === END: RTL ILA ===========================================================
+## === BEGIN: RTL ILA =========================================================
+#
+#open_run synth_1 -name synth_1
+#update_compile_order -fileset sources_1
+#for {set i 0} {$i < 14*2} {incr i} {
+#    set_property mark_debug true [get_nets [list d_1_i/NN_0/inst/in_local_V_fu_160[$i]]]
+#}
+#set_property mark_debug true [get_nets [list d_1_i/NN_0/inst/grp_myproject_fu_206_ap_start]]
+#set_property mark_debug true [get_nets [list d_1_i/NN_0/inst/grp_myproject_fu_206_ap_done]]
+#file mkdir ${proj_dir}/top_216.srcs/constrs_1/new
+#close [ open ${proj_dir}/top_216.srcs/constrs_1/new/dbg_constraints.xdc w ]
+#add_files -fileset constrs_1 ${proj_dir}/top_216.srcs/constrs_1/new/dbg_constraints.xdc
+#set_property target_constrs_file ${proj_dir}/top_216.srcs/constrs_1/new/dbg_constraints.xdc [current_fileset -constrset]
+#save_constraints -force
+#create_debug_core u_ila_0 ila
+#set_property C_DATA_DEPTH 1024 [get_debug_cores u_ila_0]
+#set_property C_TRIGIN_EN false [get_debug_cores u_ila_0]
+#set_property C_TRIGOUT_EN false [get_debug_cores u_ila_0]
+#set_property C_ADV_TRIGGER false [get_debug_cores u_ila_0]
+#set_property C_INPUT_PIPE_STAGES 0 [get_debug_cores u_ila_0]
+#set_property C_EN_STRG_QUAL false [get_debug_cores u_ila_0]
+#set_property ALL_PROBE_SAME_MU true [get_debug_cores u_ila_0]
+#set_property ALL_PROBE_SAME_MU_CNT 1 [get_debug_cores u_ila_0]
+#connect_debug_port u_ila_0/clk [get_nets [list d_1_i/usp_rf_data_converter_0/inst/i_d_1_usp_rf_data_converter_0_0_bufg_gt_ctrl/clk_adc2 ]]
+#set_property port_width 56 [get_debug_ports u_ila_0/probe0]
+#set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe0]
+#for {set i 0} {$i < 14*2} {incr i} {
+#    connect_debug_port u_ila_0/probe0 [get_nets [list d_1_i/NN_0/inst/in_local_V_fu_160[$i]]]
+#}
+#create_debug_port u_ila_0 probe
+#set_property port_width 1 [get_debug_ports u_ila_0/probe1]
+#set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe1]
+#connect_debug_port u_ila_0/probe1 [get_nets [list d_1_i/NN_0/inst/grp_myproject_fu_206_ap_done ]]
+#create_debug_port u_ila_0 probe
+#set_property port_width 1 [get_debug_ports u_ila_0/probe2]
+#set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe2]
+#connect_debug_port u_ila_0/probe2 [get_nets [list d_1_i/NN_0/inst/grp_myproject_fu_206_ap_start ]]
+#save_constraints
+#reset_run d_1_axi_smc_0_synth_1
+#reset_run d_1_axi_smc_1_0_synth_1
+#reset_run d_1_system_ila_0_0_synth_1
+#save_bd_design
+#reset_run synth_1
+#
+## === END: RTL ILA ===========================================================
 
 reset_run impl_1
 launch_runs impl_1 -to_step write_bitstream -jobs 20
