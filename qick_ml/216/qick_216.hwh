@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
-<EDKSYSTEM EDWVERSION="1.2" TIMESTAMP="Tue Jan 16 18:52:08 2024" VIVADOVERSION="2022.1">
+<EDKSYSTEM EDWVERSION="1.2" TIMESTAMP="Thu Jan 25 13:22:02 2024" VIVADOVERSION="2022.1">
 
   <SYSTEMINFO ARCH="zynquplusRFSOC" BOARD="xilinx.com:zcu216:part0:2.0" DEVICE="xczu49dr" NAME="d_1" PACKAGE="ffvf1760" SPEEDGRADE="-2"/>
 
@@ -32652,7 +32652,7 @@
         <PARAMETER NAME="EN_BRAM_DRC" VALUE="TRUE"/>
         <PARAMETER NAME="ALL_PROBE_SAME_MU" VALUE="TRUE"/>
         <PARAMETER NAME="ALL_PROBE_SAME_MU_CNT" VALUE="1"/>
-        <PARAMETER NAME="C_NUM_MONITOR_SLOTS" VALUE="2"/>
+        <PARAMETER NAME="C_NUM_MONITOR_SLOTS" VALUE="3"/>
         <PARAMETER NAME="C_SLOT_0_AXI_ARUSER_WIDTH" VALUE="1"/>
         <PARAMETER NAME="C_SLOT_0_AXI_RUSER_WIDTH" VALUE="1"/>
         <PARAMETER NAME="C_SLOT_0_AXI_AWUSER_WIDTH" VALUE="1"/>
@@ -32680,7 +32680,7 @@
         <PARAMETER NAME="C_SLOT_1_AXIS_TUSER_WIDTH" VALUE="AUTO"/>
         <PARAMETER NAME="C_SLOT_1_AXIS_TDEST_WIDTH" VALUE="AUTO"/>
         <PARAMETER NAME="C_SLOT_0_INTF_TYPE" VALUE="xilinx.com:interface:axis_rtl:1.0"/>
-        <PARAMETER NAME="C_SLOT_1_INTF_TYPE" VALUE="xilinx.com:interface:axis_rtl:1.0"/>
+        <PARAMETER NAME="C_SLOT_1_INTF_TYPE" VALUE="xilinx.com:interface:bram_rtl:1.0"/>
         <PARAMETER NAME="C_SLOT_2_INTF_TYPE" VALUE="xilinx.com:interface:aximm_rtl:1.0"/>
         <PARAMETER NAME="C_SLOT_3_INTF_TYPE" VALUE="xilinx.com:interface:aximm_rtl:1.0"/>
         <PARAMETER NAME="C_SLOT_4_INTF_TYPE" VALUE="xilinx.com:interface:aximm_rtl:1.0"/>
@@ -32891,15 +32891,36 @@
         <PORT DIR="I" LEFT="31" NAME="SLOT_0_AXIS_tdata" RIGHT="0" SIGIS="undef"/>
         <PORT DIR="I" NAME="SLOT_0_AXIS_tlast" SIGIS="undef"/>
         <PORT DIR="I" NAME="SLOT_0_AXIS_tvalid" SIGIS="undef"/>
+        <PORT DIR="I" NAME="SLOT_0_AXIS_tready" SIGIS="undef"/>
+        <PORT DIR="I" NAME="SLOT_1_BRAM_en" SIGIS="undef"/>
+        <PORT DIR="I" LEFT="31" NAME="SLOT_1_BRAM_dout" RIGHT="0" SIGIS="undef"/>
+        <PORT DIR="I" LEFT="31" NAME="SLOT_1_BRAM_din" RIGHT="0" SIGIS="undef"/>
+        <PORT DIR="I" LEFT="3" NAME="SLOT_1_BRAM_we" RIGHT="0" SIGIS="undef"/>
+        <PORT DIR="I" LEFT="31" NAME="SLOT_1_BRAM_addr" RIGHT="0" SIGIS="undef"/>
+        <PORT DIR="I" NAME="SLOT_1_BRAM_clk" SIGIS="clk"/>
+        <PORT DIR="I" NAME="SLOT_1_BRAM_rst" SIGIS="rst"/>
+        <PORT DIR="I" LEFT="4" NAME="SLOT_2_AXI_awaddr" RIGHT="0" SIGIS="undef"/>
+        <PORT DIR="I" NAME="SLOT_2_AXI_awvalid" SIGIS="undef"/>
+        <PORT DIR="I" NAME="SLOT_2_AXI_awready" SIGIS="undef"/>
+        <PORT DIR="I" LEFT="31" NAME="SLOT_2_AXI_wdata" RIGHT="0" SIGIS="undef"/>
+        <PORT DIR="I" LEFT="3" NAME="SLOT_2_AXI_wstrb" RIGHT="0" SIGIS="undef"/>
+        <PORT DIR="I" NAME="SLOT_2_AXI_wvalid" SIGIS="undef"/>
+        <PORT DIR="I" NAME="SLOT_2_AXI_wready" SIGIS="undef"/>
+        <PORT DIR="I" LEFT="1" NAME="SLOT_2_AXI_bresp" RIGHT="0" SIGIS="undef"/>
+        <PORT DIR="I" NAME="SLOT_2_AXI_bvalid" SIGIS="undef"/>
+        <PORT DIR="I" NAME="SLOT_2_AXI_bready" SIGIS="undef"/>
+        <PORT DIR="I" LEFT="4" NAME="SLOT_2_AXI_araddr" RIGHT="0" SIGIS="undef"/>
+        <PORT DIR="I" NAME="SLOT_2_AXI_arvalid" SIGIS="undef"/>
+        <PORT DIR="I" NAME="SLOT_2_AXI_arready" SIGIS="undef"/>
+        <PORT DIR="I" LEFT="31" NAME="SLOT_2_AXI_rdata" RIGHT="0" SIGIS="undef"/>
+        <PORT DIR="I" LEFT="1" NAME="SLOT_2_AXI_rresp" RIGHT="0" SIGIS="undef"/>
+        <PORT DIR="I" NAME="SLOT_2_AXI_rvalid" SIGIS="undef"/>
+        <PORT DIR="I" NAME="SLOT_2_AXI_rready" SIGIS="undef"/>
         <PORT DIR="I" NAME="resetn" POLARITY="ACTIVE_LOW" SIGIS="rst" SIGNAME="rst_adc_peripheral_aresetn">
           <CONNECTIONS>
             <CONNECTION INSTANCE="rst_adc" PORT="peripheral_aresetn"/>
           </CONNECTIONS>
         </PORT>
-        <PORT DIR="I" LEFT="31" NAME="SLOT_1_AXIS_tdata" RIGHT="0" SIGIS="undef"/>
-        <PORT DIR="I" NAME="SLOT_1_AXIS_tlast" SIGIS="undef"/>
-        <PORT DIR="I" NAME="SLOT_1_AXIS_tvalid" SIGIS="undef"/>
-        <PORT DIR="I" NAME="SLOT_1_AXIS_tready" SIGIS="undef"/>
         <PORT DIR="I" LEFT="0" NAME="probe0" RIGHT="0" SIGIS="undef" SIGNAME="vect2bits_16_0_dout14">
           <CONNECTIONS>
             <CONNECTION INSTANCE="vect2bits_16_0" PORT="dout14"/>
@@ -32907,27 +32928,7 @@
         </PORT>
       </PORTS>
       <BUSINTERFACES>
-        <BUSINTERFACE BUSNAME="axis_broadcaster_0_M00_AXIS" NAME="SLOT_0_AXIS" TYPE="MONITOR" VLNV="xilinx.com:interface:axis:1.0">
-          <PARAMETER NAME="TDATA_NUM_BYTES" VALUE="4"/>
-          <PARAMETER NAME="TDEST_WIDTH" VALUE="0"/>
-          <PARAMETER NAME="TID_WIDTH" VALUE="0"/>
-          <PARAMETER NAME="TUSER_WIDTH" VALUE="0"/>
-          <PARAMETER NAME="HAS_TREADY" VALUE="0"/>
-          <PARAMETER NAME="HAS_TSTRB" VALUE="0"/>
-          <PARAMETER NAME="HAS_TKEEP" VALUE="0"/>
-          <PARAMETER NAME="HAS_TLAST" VALUE="0"/>
-          <PARAMETER NAME="FREQ_HZ" VALUE="307200000"/>
-          <PARAMETER NAME="PHASE" VALUE="0.0"/>
-          <PARAMETER NAME="CLK_DOMAIN" VALUE="d_1_usp_rf_data_converter_0_0_clk_adc2"/>
-          <PARAMETER NAME="LAYERED_METADATA" VALUE="undef"/>
-          <PARAMETER NAME="INSERT_VIP" VALUE="0"/>
-          <PORTMAPS>
-            <PORTMAP LOGICAL="TDATA" PHYSICAL="SLOT_0_AXIS_tdata"/>
-            <PORTMAP LOGICAL="TLAST" PHYSICAL="SLOT_0_AXIS_tlast"/>
-            <PORTMAP LOGICAL="TVALID" PHYSICAL="SLOT_0_AXIS_tvalid"/>
-          </PORTMAPS>
-        </BUSINTERFACE>
-        <BUSINTERFACE BUSNAME="axis_avg_buffer_0_fwd_axis" NAME="SLOT_1_AXIS" TYPE="MONITOR" VLNV="xilinx.com:interface:axis:1.0">
+        <BUSINTERFACE BUSNAME="axis_avg_buffer_0_fwd_axis" NAME="SLOT_0_AXIS" TYPE="MONITOR" VLNV="xilinx.com:interface:axis:1.0">
           <PARAMETER NAME="TDATA_NUM_BYTES" VALUE="4"/>
           <PARAMETER NAME="TDEST_WIDTH" VALUE="0"/>
           <PARAMETER NAME="TID_WIDTH" VALUE="0"/>
@@ -32942,10 +32943,79 @@
           <PARAMETER NAME="LAYERED_METADATA" VALUE="undef"/>
           <PARAMETER NAME="INSERT_VIP" VALUE="0"/>
           <PORTMAPS>
-            <PORTMAP LOGICAL="TDATA" PHYSICAL="SLOT_1_AXIS_tdata"/>
-            <PORTMAP LOGICAL="TLAST" PHYSICAL="SLOT_1_AXIS_tlast"/>
-            <PORTMAP LOGICAL="TVALID" PHYSICAL="SLOT_1_AXIS_tvalid"/>
-            <PORTMAP LOGICAL="TREADY" PHYSICAL="SLOT_1_AXIS_tready"/>
+            <PORTMAP LOGICAL="TDATA" PHYSICAL="SLOT_0_AXIS_tdata"/>
+            <PORTMAP LOGICAL="TLAST" PHYSICAL="SLOT_0_AXIS_tlast"/>
+            <PORTMAP LOGICAL="TVALID" PHYSICAL="SLOT_0_AXIS_tvalid"/>
+            <PORTMAP LOGICAL="TREADY" PHYSICAL="SLOT_0_AXIS_tready"/>
+          </PORTMAPS>
+        </BUSINTERFACE>
+        <BUSINTERFACE BUSNAME="NN_0_out_r_PORTA" NAME="SLOT_1_BRAM" TYPE="MONITOR" VLNV="xilinx.com:interface:bram:1.0">
+          <PARAMETER NAME="MEM_SIZE" VALUE="4"/>
+          <PARAMETER NAME="MEM_WIDTH" VALUE="32"/>
+          <PARAMETER NAME="MEM_ECC" VALUE="NONE"/>
+          <PARAMETER NAME="MASTER_TYPE" VALUE="BRAM_CTRL"/>
+          <PARAMETER NAME="READ_WRITE_MODE"/>
+          <PARAMETER NAME="READ_LATENCY" VALUE="1"/>
+          <PORTMAPS>
+            <PORTMAP LOGICAL="EN" PHYSICAL="SLOT_1_BRAM_en"/>
+            <PORTMAP LOGICAL="DOUT" PHYSICAL="SLOT_1_BRAM_dout"/>
+            <PORTMAP LOGICAL="DIN" PHYSICAL="SLOT_1_BRAM_din"/>
+            <PORTMAP LOGICAL="WE" PHYSICAL="SLOT_1_BRAM_we"/>
+            <PORTMAP LOGICAL="ADDR" PHYSICAL="SLOT_1_BRAM_addr"/>
+            <PORTMAP LOGICAL="CLK" PHYSICAL="SLOT_1_BRAM_clk"/>
+            <PORTMAP LOGICAL="RST" PHYSICAL="SLOT_1_BRAM_rst"/>
+          </PORTMAPS>
+        </BUSINTERFACE>
+        <BUSINTERFACE BUSNAME="ps8_0_axi_periph_M28_AXI" DATAWIDTH="32" NAME="SLOT_2_AXI" TYPE="MONITOR" VLNV="xilinx.com:interface:aximm:1.0">
+          <PARAMETER NAME="DATA_WIDTH" VALUE="32"/>
+          <PARAMETER NAME="PROTOCOL" VALUE="AXI4LITE"/>
+          <PARAMETER NAME="FREQ_HZ" VALUE="307200000"/>
+          <PARAMETER NAME="ID_WIDTH" VALUE="0"/>
+          <PARAMETER NAME="ADDR_WIDTH" VALUE="5"/>
+          <PARAMETER NAME="AWUSER_WIDTH" VALUE="0"/>
+          <PARAMETER NAME="ARUSER_WIDTH" VALUE="0"/>
+          <PARAMETER NAME="WUSER_WIDTH" VALUE="0"/>
+          <PARAMETER NAME="RUSER_WIDTH" VALUE="0"/>
+          <PARAMETER NAME="BUSER_WIDTH" VALUE="0"/>
+          <PARAMETER NAME="READ_WRITE_MODE" VALUE="READ_WRITE"/>
+          <PARAMETER NAME="HAS_BURST" VALUE="0"/>
+          <PARAMETER NAME="HAS_LOCK" VALUE="0"/>
+          <PARAMETER NAME="HAS_PROT" VALUE="0"/>
+          <PARAMETER NAME="HAS_CACHE" VALUE="0"/>
+          <PARAMETER NAME="HAS_QOS" VALUE="0"/>
+          <PARAMETER NAME="HAS_REGION" VALUE="0"/>
+          <PARAMETER NAME="HAS_WSTRB" VALUE="1"/>
+          <PARAMETER NAME="HAS_BRESP" VALUE="1"/>
+          <PARAMETER NAME="HAS_RRESP" VALUE="1"/>
+          <PARAMETER NAME="SUPPORTS_NARROW_BURST" VALUE="0"/>
+          <PARAMETER NAME="NUM_READ_OUTSTANDING" VALUE="8"/>
+          <PARAMETER NAME="NUM_WRITE_OUTSTANDING" VALUE="8"/>
+          <PARAMETER NAME="MAX_BURST_LENGTH" VALUE="1"/>
+          <PARAMETER NAME="PHASE" VALUE="0.0"/>
+          <PARAMETER NAME="CLK_DOMAIN" VALUE="d_1_usp_rf_data_converter_0_0_clk_adc2"/>
+          <PARAMETER NAME="NUM_READ_THREADS" VALUE="1"/>
+          <PARAMETER NAME="NUM_WRITE_THREADS" VALUE="1"/>
+          <PARAMETER NAME="RUSER_BITS_PER_BYTE" VALUE="0"/>
+          <PARAMETER NAME="WUSER_BITS_PER_BYTE" VALUE="0"/>
+          <PARAMETER NAME="INSERT_VIP" VALUE="0"/>
+          <PORTMAPS>
+            <PORTMAP LOGICAL="AWADDR" PHYSICAL="SLOT_2_AXI_awaddr"/>
+            <PORTMAP LOGICAL="AWVALID" PHYSICAL="SLOT_2_AXI_awvalid"/>
+            <PORTMAP LOGICAL="AWREADY" PHYSICAL="SLOT_2_AXI_awready"/>
+            <PORTMAP LOGICAL="WDATA" PHYSICAL="SLOT_2_AXI_wdata"/>
+            <PORTMAP LOGICAL="WSTRB" PHYSICAL="SLOT_2_AXI_wstrb"/>
+            <PORTMAP LOGICAL="WVALID" PHYSICAL="SLOT_2_AXI_wvalid"/>
+            <PORTMAP LOGICAL="WREADY" PHYSICAL="SLOT_2_AXI_wready"/>
+            <PORTMAP LOGICAL="BRESP" PHYSICAL="SLOT_2_AXI_bresp"/>
+            <PORTMAP LOGICAL="BVALID" PHYSICAL="SLOT_2_AXI_bvalid"/>
+            <PORTMAP LOGICAL="BREADY" PHYSICAL="SLOT_2_AXI_bready"/>
+            <PORTMAP LOGICAL="ARADDR" PHYSICAL="SLOT_2_AXI_araddr"/>
+            <PORTMAP LOGICAL="ARVALID" PHYSICAL="SLOT_2_AXI_arvalid"/>
+            <PORTMAP LOGICAL="ARREADY" PHYSICAL="SLOT_2_AXI_arready"/>
+            <PORTMAP LOGICAL="RDATA" PHYSICAL="SLOT_2_AXI_rdata"/>
+            <PORTMAP LOGICAL="RRESP" PHYSICAL="SLOT_2_AXI_rresp"/>
+            <PORTMAP LOGICAL="RVALID" PHYSICAL="SLOT_2_AXI_rvalid"/>
+            <PORTMAP LOGICAL="RREADY" PHYSICAL="SLOT_2_AXI_rready"/>
           </PORTMAPS>
         </BUSINTERFACE>
       </BUSINTERFACES>
@@ -36181,12 +36251,12 @@
         <PARAMETER NAME="PSU__SD0__SLOT_TYPE" VALUE="&lt;Select>"/>
         <PARAMETER NAME="PSU__SD0__RESET__ENABLE" VALUE="0"/>
         <PARAMETER NAME="PSU__SD0__DATA_TRANSFER_MODE" VALUE="&lt;Select>"/>
-        <PARAMETER NAME="PSU__SD0__CLK_50_SDR_ITAP_DLY" VALUE="0x15"/>
-        <PARAMETER NAME="PSU__SD0__CLK_50_SDR_OTAP_DLY" VALUE="0x5"/>
-        <PARAMETER NAME="PSU__SD0__CLK_50_DDR_ITAP_DLY" VALUE="0x3D"/>
-        <PARAMETER NAME="PSU__SD0__CLK_50_DDR_OTAP_DLY" VALUE="0x4"/>
-        <PARAMETER NAME="PSU__SD0__CLK_100_SDR_OTAP_DLY" VALUE="0x3"/>
-        <PARAMETER NAME="PSU__SD0__CLK_200_SDR_OTAP_DLY" VALUE="0x3"/>
+        <PARAMETER NAME="PSU__SD0__CLK_50_SDR_ITAP_DLY" VALUE="0x00"/>
+        <PARAMETER NAME="PSU__SD0__CLK_50_SDR_OTAP_DLY" VALUE="0x00"/>
+        <PARAMETER NAME="PSU__SD0__CLK_50_DDR_ITAP_DLY" VALUE="0x00"/>
+        <PARAMETER NAME="PSU__SD0__CLK_50_DDR_OTAP_DLY" VALUE="0x00"/>
+        <PARAMETER NAME="PSU__SD0__CLK_100_SDR_OTAP_DLY" VALUE="0x00"/>
+        <PARAMETER NAME="PSU__SD0__CLK_200_SDR_OTAP_DLY" VALUE="0x00"/>
         <PARAMETER NAME="PSU__SD1__PERIPHERAL__ENABLE" VALUE="1"/>
         <PARAMETER NAME="PSU__SD1__PERIPHERAL__IO" VALUE="MIO 39 .. 51"/>
         <PARAMETER NAME="PSU__SD1__GRP_CD__ENABLE" VALUE="1"/>
