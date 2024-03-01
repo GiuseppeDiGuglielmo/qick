@@ -33,7 +33,7 @@ module axis_fwd
 
     assign fwd_axis_tvalid = s_axis_tvalid && valid;
     assign fwd_axis_tdata = s_axis_tdata;
-    //assign s_axis_tready = fwd_axis_tready;
+    // assign s_axis_tready = fwd_axis_tready;
 
 endmodule
 

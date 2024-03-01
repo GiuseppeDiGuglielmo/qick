@@ -62,39 +62,6 @@ apply_bd_automation -rule xilinx.com:bd_rule:axi4 -config { \
     intc_ip {/ps8_0_axi_periph} \
     master_apm {0}} [get_bd_intf_pins NN_0/s_axi_scaler]
 
-# Add BRAMs and AXI-lite controller for the AVG-buffer / AXIS-fwd (0)
-create_bd_cell -type ip -vlnv xilinx.com:ip:blk_mem_gen:8.4 blk_mem_gen_1
-set_property -dict [list CONFIG.Memory_Type {True_Dual_Port_RAM} CONFIG.Enable_B {Use_ENB_Pin} CONFIG.Use_RSTB_Pin {true} CONFIG.Port_B_Clock {100} CONFIG.Port_B_Write_Rate {50} CONFIG.Port_B_Enable_Rate {100}] [get_bd_cells blk_mem_gen_1]
-create_bd_cell -type ip -vlnv xilinx.com:ip:axi_bram_ctrl:4.1 axi_bram_ctrl_2
-set_property -dict [list CONFIG.SINGLE_PORT_BRAM {1}] [get_bd_cells axi_bram_ctrl_2]
-connect_bd_intf_net [get_bd_intf_pins axi_bram_ctrl_2/BRAM_PORTA] [get_bd_intf_pins blk_mem_gen_1/BRAM_PORTA]
-apply_bd_automation -rule xilinx.com:bd_rule:axi4 -config { Clk_master {/zynq_ultra_ps_e_0/pl_clk0 (99 MHz)} Clk_slave {Auto} Clk_xbar {/zynq_ultra_ps_e_0/pl_clk0 (99 MHz)} Master {/zynq_ultra_ps_e_0/M_AXI_HPM0_FPD} Slave {/axi_bram_ctrl_2/S_AXI} ddr_seg {Auto} intc_ip {/ps8_0_axi_periph} master_apm {0}}  [get_bd_intf_pins axi_bram_ctrl_2/S_AXI]
-connect_bd_intf_net [get_bd_intf_pins axis_avg_buffer_0/bram] [get_bd_intf_pins blk_mem_gen_1/BRAM_PORTB]
-
-# Add BRAMs and AXI-lite controller for the AVG-buffer / AXIS-fwd (1)
-create_bd_cell -type ip -vlnv xilinx.com:ip:blk_mem_gen:8.4 blk_mem_gen_2
-connect_bd_intf_net [get_bd_intf_pins axis_avg_buffer_1/bram] [get_bd_intf_pins blk_mem_gen_2/BRAM_PORTA]
-
-set_property -dict [ \
-    list CONFIG.Enable_32bit_Address {false} \
-    CONFIG.Use_Byte_Write_Enable {false} \
-    CONFIG.Byte_Size {9} \
-    CONFIG.Register_PortA_Output_of_Memory_Primitives {true} \
-    CONFIG.Register_PortB_Output_of_Memory_Primitives {true} \
-    CONFIG.Use_RSTA_Pin {false} \
-    CONFIG.Use_RSTB_Pin {false} \
-    CONFIG.use_bram_block {Stand_Alone} \
-    CONFIG.EN_SAFETY_CKT {false} ] [get_bd_cells blk_mem_gen_1]
-
-set_property -dict [ \
-    list CONFIG.Enable_32bit_Address {false} \
-    CONFIG.Use_Byte_Write_Enable {false} \
-    CONFIG.Byte_Size {9} \
-    CONFIG.Register_PortA_Output_of_Memory_Primitives {true} \
-    CONFIG.Use_RSTA_Pin {false} \
-    CONFIG.use_bram_block {Stand_Alone} \
-    CONFIG.EN_SAFETY_CKT {false} ] [get_bd_cells blk_mem_gen_2]
-
 validate_bd_design
 
 set_property strategy Flow_AreaOptimized_high [get_runs synth_1]
@@ -102,133 +69,72 @@ set_property strategy Congestion_SpreadLogic_high [get_runs impl_1]
 
 # === END: NN ===============================================================
 
-## === BEGIN: ILA ===============================================================
-
-# AXIS-FWD BRAM 0
-set_property HDL_ATTRIBUTE.DEBUG true [get_bd_intf_nets {axi_bram_ctrl_2_BRAM_PORTA}]
+# === BEGIN: ILA ===============================================================
+set_property HDL_ATTRIBUTE.DEBUG true [get_bd_intf_nets {ps8_0_axi_periph_M28_AXI axis_avg_buffer_0_fwd_axis NN_0_out_r_PORTA}]
 apply_bd_automation -rule xilinx.com:bd_rule:debug -dict [list \
-    [get_bd_intf_nets axi_bram_ctrl_2_BRAM_PORTA] {NON_AXI_SIGNALS "Data and Trigger" CLK_SRC "/zynq_ultra_ps_e_0/pl_clk0" SYSTEM_ILA "Auto" } \
+    [get_bd_intf_nets axis_avg_buffer_0_fwd_axis] {AXIS_SIGNALS "Data and Trigger" CLK_SRC "/usp_rf_data_converter_0/clk_adc2" SYSTEM_ILA "Auto" APC_EN "0" } \
+    [get_bd_intf_nets NN_0_out_r_PORTA] {NON_AXI_SIGNALS "Data and Trigger" CLK_SRC "/usp_rf_data_converter_0/clk_adc2" SYSTEM_ILA "Auto" } \
+    [get_bd_intf_nets ps8_0_axi_periph_M28_AXI] {AXI_R_ADDRESS "Data and Trigger" AXI_R_DATA "Data and Trigger" AXI_W_ADDRESS "Data and Trigger" AXI_W_DATA "Data and Trigger" AXI_W_RESPONSE "Data and Trigger" CLK_SRC "/usp_rf_data_converter_0/clk_adc2" SYSTEM_ILA "Auto" APC_EN "0" } \
 ]
 
-## Stream out of readout_0
-##set_property HDL_ATTRIBUTE.DEBUG true [get_bd_intf_nets {axis_readout_v2_0_m1_axis}]
-##apply_bd_automation -rule xilinx.com:bd_rule:debug -dict [list \
-##    [get_bd_intf_nets axis_readout_v2_0_m1_axis] {AXIS_SIGNALS "Data and Trigger" CLK_SRC "/usp_rf_data_converter_0/clk_adc2" SYSTEM_ILA "Auto" APC_EN "0" } \
-##]
-#
-## Stream out of broadcaster_0
-#set_property HDL_ATTRIBUTE.DEBUG true [get_bd_intf_nets {axis_broadcaster_0_M00_AXIS}]
-#apply_bd_automation -rule xilinx.com:bd_rule:debug -dict [list \
-#    [get_bd_intf_nets axis_broadcaster_0_M00_AXIS] {AXIS_SIGNALS "Data and Trigger" CLK_SRC "/usp_rf_data_converter_0/clk_adc2" SYSTEM_ILA "Auto" APC_EN "0" } \
-#]
-#
-## Stream out of avg_0 (to NN_0)
-#set_property HDL_ATTRIBUTE.DEBUG true [get_bd_intf_nets {axis_avg_buffer_0_fwd_axis}]
-#apply_bd_automation -rule xilinx.com:bd_rule:debug -dict [list \
-#    [get_bd_intf_nets axis_avg_buffer_0_fwd_axis] {AXIS_SIGNALS "Data and Trigger" CLK_SRC "/usp_rf_data_converter_0/clk_adc2" SYSTEM_ILA "Auto" APC_EN "0" } \
-#]
-#
-## Stream out of NN_0 to BRAMs
-##set_property HDL_ATTRIBUTE.DEBUG true [get_bd_intf_nets {NN_0_out_r_PORTA}]
-##apply_bd_automation -rule xilinx.com:bd_rule:debug -dict [list \
-##    [get_bd_intf_nets NN_0_out_r_PORTA] {NON_AXI_SIGNALS "Data and Trigger" CLK_SRC "/usp_rf_data_converter_0/clk_adc2" SYSTEM_ILA "Auto" } \
-##]
-#
-## Trigger
-#set_property HDL_ATTRIBUTE.DEBUG true [get_bd_nets {vect2bits_16_0_dout14 }]
-#set_property -dict [list CONFIG.C_MON_TYPE {MIX}] [get_bd_cells system_ila_0]
-#connect_bd_net [get_bd_pins system_ila_0/probe0] [get_bd_pins vect2bits_16_0/dout14]
-#
-##set_property HDL_ATTRIBUTE.DEBUG true [get_bd_intf_nets {axis_avg_buffer_0_fwd_axis}]
-##set_property HDL_ATTRIBUTE.DEBUG true [get_bd_intf_nets {axis_readout_v2_0_m1_axis}]
-##set_property HDL_ATTRIBUTE.DEBUG true [get_bd_intf_nets {axis_broadcaster_0_M00_AXIS}]
-##set_property HDL_ATTRIBUTE.DEBUG true [get_bd_nets {vect2bits_16_0_dout14 }]
-##set_property HDL_ATTRIBUTE.DEBUG true [get_bd_intf_nets {NN_0_out_r_PORTA}]
-##
-##apply_bd_automation -rule xilinx.com:bd_rule:debug -dict [list \
-##    [get_bd_intf_nets axis_readout_v2_0_m1_axis] {AXIS_SIGNALS "Data and Trigger" CLK_SRC "/usp_rf_data_converter_0/clk_adc2" SYSTEM_ILA "Auto" APC_EN "0" } \
-##]
-##set_property -dict [list CONFIG.C_BRAM_CNT {12} CONFIG.C_NUM_MONITOR_SLOTS {3} CONFIG.C_MON_TYPE {MIX}] [get_bd_cells system_ila_0]
-##set_property -dict [list CONFIG.C_SLOT {2} CONFIG.C_BRAM_CNT {6.5} CONFIG.C_SLOT_1_INTF_TYPE {xilinx.com:interface:axis_rtl:1.0} CONFIG.C_SLOT_2_INTF_TYPE {xilinx.com:interface:bram_rtl:1.0}] [get_bd_cells system_ila_0]
-##set_property -dict [list CONFIG.C_SLOT {2} CONFIG.C_NUM_MONITOR_SLOTS {4} CONFIG.C_SLOT_2_INTF_TYPE {xilinx.com:interface:axis_rtl:1.0} CONFIG.C_SLOT_3_INTF_TYPE {xilinx.com:interface:bram_rtl:1.0}] [get_bd_cells system_ila_0]
-##connect_bd_intf_net [get_bd_intf_pins system_ila_0/SLOT_1_AXIS] [get_bd_intf_pins axis_broadcaster_0/M00_AXIS]
-###connect_bd_intf_net [get_bd_intf_pins system_ila_0/SLOT_2_AXIS] [get_bd_intf_pins NN_0/in_V]
-##connect_bd_intf_net [get_bd_intf_pins system_ila_0/SLOT_2_AXIS] [get_bd_intf_pins NN_0/in_V_V]
-##connect_bd_intf_net [get_bd_intf_pins system_ila_0/SLOT_3_BRAM] [get_bd_intf_pins blk_mem_gen_0/BRAM_PORTB]
-##connect_bd_net [get_bd_pins system_ila_0/probe0] [get_bd_pins vect2bits_16_0/dout14]
-##
-### debug scaler
-###set_property HDL_ATTRIBUTE.DEBUG true [get_bd_intf_nets {ps8_0_axi_periph_M28_AXI}]
-###set_property -dict [list CONFIG.C_NUM_MONITOR_SLOTS {5}] [get_bd_cells system_ila_0]
-###connect_bd_intf_net [get_bd_intf_pins system_ila_0/SLOT_4_AXI] [get_bd_intf_pins NN_0/s_axi_scaler]
-##
-##set_property HDL_ATTRIBUTE.DEBUG true [get_bd_intf_nets {ps8_0_axi_periph_M28_AXI}]
-##apply_bd_automation -rule xilinx.com:bd_rule:debug -dict [list \
-##    [get_bd_intf_nets ps8_0_axi_periph_M28_AXI] {AXI_R_ADDRESS "Data and Trigger" AXI_R_DATA "Data and Trigger" AXI_W_ADDRESS "Data and Trigger" AXI_W_DATA "Data and Trigger" AXI_W_RESPONSE "Data and Trigger" CLK_SRC "/usp_rf_data_converter_0/clk_adc2" SYSTEM_ILA "Auto" APC_EN "0" } \
-##]
-#
-## disable some ILAs
-##set_property HDL_ATTRIBUTE.DEBUG false [get_bd_intf_nets { axis_readout_v2_0_m1_axis } ]
-##disconnect_bd_intf_net [get_bd_intf_net axis_readout_v2_0_m1_axis] [get_bd_intf_pins system_ila_0/SLOT_0_AXIS]
-##apply_bd_automation -rule xilinx.com:bd_rule:resize [get_bd_cells system_ila_0]
-##set_property HDL_ATTRIBUTE.DEBUG false [get_bd_intf_nets { axis_broadcaster_0_M00_AXIS } ]
-##disconnect_bd_intf_net [get_bd_intf_net axis_broadcaster_0_M00_AXIS] [get_bd_intf_pins system_ila_0/SLOT_0_AXIS]
-##apply_bd_automation -rule xilinx.com:bd_rule:resize [get_bd_cells system_ila_0]
-##set_property HDL_ATTRIBUTE.DEBUG false [get_bd_intf_nets { NN_0_out_r_PORTA } ]
-##disconnect_bd_intf_net [get_bd_intf_net NN_0_out_r_PORTA] [get_bd_intf_pins system_ila_0/SLOT_1_BRAM]
-##apply_bd_automation -rule xilinx.com:bd_rule:resize [get_bd_cells system_ila_0]
-#
-#validate_bd_design
-#
-## === END: ILA ===============================================================
-##
-### === BEGIN: RTL ILA =========================================================
-###launch_runs synth_1 -jobs 20
-###wait_on_run -timeout 360 synth_1
-###
-###open_run synth_1 -name synth_1
-###update_compile_order -fileset sources_1
-###for {set i 0} {$i < 14*6} {incr i} {
-###    set_property mark_debug true [get_nets [list d_1_i/NN_0/inst/in_local_V_fu_162[$i]]]
-###}
-###set_property mark_debug true [get_nets [list d_1_i/NN_0/inst/grp_myproject_fu_214_ap_start]]
-###set_property mark_debug true [get_nets [list d_1_i/NN_0/inst/grp_myproject_fu_214_ap_done]]
-###file mkdir ${proj_dir}/top_216.srcs/constrs_1/new
-###close [ open ${proj_dir}/top_216.srcs/constrs_1/new/dbg_constraints.xdc w ]
-###add_files -fileset constrs_1 ${proj_dir}/top_216.srcs/constrs_1/new/dbg_constraints.xdc
-###set_property target_constrs_file ${proj_dir}/top_216.srcs/constrs_1/new/dbg_constraints.xdc [current_fileset -constrset]
-###save_constraints -force
-###create_debug_core u_ila_0 ila
-###set_property C_DATA_DEPTH 1024 [get_debug_cores u_ila_0]
-###set_property C_TRIGIN_EN false [get_debug_cores u_ila_0]
-###set_property C_TRIGOUT_EN false [get_debug_cores u_ila_0]
-###set_property C_ADV_TRIGGER false [get_debug_cores u_ila_0]
-###set_property C_INPUT_PIPE_STAGES 0 [get_debug_cores u_ila_0]
-###set_property C_EN_STRG_QUAL false [get_debug_cores u_ila_0]
-###set_property ALL_PROBE_SAME_MU true [get_debug_cores u_ila_0]
-###set_property ALL_PROBE_SAME_MU_CNT 1 [get_debug_cores u_ila_0]
-###connect_debug_port u_ila_0/clk [get_nets [list d_1_i/usp_rf_data_converter_0/inst/i_d_1_usp_rf_data_converter_0_0_bufg_gt_ctrl/clk_adc2 ]]
-###set_property port_width [expr 14*6*2] [get_debug_ports u_ila_0/probe0]
-###set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe0]
-###for {set i 0} {$i < 14*6} {incr i} {
-###    connect_debug_port u_ila_0/probe0 [get_nets [list d_1_i/NN_0/inst/in_local_V_fu_162[$i]]]
-###}
-###create_debug_port u_ila_0 probe
-###set_property port_width 1 [get_debug_ports u_ila_0/probe1]
-###set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe1]
-###connect_debug_port u_ila_0/probe1 [get_nets [list d_1_i/NN_0/inst/grp_myproject_fu_214_ap_done ]]
-###create_debug_port u_ila_0 probe
-###set_property port_width 1 [get_debug_ports u_ila_0/probe2]
-###set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe2]
-###connect_debug_port u_ila_0/probe2 [get_nets [list d_1_i/NN_0/inst/grp_myproject_fu_214_ap_start ]]
-###save_constraints
-###reset_run d_1_axi_smc_0_synth_1
-###reset_run d_1_axi_smc_1_0_synth_1
-###reset_run d_1_system_ila_0_0_synth_1
-###save_bd_design
-###reset_run synth_1
+# Trigger
+set_property -dict [list CONFIG.C_MON_TYPE {MIX}] [get_bd_cells system_ila_0]
+set_property HDL_ATTRIBUTE.DEBUG true [get_bd_nets {vect2bits_16_0_dout14 }]
+connect_bd_net [get_bd_pins system_ila_0/probe0] [get_bd_pins vect2bits_16_0/dout14]
 
-# === END: RTL ILA ===========================================================
+
+validate_bd_design
+# === END: ILA ===============================================================
+
+update_compile_order -fileset sources_1
+launch_runs synth_1 -jobs 20
+wait_on_run -timeout 360 synth_1
+
+## === BEGIN: RTL ILA =========================================================
+#
+#open_run synth_1 -name synth_1
+#update_compile_order -fileset sources_1
+#for {set i 0} {$i < 14*2} {incr i} {
+#    set_property mark_debug true [get_nets [list d_1_i/NN_0/inst/in_local_V_fu_160[$i]]]
+#}
+#set_property mark_debug true [get_nets [list d_1_i/NN_0/inst/grp_myproject_fu_206_ap_start]]
+#set_property mark_debug true [get_nets [list d_1_i/NN_0/inst/grp_myproject_fu_206_ap_done]]
+#file mkdir ${proj_dir}/top_216.srcs/constrs_1/new
+#close [ open ${proj_dir}/top_216.srcs/constrs_1/new/dbg_constraints.xdc w ]
+#add_files -fileset constrs_1 ${proj_dir}/top_216.srcs/constrs_1/new/dbg_constraints.xdc
+#set_property target_constrs_file ${proj_dir}/top_216.srcs/constrs_1/new/dbg_constraints.xdc [current_fileset -constrset]
+#save_constraints -force
+#create_debug_core u_ila_0 ila
+#set_property C_DATA_DEPTH 1024 [get_debug_cores u_ila_0]
+#set_property C_TRIGIN_EN false [get_debug_cores u_ila_0]
+#set_property C_TRIGOUT_EN false [get_debug_cores u_ila_0]
+#set_property C_ADV_TRIGGER false [get_debug_cores u_ila_0]
+#set_property C_INPUT_PIPE_STAGES 0 [get_debug_cores u_ila_0]
+#set_property C_EN_STRG_QUAL false [get_debug_cores u_ila_0]
+#set_property ALL_PROBE_SAME_MU true [get_debug_cores u_ila_0]
+#set_property ALL_PROBE_SAME_MU_CNT 1 [get_debug_cores u_ila_0]
+#connect_debug_port u_ila_0/clk [get_nets [list d_1_i/usp_rf_data_converter_0/inst/i_d_1_usp_rf_data_converter_0_0_bufg_gt_ctrl/clk_adc2 ]]
+#set_property port_width 56 [get_debug_ports u_ila_0/probe0]
+#set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe0]
+#for {set i 0} {$i < 14*2} {incr i} {
+#    connect_debug_port u_ila_0/probe0 [get_nets [list d_1_i/NN_0/inst/in_local_V_fu_160[$i]]]
+#}
+#create_debug_port u_ila_0 probe
+#set_property port_width 1 [get_debug_ports u_ila_0/probe1]
+#set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe1]
+#connect_debug_port u_ila_0/probe1 [get_nets [list d_1_i/NN_0/inst/grp_myproject_fu_206_ap_done ]]
+#create_debug_port u_ila_0 probe
+#set_property port_width 1 [get_debug_ports u_ila_0/probe2]
+#set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe2]
+#connect_debug_port u_ila_0/probe2 [get_nets [list d_1_i/NN_0/inst/grp_myproject_fu_206_ap_start ]]
+#save_constraints
+#reset_run d_1_axi_smc_0_synth_1
+#reset_run d_1_axi_smc_1_0_synth_1
+#reset_run d_1_system_ila_0_0_synth_1
+#save_bd_design
+#reset_run synth_1
+#
+## === END: RTL ILA ===========================================================
 
 reset_run impl_1
 launch_runs impl_1 -to_step write_bitstream -jobs 20
