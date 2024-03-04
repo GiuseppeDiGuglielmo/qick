@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
-<EDKSYSTEM EDWVERSION="1.2" TIMESTAMP="Sat Mar  2 14:06:25 2024" VIVADOVERSION="2022.1">
+<EDKSYSTEM EDWVERSION="1.2" TIMESTAMP="Sun Mar  3 20:14:21 2024" VIVADOVERSION="2022.1">
 
   <SYSTEMINFO ARCH="zynquplusRFSOC" BOARD="xilinx.com:zcu216:part0:2.0" DEVICE="xczu49dr" NAME="d_1" PACKAGE="ffvf1760" SPEEDGRADE="-2"/>
 
@@ -12207,13 +12207,6 @@
             <CONNECTION INSTANCE="axis_clk_cnvrt_avg_0" PORT="s_axis_tdata"/>
           </CONNECTIONS>
         </PORT>
-        <PORT DIR="O" LEFT="31" NAME="bram_addr" RIGHT="0" SIGIS="undef"/>
-        <PORT CLKFREQUENCY="100000000" DIR="O" NAME="bram_clk" SIGIS="clk"/>
-        <PORT DIR="O" LEFT="31" NAME="bram_din" RIGHT="0" SIGIS="undef"/>
-        <PORT DIR="I" LEFT="31" NAME="bram_dout" RIGHT="0" SIGIS="undef"/>
-        <PORT DIR="O" NAME="bram_en" SIGIS="undef"/>
-        <PORT DIR="O" NAME="bram_rst" POLARITY="ACTIVE_LOW" SIGIS="rst"/>
-        <PORT DIR="O" LEFT="3" NAME="bram_we" RIGHT="0" SIGIS="undef"/>
       </PORTS>
       <BUSINTERFACES>
         <BUSINTERFACE BUSNAME="axis_avg_buffer_0_m0_axis" NAME="m0_axis" TYPE="INITIATOR" VLNV="xilinx.com:interface:axis:1.0">
@@ -12370,23 +12363,6 @@
             <PORTMAP LOGICAL="TDATA" PHYSICAL="m2_axis_tdata"/>
             <PORTMAP LOGICAL="TVALID" PHYSICAL="m2_axis_tvalid"/>
             <PORTMAP LOGICAL="TREADY" PHYSICAL="m2_axis_tready"/>
-          </PORTMAPS>
-        </BUSINTERFACE>
-        <BUSINTERFACE BUSNAME="__NOC__" NAME="bram" TYPE="INITIATOR" VLNV="xilinx.com:interface:bram:1.0">
-          <PARAMETER NAME="MEM_SIZE" VALUE="8192"/>
-          <PARAMETER NAME="MEM_WIDTH" VALUE="32"/>
-          <PARAMETER NAME="MEM_ECC" VALUE="NONE"/>
-          <PARAMETER NAME="MASTER_TYPE" VALUE="OTHER"/>
-          <PARAMETER NAME="READ_WRITE_MODE"/>
-          <PARAMETER NAME="READ_LATENCY" VALUE="1"/>
-          <PORTMAPS>
-            <PORTMAP LOGICAL="RST" PHYSICAL="bram_rst"/>
-            <PORTMAP LOGICAL="CLK" PHYSICAL="bram_clk"/>
-            <PORTMAP LOGICAL="DIN" PHYSICAL="bram_din"/>
-            <PORTMAP LOGICAL="EN" PHYSICAL="bram_en"/>
-            <PORTMAP LOGICAL="DOUT" PHYSICAL="bram_dout"/>
-            <PORTMAP LOGICAL="WE" PHYSICAL="bram_we"/>
-            <PORTMAP LOGICAL="ADDR" PHYSICAL="bram_addr"/>
           </PORTMAPS>
         </BUSINTERFACE>
       </BUSINTERFACES>
@@ -12607,13 +12583,6 @@
             <CONNECTION INSTANCE="axis_clk_cnvrt_avg_1" PORT="s_axis_tdata"/>
           </CONNECTIONS>
         </PORT>
-        <PORT DIR="O" LEFT="31" NAME="bram_addr" RIGHT="0" SIGIS="undef"/>
-        <PORT CLKFREQUENCY="100000000" DIR="O" NAME="bram_clk" SIGIS="clk"/>
-        <PORT DIR="O" LEFT="31" NAME="bram_din" RIGHT="0" SIGIS="undef"/>
-        <PORT DIR="I" LEFT="31" NAME="bram_dout" RIGHT="0" SIGIS="undef"/>
-        <PORT DIR="O" NAME="bram_en" SIGIS="undef"/>
-        <PORT DIR="O" NAME="bram_rst" POLARITY="ACTIVE_LOW" SIGIS="rst"/>
-        <PORT DIR="O" LEFT="3" NAME="bram_we" RIGHT="0" SIGIS="undef"/>
       </PORTS>
       <BUSINTERFACES>
         <BUSINTERFACE BUSNAME="axis_avg_buffer_1_m0_axis" NAME="m0_axis" TYPE="INITIATOR" VLNV="xilinx.com:interface:axis:1.0">
@@ -12770,23 +12739,6 @@
             <PORTMAP LOGICAL="TDATA" PHYSICAL="m2_axis_tdata"/>
             <PORTMAP LOGICAL="TVALID" PHYSICAL="m2_axis_tvalid"/>
             <PORTMAP LOGICAL="TREADY" PHYSICAL="m2_axis_tready"/>
-          </PORTMAPS>
-        </BUSINTERFACE>
-        <BUSINTERFACE BUSNAME="__NOC__" NAME="bram" TYPE="INITIATOR" VLNV="xilinx.com:interface:bram:1.0">
-          <PARAMETER NAME="MEM_SIZE" VALUE="8192"/>
-          <PARAMETER NAME="MEM_WIDTH" VALUE="32"/>
-          <PARAMETER NAME="MEM_ECC" VALUE="NONE"/>
-          <PARAMETER NAME="MASTER_TYPE" VALUE="OTHER"/>
-          <PARAMETER NAME="READ_WRITE_MODE"/>
-          <PARAMETER NAME="READ_LATENCY" VALUE="1"/>
-          <PORTMAPS>
-            <PORTMAP LOGICAL="RST" PHYSICAL="bram_rst"/>
-            <PORTMAP LOGICAL="CLK" PHYSICAL="bram_clk"/>
-            <PORTMAP LOGICAL="DIN" PHYSICAL="bram_din"/>
-            <PORTMAP LOGICAL="EN" PHYSICAL="bram_en"/>
-            <PORTMAP LOGICAL="DOUT" PHYSICAL="bram_dout"/>
-            <PORTMAP LOGICAL="WE" PHYSICAL="bram_we"/>
-            <PORTMAP LOGICAL="ADDR" PHYSICAL="bram_addr"/>
           </PORTMAPS>
         </BUSINTERFACE>
       </BUSINTERFACES>
