@@ -1,0 +1,5 @@
+delete_bd_objs [get_bd_intf_nets usp_rf_data_converter_0_m22_axis] [get_bd_intf_nets axis_register_slice_1_M_AXIS] [get_bd_cells axis_register_slice_1]
+delete_bd_objs [get_bd_intf_nets axis_readout_v2_1_m0_axis] [get_bd_intf_nets axis_readout_v2_1_m1_axis] [get_bd_intf_nets ps8_0_axi_periph_M16_AXI] [get_bd_cells axis_readout_v2_1]
+delete_bd_objs [get_bd_intf_nets axis_broadcaster_1_M00_AXIS] [get_bd_intf_nets axis_broadcaster_1_M01_AXIS] [get_bd_cells axis_broadcaster_1]
+delete_bd_objs [get_bd_intf_nets axis_avg_buffer_1_m1_axis] [get_bd_nets vect2bits_16_0_dout15] [get_bd_intf_nets axis_avg_buffer_1_m0_axis] [get_bd_intf_nets axis_avg_buffer_1_m2_axis] [get_bd_intf_nets ps8_0_axi_periph_M10_AXI] [get_bd_cells axis_avg_buffer_1]
+delete_bd_objs [get_bd_intf_nets axis_clk_cnvrt_avg_1_M_AXIS] [get_bd_cells axis_clk_cnvrt_avg_1]
