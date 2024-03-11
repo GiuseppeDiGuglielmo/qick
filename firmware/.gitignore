@@ -1,2 +1,5 @@
+package
+package*zip
+package*gz
 top*/
 *.rpt

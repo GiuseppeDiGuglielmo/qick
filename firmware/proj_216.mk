@@ -15,7 +15,7 @@ syn-zcu216-batch-ila:
 
 # Batch mode: create Vivado project, QICK+NN, use BRAMs + AXI-lite for NN, ILAs, and run implementation
 syn-zcu216-batch-nn:
-	vivado -mode batch -source proj_216_batch_nn.tcl
+	vivado -mode gui -source proj_216_batch_nn.tcl
 .PHONY: syn-zcu216-batch-nn
 
 # Open GUI of the latest Vivado project
