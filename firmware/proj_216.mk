@@ -39,11 +39,12 @@ package-zcu216:
 # Copy package remotely
 copy-zcu216: package-zcu216
 	@./copy.sh \
-		xilinx@rfsoc216-ml01.dhcp.fnal.gov:~/jupyter_notebooks/qick/qick_ml \
+		xilinx@rfsoc216-ml01.dhcp.fnal.gov:~/jupyter_notebooks/qick_dev/qick_ml/216 \
 		qick_216 \
 		quantum2023.
 .PHONY: package-zcu216
 
 ultraclean-zcu216:
 	@rm -rf top_216
+	@rm -rf ip_local/*
 .PHONY: ultraclean-zcu216

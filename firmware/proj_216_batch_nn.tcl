@@ -5,11 +5,12 @@ source proj_216.tcl
 open_bd_design {${proj_dir}/top_216.srcs/sources_1/bd/d_1/d_1.bd}
 
 # Set neural network IP path
-set OTHER_IP_PATH "[file normalize ${orig_proj_dir}/ip]"
-#set NN_IP_PATH "[file normalize ${orig_proj_dir}/../../models_HLS/fcnn/ioParallel/dummy/dummy_model]"
-set NN_IP_PATH "[file normalize /extras/home/gdg/research/projects/quantum/ml-quantum-readout/hls_models/single_layer_hls4ml_prj/NN_prj]"
-set_property ip_repo_paths "${OTHER_IP_PATH} ${NN_IP_PATH}" [current_project]
+set QICK_IPS_PATH "[file normalize ${orig_proj_dir}/ip]"
+set LOCAL_IPS_PATH "[file normalize ${orig_proj_dir}/ip_local]"
+set_property ip_repo_paths "${QICK_IPS_PATH} ${LOCAL_IPS_PATH}" [current_project]
 update_ip_catalog
+
+update_ip_catalog -add_ip "[file normalize ${orig_proj_dir}/../qick_ml/xilinx_com_hls_NN_axi_1_0.zip]" -repo_path ${LOCAL_IPS_PATH}
 
 # Add NN IPs
 create_bd_cell -type ip -vlnv xilinx.com:hls:NN_axi:1.0 NN_axi_0
