@@ -13,7 +13,7 @@ set _xil_proj_name_ "top_216"
 set orig_proj_dir "[file normalize "$origin_dir/"]"
 
 # Create project
-create_project ${_xil_proj_name_} ./${_xil_proj_name_} -part xczu49dr-ffvf1760-2-e
+create_project ${_xil_proj_name_} ./${_xil_proj_name_}${_xil_proj_name_suffix_}  -part xczu49dr-ffvf1760-2-e
 
 # Set the directory path for the new project
 set proj_dir [get_property directory [current_project]]
@@ -70,7 +70,7 @@ make_wrapper -files [get_files d_1.bd] -top
 
 # Add files to sources_1 fileset
 set files [list \
-  [file normalize "${origin_dir}/top_216/top_216.srcs/sources_1/bd/d_1/hdl/d_1_wrapper.v" ]\
+  [file normalize "${proj_dir}/top_216.srcs/sources_1/bd/d_1/hdl/d_1_wrapper.v" ]\
 ]
 add_files -fileset $obj $files
 
