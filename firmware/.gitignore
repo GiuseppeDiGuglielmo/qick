@@ -1,6 +1,4 @@
-top_216
-util_216.rpt
-
+top*/
 package
-package.tar.gz
-package.zip
+package*.gz
+package*.zip

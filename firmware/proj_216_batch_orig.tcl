@@ -1,3 +1,5 @@
+set _xil_proj_name_suffix_ ""
+
 source proj_216.tcl
 
 reset_run impl_1

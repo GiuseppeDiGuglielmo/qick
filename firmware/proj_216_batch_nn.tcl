@@ -1,3 +1,5 @@
+set _xil_proj_name_suffix_ "_nn"
+
 source proj_216.tcl
 
 ## === BEGIN: NN ===============================================================
@@ -27,6 +29,7 @@ connect_bd_intf_net [get_bd_intf_pins axis_readout_v2_0/m1_axis] [get_bd_intf_pi
 # Connect NN0 to broadcaster0
 connect_bd_intf_net [get_bd_intf_pins axis_broadcaster_0/M00_AXIS] [get_bd_intf_pins NN_0/in_V_V]
 create_bd_cell -type ip -vlnv xilinx.com:ip:xlconstant:1.1 always_ready0
+set_property -dict [list CONFIG.CONST_WIDTH {2} CONFIG.CONST_VAL {3}] [get_bd_cells always_ready0]
 connect_bd_net [get_bd_pins always_ready0/dout] [get_bd_pins axis_broadcaster_0/m_axis_tready]
 
 # Connect NN0 trigger
@@ -93,6 +96,8 @@ set_property HDL_ATTRIBUTE.DEBUG true [get_bd_intf_nets {axis_broadcaster_0_M00_
 set_property HDL_ATTRIBUTE.DEBUG true [get_bd_intf_nets {axis_broadcaster_0_M01_AXIS}]
 # Debug brams0
 set_property HDL_ATTRIBUTE.DEBUG true [get_bd_intf_nets {NN_0_out_r_PORTA}]
+# Debug trigger
+set_property HDL_ATTRIBUTE.DEBUG true [get_bd_nets {vect2bits_16_0_dout8 }]
 
 # Autoconnect ILAs
 apply_bd_automation -rule xilinx.com:bd_rule:debug -dict [list \
@@ -101,6 +106,9 @@ apply_bd_automation -rule xilinx.com:bd_rule:debug -dict [list \
     [get_bd_intf_nets axis_broadcaster_0_M01_AXIS] {AXIS_SIGNALS "Data and Trigger" CLK_SRC "/usp_rf_data_converter_0/clk_adc2" SYSTEM_ILA "Auto" APC_EN "0" } \
     [get_bd_intf_nets NN_0_out_r_PORTA] {NON_AXI_SIGNALS "Data and Trigger" CLK_SRC "/usp_rf_data_converter_0/clk_adc2" SYSTEM_ILA "Auto" } \
 ]
+
+set_property -dict [list CONFIG.C_MON_TYPE {MIX}] [get_bd_cells system_ila_0]
+connect_bd_net [get_bd_pins system_ila_0/probe0] [get_bd_pins vect2bits_16_0/dout8]
 
 # Set locations
 set_property location {8 3492 1813} [get_bd_cells system_ila_0]
