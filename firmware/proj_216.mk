@@ -9,7 +9,11 @@ syn-zcu216:
 # - create original Vivado project
 # - run implementation
 syn-zcu216-batch-orig:
+ifeq ($(GUI),1)
+	vivado -mode gui -source proj_216_batch_orig.tcl
+else
 	vivado -mode batch -source proj_216_batch_orig.tcl
+endif
 .PHONY: syn-zcu216-batch-orig
 
 # Batch mode:
@@ -17,7 +21,11 @@ syn-zcu216-batch-orig:
 # - ILAs
 # - run implementation
 syn-zcu216-batch-ila:
+ifeq ($(GUI),1)
+	vivado -mode gui -source proj_216_batch_ila.tcl
+else
 	vivado -mode batch -source proj_216_batch_ila.tcl
+endif
 .PHONY: syn-zcu216-batch-ila
 
 # Batch mode:
@@ -27,10 +35,18 @@ syn-zcu216-batch-ila:
 # - ILAs
 # - run implementation
 syn-zcu216-batch-nn:
+ifeq ($(GUI),1)
+	vivado -mode gui -source proj_216_batch_nn.tcl
+else
 	vivado -mode batch -source proj_216_batch_nn.tcl
+endif
 .PHONY: syn-zcu216-batch-nn
 
 # Open GUI of the latest Vivado project
+gui-zcu216-orig:
+	vivado top_216_orig/top_216.xpr
+.PHONY: gui-zcu216-orig
+
 gui-zcu216-ila:
 	vivado top_216_ila/top_216.xpr
 .PHONY: gui-zcu216-ila
@@ -63,6 +79,10 @@ copy-zcu216:
 		qick_216 \
 		quantum2023.
 .PHONY: copy-zcu216
+
+ultraclean-zcu216-orig:
+	@rm -rf top_216_orig
+.PHONY: ultraclean-zcu216-orig
 
 ultraclean-zcu216-ila:
 	@rm -rf top_216_ila

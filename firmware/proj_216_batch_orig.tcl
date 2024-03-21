@@ -1,4 +1,4 @@
-set _xil_proj_name_suffix_ ""
+set _xil_proj_name_suffix_ "_orig"
 
 source proj_216.tcl
 
