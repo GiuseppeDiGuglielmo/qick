@@ -56,6 +56,14 @@ gui-zcu216-nn:
 .PHONY: gui-zcu216-nn
 
 # Package BIT, HWH, and LTX files
+package-zcu216-orig:
+	@./package.sh \
+		top_216 \
+		d_1 \
+		top_216_orig \
+		qick_216_orig
+.PHONY: package-zcu216-orig
+
 package-zcu216-ila:
 	@./package.sh \
 		top_216 \
