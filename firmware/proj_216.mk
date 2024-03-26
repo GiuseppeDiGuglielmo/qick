@@ -35,6 +35,7 @@ endif
 # - ILAs
 # - run implementation
 syn-zcu216-batch-nn:
+	@rm -rf ip_local/*
 ifeq ($(GUI),1)
 	vivado -mode gui -source proj_216_batch_nn.tcl
 else

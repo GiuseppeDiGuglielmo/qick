@@ -12,7 +12,15 @@ set LOCAL_IPS_PATH "[file normalize ${orig_proj_dir}/ip_local]"
 set_property ip_repo_paths "${QICK_IPS_PATH} ${LOCAL_IPS_PATH}" [current_project]
 update_ip_catalog
 
-update_ip_catalog -add_ip "[file normalize ${orig_proj_dir}/../qick_ml/xilinx_com_hls_NN_axi_1_0.zip]" -repo_path ${LOCAL_IPS_PATH}
+
+# Choose one of the NN IPs
+set NN_IP_ZIP "xilinx_com_hls_NN_axi_1_0_nonregistered_axis_200.zip"
+#set NN_IP_ZIP "xilinx_com_hls_NN_axi_1_0_registered_axis_200.zip"
+#
+#set NN_IP_ZIP "xilinx_com_hls_NN_axi_1_0_nonregistered_axis_770.zip"
+#set NN_IP_ZIP "xilinx_com_hls_NN_axi_1_0_registered_axis_770.zip"
+
+update_ip_catalog -add_ip "[file normalize ${orig_proj_dir}/../qick_ml/ip/${NN_IP_ZIP}]" -repo_path ${LOCAL_IPS_PATH}
 
 # Add NN IPs
 create_bd_cell -type ip -vlnv xilinx.com:hls:NN_axi:1.0 NN_axi_0
