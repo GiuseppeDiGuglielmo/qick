@@ -14,11 +14,18 @@ update_ip_catalog
 
 
 # Choose one of the NN IPs
-set NN_IP_ZIP "xilinx_com_hls_NN_axi_1_0_nonregistered_axis_200.zip"
-#set NN_IP_ZIP "xilinx_com_hls_NN_axi_1_0_registered_axis_200.zip"
-#
-#set NN_IP_ZIP "xilinx_com_hls_NN_axi_1_0_nonregistered_axis_770.zip"
-#set NN_IP_ZIP "xilinx_com_hls_NN_axi_1_0_registered_axis_770.zip"
+
+# 100 I/Q, 200 inputs
+set NN_IP_ZIP "xilinx_com_hls_NN_axi_1_0_nonregistered_285_385.zip"
+
+## 200 I/Q, 400 inputs
+#set NN_IP_ZIP "xilinx_com_hls_NN_axi_1_0_nonregistered_150_350.zip"
+
+# 400 I/Q, 800 inputs
+#set NN_IP_ZIP "xilinx_com_hls_NN_axi_1_0_nonregistered_150_550.zip"
+
+## 770 I/Q, 1540 inputs
+#set NN_IP_ZIP "xilinx_com_hls_NN_axi_1_0_nonregistered_0_770.zip"
 
 update_ip_catalog -add_ip "[file normalize ${orig_proj_dir}/../qick_ml/ip/${NN_IP_ZIP}]" -repo_path ${LOCAL_IPS_PATH}
 
@@ -123,7 +130,7 @@ set_property location {8 3467 2232} [get_bd_cells always_ready0]
 ## === END: ILAs ===============================================================
 
 reset_run impl_1
-launch_runs impl_1 -to_step write_bitstream -jobs 20
+launch_runs impl_1 -to_step write_bitstream -jobs 16
 wait_on_run -timeout 360 impl_1
 
 open_run impl_1
