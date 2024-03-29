@@ -35,6 +35,7 @@ endif
 # - ILAs
 # - run implementation
 syn-zcu216-batch-nn:
+	@rm -rf ip_local/*
 ifeq ($(GUI),1)
 	vivado -mode gui -source proj_216_batch_nn.tcl
 else
@@ -56,6 +57,14 @@ gui-zcu216-nn:
 .PHONY: gui-zcu216-nn
 
 # Package BIT, HWH, and LTX files
+package-zcu216-orig:
+	@./package.sh \
+		top_216 \
+		d_1 \
+		top_216_orig \
+		qick_216_orig
+.PHONY: package-zcu216-orig
+
 package-zcu216-ila:
 	@./package.sh \
 		top_216 \
