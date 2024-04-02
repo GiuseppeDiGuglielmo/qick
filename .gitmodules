@@ -1,0 +1,3 @@
+[submodule "submodules/ml-quantum-readout"]
+	path = submodules/ml-quantum-readout
+	url = git@github.com:GiuseppeDiGuglielmo/ml-quantum-readout.git

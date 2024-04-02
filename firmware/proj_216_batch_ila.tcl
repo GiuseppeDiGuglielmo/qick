@@ -26,7 +26,7 @@ set_property location {8 3492 1813} [get_bd_cells system_ila_0]
 # === END: ILAs ===============================================================
 
 reset_run impl_1
-launch_runs impl_1 -to_step write_bitstream -jobs 20
+launch_runs impl_1 -to_step write_bitstream -jobs 16
 wait_on_run -timeout 360 impl_1
 
 open_run impl_1

@@ -16,7 +16,7 @@ update_ip_catalog
 # Choose one of the NN IPs
 
 # 100 I/Q, 200 inputs
-set NN_IP_ZIP "xilinx_com_hls_NN_axi_1_0_nonregistered_285_385.zip"
+#set NN_IP_ZIP "xilinx_com_hls_NN_axi_1_0_nonregistered_285_385.zip"
 
 ## 200 I/Q, 400 inputs
 #set NN_IP_ZIP "xilinx_com_hls_NN_axi_1_0_nonregistered_150_350.zip"
@@ -24,8 +24,15 @@ set NN_IP_ZIP "xilinx_com_hls_NN_axi_1_0_nonregistered_285_385.zip"
 # 400 I/Q, 800 inputs
 #set NN_IP_ZIP "xilinx_com_hls_NN_axi_1_0_nonregistered_150_550.zip"
 
+# 765 I/Q, 1530
+set NN_IP_ZIP "xilinx_com_hls_NN_axi_1_0_nonregistered_5_765.zip"
+
+# 769 I/Q, 1538
+#set NN_IP_ZIP "xilinx_com_hls_NN_axi_1_0_nonregistered_1_769.zip"
+
 ## 770 I/Q, 1540 inputs
 #set NN_IP_ZIP "xilinx_com_hls_NN_axi_1_0_nonregistered_0_770.zip"
+#set NN_IP_ZIP "xilinx_com_hls_NN_axi_1_0_nonregistered_0_770_updated.zip"
 
 update_ip_catalog -add_ip "[file normalize ${orig_proj_dir}/../qick_ml/ip/${NN_IP_ZIP}]" -repo_path ${LOCAL_IPS_PATH}
 
