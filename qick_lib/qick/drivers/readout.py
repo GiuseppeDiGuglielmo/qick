@@ -101,6 +101,9 @@ class AxisReadoutV2(SocIp, AbsReadout):
         blocktype = soc.metadata.mod2type(block)
         if blocktype == "axis_broadcaster":
                 ((block, port),) = soc.metadata.trace_bus(block, 'M00_AXIS')
+        # TODO: This is a workaround to filter out NN modules
+        #if block != "NN_0":
+        #    self.buffer = getattr(soc, block)
         self.buffer = getattr(soc, block)
 
         #print("%s: ADC tile %s block %s, buffer %s"%(self.fullpath, *self.adc, self.buffer.fullpath))
@@ -506,7 +509,11 @@ class AxisAvgBuffer(SocIp):
         self.switch_ch = switch_avg_ch
 
         # which tProc output bit triggers this buffer?
-        ((block, port),) = soc.metadata.trace_sig(self.fullpath, 'trigger')
+        #print(soc.metadata.trace_sig(self.fullpath, 'trigger'))
+        #((block, port),) = soc.metadata.trace_sig(self.fullpath, 'trigger')
+        # TODO: This is a workaround to filter out NN triggers
+        filtered_couples = [couple for couple in soc.metadata.trace_sig(self.fullpath, 'trigger') if 'vect2bits' in couple[0]] 
+        ((block, port),) = filtered_couples
         # vect2bits/qick_vec2bit port names are of the form 'dout14'
         self.cfg['trigger_bit'] = int(port[4:])
 
