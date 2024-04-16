@@ -24,7 +24,10 @@ update_ip_catalog
 #set NN_IP_ZIP "xilinx_com_hls_NN_axi_1_0_nonregistered_150_350.zip"
 
 ## 400 I/Q, 800 inputs
-set NN_IP_ZIP "xilinx_com_hls_NN_axi_1_0_nonregistered_150_550.zip"
+#set NN_IP_ZIP "xilinx_com_hls_NN_axi_1_0_nonregistered_150_550.zip"
+
+# 720 I/Q, 1440 inputs
+set NN_IP_ZIP "xilinx_com_hls_NN_axi_1_0_nonregistered_25_745.zip"
 
 ## 765 I/Q, 1530
 #set NN_IP_ZIP "xilinx_com_hls_NN_axi_1_0_nonregistered_5_765.zip"
