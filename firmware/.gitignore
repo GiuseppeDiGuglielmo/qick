@@ -1,4 +1,5 @@
 top*/
+*.rpt
 package
 package*.gz
 package*.zip
