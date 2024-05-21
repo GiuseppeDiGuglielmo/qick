@@ -2,7 +2,8 @@ set _xil_proj_name_suffix_ "_nn"
 
 source proj_216.tcl
 
-## === BEGIN: NN ===============================================================
+# === 1. BEGIN: NN =============================================================
+
 # Open block diagram
 open_bd_design {${proj_dir}/top_216.srcs/sources_1/bd/d_1/d_1.bd}
 
@@ -14,32 +15,14 @@ file mkdir $LOCAL_IPS_PATH
 set_property ip_repo_paths "${QICK_IPS_PATH} ${LOCAL_IPS_PATH}" [current_project]
 update_ip_catalog
 
-
 # Choose one of the NN IPs
+set WINDOW_SIZE 770
+set DATASET_DATE "00000000"
 
-## 100 I/Q, 200 inputs
-#set NN_IP_ZIP "xilinx_com_hls_NN_axi_1_0_nonregistered_285_385.zip"
+set NN_IP_ZIP "xilinx_com_hls_NN_axi_1_0_nonregistered_w${WINDOW_SIZE}.zip"
 
-## 200 I/Q, 400 inputs
-#set NN_IP_ZIP "xilinx_com_hls_NN_axi_1_0_nonregistered_150_350.zip"
-
-## 400 I/Q, 800 inputs
-#set NN_IP_ZIP "xilinx_com_hls_NN_axi_1_0_nonregistered_150_550.zip"
-
-# 720 I/Q, 1440 inputs
-set NN_IP_ZIP "xilinx_com_hls_NN_axi_1_0_nonregistered_25_745.zip"
-
-## 765 I/Q, 1530
-#set NN_IP_ZIP "xilinx_com_hls_NN_axi_1_0_nonregistered_5_765.zip"
-
-## 769 I/Q, 1538
-#set NN_IP_ZIP "xilinx_com_hls_NN_axi_1_0_nonregistered_1_769.zip"
-
-# 770 I/Q, 1540 inputs
-#set NN_IP_ZIP "xilinx_com_hls_NN_axi_1_0_nonregistered_0_770.zip"
-#set NN_IP_ZIP "xilinx_com_hls_NN_axi_1_0_nonregistered_0_770_updated.zip"
-
-update_ip_catalog -add_ip "[file normalize ${orig_proj_dir}/../qick_ml/ip/${NN_IP_ZIP}]" -repo_path ${LOCAL_IPS_PATH}
+update_ip_catalog -add_ip "[file normalize ${orig_proj_dir}/../qick_ml/ip/${DATASET_DATE}/${NN_IP_ZIP}]" -repo_path ${LOCAL_IPS_PATH}
+#update_ip_catalog -add_ip "[file normalize ${orig_proj_dir}/../qick_ml/ip/20240501/${NN_IP_ZIP}]" -repo_path ${LOCAL_IPS_PATH}
 
 # Add NN IPs
 create_bd_cell -type ip -vlnv xilinx.com:hls:NN_axi:1.0 NN_axi_0
@@ -92,6 +75,10 @@ set_property -dict [list \
     CONFIG.Port_B_Enable_Rate {100}] [get_bd_cells blk_bram_0]
 connect_bd_intf_net [get_bd_intf_pins NN_0/out_r_PORTA] [get_bd_intf_pins blk_bram_0/BRAM_PORTB]
 
+# Add larger buffer
+#set_property offset 0x00A0300000 [get_bd_addr_segs {zynq_ultra_ps_e_0/Data/SEG_axi_blk_bram_ctrl_0_Mem0}]
+#set_property range 32K [get_bd_addr_segs {zynq_ultra_ps_e_0/Data/SEG_axi_blk_bram_ctrl_0_Mem0}]
+
 # Add AXI-lite for debugging (NN0)
 create_bd_cell -type ip -vlnv xilinx.com:ip:axi_bram_ctrl:4.1 axi_blk_bram_ctrl_0
 set_property -dict [list CONFIG.SINGLE_PORT_BRAM {1}] [get_bd_cells axi_blk_bram_ctrl_0]
@@ -106,33 +93,37 @@ apply_bd_automation -rule xilinx.com:bd_rule:axi4 -config { \
     intc_ip {/ps8_0_axi_periph} \
     master_apm {0}} [get_bd_intf_pins axi_blk_bram_ctrl_0/S_AXI]
 
+set_property offset 0x00A0300000 [get_bd_addr_segs {zynq_ultra_ps_e_0/Data/SEG_axi_blk_bram_ctrl_0_Mem0}]
+set_property range 128K [get_bd_addr_segs {zynq_ultra_ps_e_0/Data/SEG_axi_blk_bram_ctrl_0_Mem0}]
+
 # Set locations
 set_property location {7 2954 1995} [get_bd_cells NN_0]
 set_property location {8 3442 1984} [get_bd_cells blk_bram_0]
 set_property location {7 2977 1770} [get_bd_cells axi_blk_bram_ctrl_0]
 set_property location {8 3467 2232} [get_bd_cells always_ready0]
-# === END: NN =================================================================
 
-## === BEGIN: ILAs =============================================================
-#
-## Debug readout0
-##set_property HDL_ATTRIBUTE.DEBUG true [get_bd_intf_nets {axis_readout_v2_0_m1_axis}]
-## Debug broadcaster0 to avg-buffer0
-##set_property HDL_ATTRIBUTE.DEBUG true [get_bd_intf_nets {axis_broadcaster_0_M00_AXIS}]
-## Debug broadcaster0 to NN0
-#set_property HDL_ATTRIBUTE.DEBUG true [get_bd_intf_nets {axis_broadcaster_0_M01_AXIS}]
-## Debug brams0
-#set_property HDL_ATTRIBUTE.DEBUG true [get_bd_intf_nets {NN_0_out_r_PORTA}]
-## Debug trigger
-#set_property HDL_ATTRIBUTE.DEBUG true [get_bd_nets {vect2bits_16_0_dout8 }]
-#
-## Autoconnect ILAs
-##apply_bd_automation -rule xilinx.com:bd_rule:debug -dict [list \
-##    [get_bd_intf_nets axis_readout_v2_0_m1_axis] {AXIS_SIGNALS "Data and Trigger" CLK_SRC "/usp_rf_data_converter_0/clk_adc2" SYSTEM_ILA "Auto" APC_EN "0" } \
-##    [get_bd_intf_nets axis_broadcaster_0_M00_AXIS] {AXIS_SIGNALS "Data and Trigger" CLK_SRC "/usp_rf_data_converter_0/clk_adc2" SYSTEM_ILA "Auto" APC_EN "0" } \
-##    [get_bd_intf_nets axis_broadcaster_0_M01_AXIS] {AXIS_SIGNALS "Data and Trigger" CLK_SRC "/usp_rf_data_converter_0/clk_adc2" SYSTEM_ILA "Auto" APC_EN "0" } \
-##    [get_bd_intf_nets NN_0_out_r_PORTA] {NON_AXI_SIGNALS "Data and Trigger" CLK_SRC "/usp_rf_data_converter_0/clk_adc2" SYSTEM_ILA "Auto" } \
-##]
+# === 1. END: NN ===============================================================
+
+# === 2. BEGIN: ILAs ===========================================================
+
+# Debug readout0
+#set_property HDL_ATTRIBUTE.DEBUG true [get_bd_intf_nets {axis_readout_v2_0_m1_axis}]
+# Debug broadcaster0 to avg-buffer0
+#set_property HDL_ATTRIBUTE.DEBUG true [get_bd_intf_nets {axis_broadcaster_0_M00_AXIS}]
+# Debug broadcaster0 to NN0
+set_property HDL_ATTRIBUTE.DEBUG true [get_bd_intf_nets {axis_broadcaster_0_M01_AXIS}]
+# Debug brams0
+set_property HDL_ATTRIBUTE.DEBUG true [get_bd_intf_nets {NN_0_out_r_PORTA}]
+# Debug trigger
+set_property HDL_ATTRIBUTE.DEBUG true [get_bd_nets {vect2bits_16_0_dout8 }]
+
+# Autoconnect ILAs
+#apply_bd_automation -rule xilinx.com:bd_rule:debug -dict [list \
+#    [get_bd_intf_nets axis_readout_v2_0_m1_axis] {AXIS_SIGNALS "Data and Trigger" CLK_SRC "/usp_rf_data_converter_0/clk_adc2" SYSTEM_ILA "Auto" APC_EN "0" } \
+#    [get_bd_intf_nets axis_broadcaster_0_M00_AXIS] {AXIS_SIGNALS "Data and Trigger" CLK_SRC "/usp_rf_data_converter_0/clk_adc2" SYSTEM_ILA "Auto" APC_EN "0" } \
+#    [get_bd_intf_nets axis_broadcaster_0_M01_AXIS] {AXIS_SIGNALS "Data and Trigger" CLK_SRC "/usp_rf_data_converter_0/clk_adc2" SYSTEM_ILA "Auto" APC_EN "0" } \
+#    [get_bd_intf_nets NN_0_out_r_PORTA] {NON_AXI_SIGNALS "Data and Trigger" CLK_SRC "/usp_rf_data_converter_0/clk_adc2" SYSTEM_ILA "Auto" } \
+#]
 #apply_bd_automation -rule xilinx.com:bd_rule:debug -dict [list \
 #    [get_bd_intf_nets axis_broadcaster_0_M01_AXIS] {AXIS_SIGNALS "Data and Trigger" CLK_SRC "/usp_rf_data_converter_0/clk_adc2" SYSTEM_ILA "Auto" APC_EN "0" } \
 #    [get_bd_intf_nets NN_0_out_r_PORTA] {NON_AXI_SIGNALS "Data and Trigger" CLK_SRC "/usp_rf_data_converter_0/clk_adc2" SYSTEM_ILA "Auto" } \
@@ -148,13 +139,19 @@ set_property location {8 3467 2232} [get_bd_cells always_ready0]
 #
 ## Set locations
 #set_property location {8 3492 1813} [get_bd_cells system_ila_0]
-## === END: ILAs ===============================================================
+#
+# === 2. END: ILAs =============================================================
+
+# === 3. BEGIN: RUN LOGIC SYNTHESIS ============================================
 
 #update_compile_order -fileset sources_1
 #launch_runs synth_1 -jobs 20
 #wait_on_run -timeout 360 synth_1
-#
-## === BEGIN: RTL ILAs =========================================================
+
+# === 3. END: RUN LOGIC SYNTHESIS ==============================================
+
+# === 4. BEGIN: SYN ILAs =======================================================
+
 #set BIT_PER_SAMPLE 14
 #set SAMPLE_COUNT 6
 #set TOTAL_BITS [expr $SAMPLE_COUNT * $BIT_PER_SAMPLE]
@@ -218,7 +215,10 @@ set_property location {8 3467 2232} [get_bd_cells always_ready0]
 #save_constraints -force
 #
 #reset_run synth_1
-## === END: RTL ILAs ===========================================================
+
+# === 4. END: SYN ILAs =========================================================
+
+# === 5. BEGIN: BITSTREAM ======================================================
 
 reset_run impl_1
 launch_runs impl_1 -to_step write_bitstream -jobs 16
@@ -227,3 +227,4 @@ wait_on_run -timeout 360 impl_1
 open_run impl_1
 report_utilization -file util_216.rpt -hierarchical -hierarchical_percentages
 
+## === 5. END: BITSTREAM ========================================================
