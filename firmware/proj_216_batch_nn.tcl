@@ -16,8 +16,9 @@ set_property ip_repo_paths "${QICK_IPS_PATH} ${LOCAL_IPS_PATH}" [current_project
 update_ip_catalog
 
 # Choose one of the NN IPs
-set WINDOW_SIZE 770
-set DATASET_DATE "00000000"
+set WINDOW_SIZE 400
+#set DATASET_DATE "00000000"
+set DATASET_DATE "20240528"
 
 set NN_IP_ZIP "xilinx_com_hls_NN_axi_1_0_nonregistered_w${WINDOW_SIZE}.zip"
 
