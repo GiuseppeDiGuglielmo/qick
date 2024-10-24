@@ -16,11 +16,15 @@ set_property ip_repo_paths "${QICK_IPS_PATH} ${LOCAL_IPS_PATH}" [current_project
 update_ip_catalog
 
 # Choose one of the NN IPs
+#set MODEL_NAME "_streaming_l2"
+set MODEL_NAME "_l2"
 set WINDOW_SIZE 400
-#set DATASET_DATE "00000000"
+set WINDOW_START 100
+#set DATASET_DATE "20230529"
 set DATASET_DATE "20240528"
 
-set NN_IP_ZIP "xilinx_com_hls_NN_axi_1_0_nonregistered_w${WINDOW_SIZE}.zip"
+#set NN_IP_ZIP "xilinx_com_hls_NN_axi_1_0_nonregistered_w${WINDOW_SIZE}.zip"
+set NN_IP_ZIP "xilinx_com_hls_NN_axi_1_0_nonregistered${MODEL_NAME}_w${WINDOW_SIZE}_ternary_h4_s${WINDOW_START}.zip"
 
 update_ip_catalog -add_ip "[file normalize ${orig_proj_dir}/../qick_ml/ip/${DATASET_DATE}/${NN_IP_ZIP}]" -repo_path ${LOCAL_IPS_PATH}
 #update_ip_catalog -add_ip "[file normalize ${orig_proj_dir}/../qick_ml/ip/20240501/${NN_IP_ZIP}]" -repo_path ${LOCAL_IPS_PATH}
@@ -112,27 +116,27 @@ set_property location {8 3467 2232} [get_bd_cells always_ready0]
 # Debug broadcaster0 to avg-buffer0
 #set_property HDL_ATTRIBUTE.DEBUG true [get_bd_intf_nets {axis_broadcaster_0_M00_AXIS}]
 # Debug broadcaster0 to NN0
-set_property HDL_ATTRIBUTE.DEBUG true [get_bd_intf_nets {axis_broadcaster_0_M01_AXIS}]
+#set_property HDL_ATTRIBUTE.DEBUG true [get_bd_intf_nets {axis_broadcaster_0_M01_AXIS}]
 # Debug brams0
-set_property HDL_ATTRIBUTE.DEBUG true [get_bd_intf_nets {NN_0_out_r_PORTA}]
+#set_property HDL_ATTRIBUTE.DEBUG true [get_bd_intf_nets {NN_0_out_r_PORTA}]
 # Debug trigger
-set_property HDL_ATTRIBUTE.DEBUG true [get_bd_nets {vect2bits_16_0_dout8 }]
+#set_property HDL_ATTRIBUTE.DEBUG true [get_bd_nets {vect2bits_16_0_dout8 }]
 
 # Autoconnect ILAs
 #apply_bd_automation -rule xilinx.com:bd_rule:debug -dict [list \
 #    [get_bd_intf_nets axis_readout_v2_0_m1_axis] {AXIS_SIGNALS "Data and Trigger" CLK_SRC "/usp_rf_data_converter_0/clk_adc2" SYSTEM_ILA "Auto" APC_EN "0" } \
-#    [get_bd_intf_nets axis_broadcaster_0_M00_AXIS] {AXIS_SIGNALS "Data and Trigger" CLK_SRC "/usp_rf_data_converter_0/clk_adc2" SYSTEM_ILA "Auto" APC_EN "0" } \
 #    [get_bd_intf_nets axis_broadcaster_0_M01_AXIS] {AXIS_SIGNALS "Data and Trigger" CLK_SRC "/usp_rf_data_converter_0/clk_adc2" SYSTEM_ILA "Auto" APC_EN "0" } \
 #    [get_bd_intf_nets NN_0_out_r_PORTA] {NON_AXI_SIGNALS "Data and Trigger" CLK_SRC "/usp_rf_data_converter_0/clk_adc2" SYSTEM_ILA "Auto" } \
 #]
+#    [get_bd_intf_nets axis_broadcaster_0_M00_AXIS] {AXIS_SIGNALS "Data and Trigger" CLK_SRC "/usp_rf_data_converter_0/clk_adc2" SYSTEM_ILA "Auto" APC_EN "0" } \
+
 #apply_bd_automation -rule xilinx.com:bd_rule:debug -dict [list \
 #    [get_bd_intf_nets axis_broadcaster_0_M01_AXIS] {AXIS_SIGNALS "Data and Trigger" CLK_SRC "/usp_rf_data_converter_0/clk_adc2" SYSTEM_ILA "Auto" APC_EN "0" } \
 #    [get_bd_intf_nets NN_0_out_r_PORTA] {NON_AXI_SIGNALS "Data and Trigger" CLK_SRC "/usp_rf_data_converter_0/clk_adc2" SYSTEM_ILA "Auto" } \
 #]
-#
+
 #set_property -dict [list CONFIG.C_MON_TYPE {MIX}] [get_bd_cells system_ila_0]
 #connect_bd_net [get_bd_pins system_ila_0/probe0] [get_bd_pins vect2bits_16_0/dout8]
-#
 #
 #set_property -dict [list CONFIG.C_NUM_OF_PROBES {2}] [get_bd_cells system_ila_0]
 #connect_bd_net [get_bd_pins NN_0/in_V_V_TREADY] [get_bd_pins system_ila_0/probe1]
@@ -140,7 +144,7 @@ set_property HDL_ATTRIBUTE.DEBUG true [get_bd_nets {vect2bits_16_0_dout8 }]
 #
 ## Set locations
 #set_property location {8 3492 1813} [get_bd_cells system_ila_0]
-#
+
 # === 2. END: ILAs =============================================================
 
 # === 3. BEGIN: RUN LOGIC SYNTHESIS ============================================
