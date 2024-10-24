@@ -24,8 +24,8 @@ set WINDOW_START 100
 set DATASET_DATE "20240528"
 
 #set NN_IP_ZIP "xilinx_com_hls_NN_axi_1_0_nonregistered_w${WINDOW_SIZE}.zip"
-set NN_IP_ZIP "xilinx_com_hls_NN_axi_1_0_nonregistered${MODEL_NAME}_w${WINDOW_SIZE}_ternary_h4_s${WINDOW_START}.zip"
-
+#set NN_IP_ZIP "xilinx_com_hls_NN_axi_1_0_nonregistered${MODEL_NAME}_w${WINDOW_SIZE}_ternary_h4_s${WINDOW_START}.zip"
+set NN_IP_ZIP "xilinx_com_hls_NN_axi_1_0_nonregistered${MODEL_NAME}_w${WINDOW_SIZE}_b3_h4_s${WINDOW_START}.zip"
 update_ip_catalog -add_ip "[file normalize ${orig_proj_dir}/../qick_ml/ip/${DATASET_DATE}/${NN_IP_ZIP}]" -repo_path ${LOCAL_IPS_PATH}
 #update_ip_catalog -add_ip "[file normalize ${orig_proj_dir}/../qick_ml/ip/20240501/${NN_IP_ZIP}]" -repo_path ${LOCAL_IPS_PATH}
 
