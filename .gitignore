@@ -19,6 +19,7 @@ ipython_config.py
 .Xil/
 *.log
 *.jou
+*.rpt
 vivado_pid*.str
 
 ### Python template
