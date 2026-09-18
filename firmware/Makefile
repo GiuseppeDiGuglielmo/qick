@@ -22,14 +22,14 @@ GUI ?= 0
 HW_SERVER ?= localhost:3121
 
 # Open the Hardware Manager and connect to hw_server (GUI)
-hw-server:
+hw:
 	vivado -source open_hw.tcl -tclargs $(HW_SERVER)
-.PHONY: hw-server
+.PHONY: hw
 
 # Same as hw, in the Vivado Tcl shell (no GUI)
-hw-server-tcl:
+hw-tcl:
 	vivado -mode tcl -source open_hw.tcl -tclargs $(HW_SERVER)
-.PHONY: hw-server-tcl
+.PHONY: hw-tcl
 
 # Fail if XILINXD_LICENSE_FILE is not set (needed by targets that run synthesis)
 check_license:
