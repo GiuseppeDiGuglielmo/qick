@@ -9,11 +9,16 @@ if { [info exists ::origin_dir_loc] } {
 # Set the project name
 set _xil_proj_name_ "top_216"
 
+# Use project name suffix variable, if specified in the tcl shell
+if { ![info exists _xil_proj_name_suffix_] } {
+  set _xil_proj_name_suffix_ ""
+}
+
 # Set the directory path for the original project from where this script was exported
 set orig_proj_dir "[file normalize "$origin_dir/"]"
 
 # Create project
-create_project ${_xil_proj_name_} ./${_xil_proj_name_} -part xczu49dr-ffvf1760-2-e
+create_project ${_xil_proj_name_} ./${_xil_proj_name_}${_xil_proj_name_suffix_} -part xczu49dr-ffvf1760-2-e
 
 # Set the directory path for the new project
 set proj_dir [get_property directory [current_project]]
@@ -70,7 +75,7 @@ make_wrapper -files [get_files d_1.bd] -top
 
 # Add files to sources_1 fileset
 set files [list \
-  [file normalize "${origin_dir}/top_216/top_216.srcs/sources_1/bd/d_1/hdl/d_1_wrapper.v" ]\
+  [file normalize "${origin_dir}/${_xil_proj_name_}${_xil_proj_name_suffix_}/top_216.srcs/sources_1/bd/d_1/hdl/d_1_wrapper.v" ]\
 ]
 add_files -fileset $obj $files
 
