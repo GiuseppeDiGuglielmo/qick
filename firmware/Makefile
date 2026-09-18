@@ -3,6 +3,8 @@ help:
 	@echo "syn-zcu216-orig  build top_216_orig (GUI=1 for gui mode)"
 	@echo "gui-zcu216       open top_216 project"
 	@echo "gui-zcu216-orig  open top_216_orig project"
+	@echo "hw               open Hardware Manager and connect to hw_server (GUI)"
+	@echo "hw-tcl           same, in the Vivado Tcl shell (no GUI)"
 	@echo "clean            remove Vivado logs/journals/reports and .Xil scratch"
 	@echo "distclean        clean + remove all top_216* project dirs and packages"
 .PHONY: help
@@ -15,6 +17,19 @@ GUI ?= 0
 #check_ip:
 #	@ls ip_local
 #.PHONY: check_ip
+
+# hw_server to connect to (host:port); Vivado starts a local one if none is running
+HW_SERVER ?= localhost:3121
+
+# Open the Hardware Manager and connect to hw_server (GUI)
+hw-server:
+	vivado -source open_hw.tcl -tclargs $(HW_SERVER)
+.PHONY: hw-server
+
+# Same as hw, in the Vivado Tcl shell (no GUI)
+hw-server-tcl:
+	vivado -mode tcl -source open_hw.tcl -tclargs $(HW_SERVER)
+.PHONY: hw-server-tcl
 
 # Fail if XILINXD_LICENSE_FILE is not set (needed by targets that run synthesis)
 check_license:
