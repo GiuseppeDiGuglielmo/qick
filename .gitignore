@@ -22,6 +22,11 @@ ipython_config.py
 *.rpt
 vivado_pid*.str
 
+# Firmware packages (firmware/package.sh)
+firmware/package/
+firmware/package.tar.gz
+firmware/package.zip
+
 ### Python template
 # Byte-compiled / optimized / DLL files
 __pycache__/
