@@ -85,7 +85,7 @@ package-zcu216-orig-ila:
 BRANCH ?= $(shell git rev-parse --abbrev-ref HEAD | tr / -)
 
 # scp destination of copy-zcu216 (override with REMOTE=user@host:path)
-REMOTE ?= xilinx@rfsoc216-ml01.dhcp.fnal.gov:~/jupyter_notebooks/qick-$(BRANCH)/qick_ml/216
+REMOTE ?= xilinx@rfsoc216-ml01.dhcp.fnal.gov:~/jupyter_notebooks/qick-$(BRANCH)/qick_ml/216/$(BRANCH)
 
 # Copy the files in package/ (created by package-zcu216-*) to REMOTE
 # Authenticates with an SSH key/agent, or export SSHPASS to use a password instead
