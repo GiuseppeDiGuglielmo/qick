@@ -1,12 +1,17 @@
 help:
-	@echo "syn-zcu216       create top_216 project (GUI, no build)"
-	@echo "syn-zcu216-orig  build top_216_orig (GUI=1 for gui mode)"
-	@echo "gui-zcu216       open top_216 project"
-	@echo "gui-zcu216-orig  open top_216_orig project"
-	@echo "hw-server        open Hardware Manager and connect to hw_server (GUI)"
-	@echo "hw-server-tcl    same, in the Vivado Tcl shell (no GUI)"
-	@echo "clean            remove Vivado logs/journals/reports and .Xil scratch"
-	@echo "distclean        clean + remove all top_216* project dirs and packages"
+	@echo "syn-zcu216                  create top_216 project (GUI, no build)"
+	@echo "syn-zcu216-orig             build top_216_orig (GUI=1 for gui mode)"
+	@echo "syn-zcu216-orig-ila         build top_216_orig_ila with ILAs (GUI=1 for gui mode)"
+	@echo "gui-zcu216                  open top_216 project"
+	@echo "gui-zcu216-orig             open top_216_orig project"
+	@echo "gui-zcu216-orig-ila         open top_216_orig_ila project"
+	@echo "hw-server                   open Hardware Manager and connect to hw_server (GUI)"
+	@echo "hw-server-tcl               same, in the Vivado Tcl shell (no GUI)"
+	@echo "clean                       remove Vivado logs/journals/reports and .Xil scratch"
+	@echo "distclean-zcu216            remove the top_216 project dir"
+	@echo "distclean-zcu216-orig       remove the top_216_orig project dir"
+	@echo "distclean-zcu216-orig-ila   remove the top_216_orig_ila project dir"
+	@echo "distclean                   clean + remove all top_216* project dirs and packages"
 .PHONY: help
 
 GUI ?= 0
@@ -37,7 +42,7 @@ check_license:
 .PHONY: check_license
 
 # Generated Vivado project directories: top_216 plus any top_216_<suffix>
-# (orig, and ila/nn once enabled). Globbed so distclean needs no per-project
+# (orig, orig_ila, and nn once enabled). Globbed so distclean needs no per-project
 # target and works even if proj_216.mk is missing.
 PROJ_DIRS = $(wildcard top_216 top_216_*)
 

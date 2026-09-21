@@ -12,15 +12,14 @@ else
 endif
 .PHONY: syn-zcu216-orig
 
-# Disabled: proj_216_ila.tcl does not exist in this repo yet
-## Batch/GUI mode: create Vivado project with ILAs and run implementation
-#syn-zcu216-ila: check_license
-#ifeq ($(GUI),1)
-#	vivado -mode gui -source proj_216_ila.tcl
-#else
-#	bash -c 'TIMEFORMAT="Elapsed time: %0lR"; time vivado -mode batch -source proj_216_ila.tcl'
-#endif
-#.PHONY: syn-zcu216-ila
+# Batch/GUI mode: create Vivado project with ILAs and run implementation
+syn-zcu216-orig-ila: check_license
+ifeq ($(GUI),1)
+	vivado -mode gui -source proj_216_orig_ila.tcl
+else
+	bash -c 'TIMEFORMAT="Elapsed time: %0lR"; time vivado -mode batch -source proj_216_orig_ila.tcl'
+endif
+.PHONY: syn-zcu216-orig-ila
 
 # Disabled: proj_216_nn.tcl does not exist in this repo yet
 ## Batch/GUI mode: create Vivado project with NN (BRAMs + AXI-lite), ILAs, and run implementation
@@ -43,11 +42,10 @@ gui-zcu216-orig:
 	vivado top_216_orig/top_216.xpr
 .PHONY: gui-zcu216-orig
 
-# Disabled: top_216_ila/ is only created by syn-zcu216-ila, which is disabled above
-## Open GUI of the latest Vivado project
-#gui-zcu216-ila:
-#	vivado top_216_ila/top_216.xpr
-#.PHONY: gui-zcu216-ila
+# Open GUI of the top_216_orig_ila Vivado project created by syn-zcu216-orig-ila
+gui-zcu216-orig-ila:
+	vivado top_216_orig_ila/top_216.xpr
+.PHONY: gui-zcu216-orig-ila
 
 # Disabled: top_216_nn/ is only created by syn-zcu216-nn, which is disabled above
 ## Open GUI of the latest Vivado project
@@ -66,13 +64,13 @@ gui-zcu216-orig:
 #.PHONY: package-zcu216-orig
 #
 ## Package BIT, HWH, and LTX files
-#package-zcu216-ila:
+#package-zcu216-orig-ila:
 #	@./package.sh \
 #		top_216 \
 #		d_1 \
-#		top_216_ila \
-#		qick_216_ila
-#.PHONY: package-zcu216-ila
+#		top_216_orig_ila \
+#		qick_216_orig_ila
+#.PHONY: package-zcu216-orig-ila
 #
 ## Package BIT, HWH, and LTX files
 #package-zcu216-nn:
@@ -102,11 +100,10 @@ distclean-zcu216-orig:
 	@rm -rf top_216_orig
 .PHONY: distclean-zcu216-orig
 
-# Disabled: top_216_ila/ is only created by syn-zcu216-ila, which is disabled above
-## Remove top_216_ila project directory
-#distclean-zcu216-ila:
-#	@rm -rf top_216_ila
-#.PHONY: distclean-zcu216-ila
+# Remove top_216_orig_ila project directory created by syn-zcu216-orig-ila
+distclean-zcu216-orig-ila:
+	@rm -rf top_216_orig_ila
+.PHONY: distclean-zcu216-orig-ila
 
 # Disabled: top_216_nn/ is only created by syn-zcu216-nn, which is disabled above
 ## Remove top_216_nn project directory
