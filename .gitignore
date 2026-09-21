@@ -3,19 +3,19 @@
 # gitignore template for Jupyter Notebooks
 # website: http://jupyter.org/
 
-.ipynb_checkpoints
-*/.ipynb_checkpoints/*
+.ipynb_checkpoints/
 
 # IPython
 profile_default/
 ipython_config.py
 
-.idea/*
+# IDEs
+.idea/
 
 # Remove previous ipynb_checkpoints
 #   git rm -r .ipynb_checkpoints/
 
-# Vivado
+# Vivado (logs, journals, reports, and pid files; see "make clean")
 .Xil/
 *.log
 *.jou
@@ -26,6 +26,9 @@ vivado_pid*.str
 firmware/package/
 firmware/package.tar.gz
 firmware/package.zip
+
+# Bitstreams deployed by "make copy-zcu216" (qick_ml/216/<branch>/)
+qick_ml/216/
 
 ### Python template
 # Byte-compiled / optimized / DLL files
@@ -74,6 +77,3 @@ Temporary Items
 ### Linux template
 *~
 .*.swp
-
-!/.gitignore
-!/README.md
