@@ -7,6 +7,8 @@ help:
 	@echo "gui-zcu216-orig-ila         open top_216_orig_ila project"
 	@echo "package-zcu216-orig         collect top_216_orig .bit/.hwh/.ltx into package/"
 	@echo "package-zcu216-orig-ila     collect top_216_orig_ila .bit/.hwh/.ltx into package/"
+	@echo "copy-zcu216                 copy package/ to the board (REMOTE=user@host:path to override)"
+	@echo "                            uses SSH key/agent; export SSHPASS to use a password"
 	@echo "hw-server                   open Hardware Manager and connect to hw_server (GUI)"
 	@echo "hw-server-tcl               same, in the Vivado Tcl shell (no GUI)"
 	@echo "clean                       remove Vivado logs/journals/reports and .Xil scratch"
