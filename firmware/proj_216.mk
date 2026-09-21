@@ -81,14 +81,17 @@ package-zcu216-orig-ila:
 #		qick_216_nn
 #.PHONY: package-zcu216-nn
 
-# Disabled: copy.sh does not exist in this repo yet
-## Copy package remotely
-#copy-zcu216:
-#	@./copy.sh \
-#		xilinx@rfsoc216-ml01.dhcp.fnal.gov:~/jupyter_notebooks/qick_dev/qick_ml/216/ml-dev \
-#		qick_216 \
-#		quantum2023.
-#.PHONY: copy-zcu216
+# Git branch this checkout is on, with / replaced by - (used in REMOTE)
+BRANCH ?= $(shell git rev-parse --abbrev-ref HEAD | tr / -)
+
+# scp destination of copy-zcu216 (override with REMOTE=user@host:path)
+REMOTE ?= xilinx@rfsoc216-ml01.dhcp.fnal.gov:~/jupyter_notebooks/qick-$(BRANCH)/qick_ml/216
+
+# Copy the files in package/ (created by package-zcu216-*) to REMOTE
+# Authenticates with an SSH key/agent, or export SSHPASS to use a password instead
+copy-zcu216:
+	@./copy.sh "$(REMOTE)"
+.PHONY: copy-zcu216
 
 # Remove top_216 project directory created by syn-zcu216
 distclean-zcu216:
