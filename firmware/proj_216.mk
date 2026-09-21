@@ -53,25 +53,25 @@ gui-zcu216-orig-ila:
 #	vivado top_216_nn/top_216.xpr
 #.PHONY: gui-zcu216-nn
 
-# Disabled: package.sh does not exist in this repo yet
-## Package BIT, HWH, and LTX files
-#package-zcu216-orig:
-#	@./package.sh \
-#		top_216 \
-#		d_1 \
-#		top_216_orig \
-#		qick_216_orig
-#.PHONY: package-zcu216-orig
-#
-## Package BIT, HWH, and LTX files
-#package-zcu216-orig-ila:
-#	@./package.sh \
-#		top_216 \
-#		d_1 \
-#		top_216_orig_ila \
-#		qick_216_orig_ila
-#.PHONY: package-zcu216-orig-ila
-#
+# Package BIT, HWH, and LTX files of top_216_orig into package/ (recreated on every run)
+package-zcu216-orig:
+	@./package.sh \
+		top_216 \
+		d_1 \
+		top_216_orig \
+		qick_216_orig
+.PHONY: package-zcu216-orig
+
+# Package BIT, HWH, and LTX files of top_216_orig_ila into package/ (recreated on every run)
+package-zcu216-orig-ila:
+	@./package.sh \
+		top_216 \
+		d_1 \
+		top_216_orig_ila \
+		qick_216_orig_ila
+.PHONY: package-zcu216-orig-ila
+
+# Disabled: top_216_nn/ is only created by syn-zcu216-nn, which is disabled above
 ## Package BIT, HWH, and LTX files
 #package-zcu216-nn:
 #	@./package.sh \
