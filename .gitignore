@@ -15,11 +15,15 @@ ipython_config.py
 # Remove previous ipynb_checkpoints
 #   git rm -r .ipynb_checkpoints/
 
-# Vivado
+# Vivado (logs, journals, reports, and pid files; see "make clean")
 .Xil/
 *.log
 *.jou
+*.rpt
 vivado_pid*.str
+
+# Bitstreams deployed by "make copy" (qick_ml/216/<branch>/)
+qick_ml/216/
 
 ### Python template
 # Byte-compiled / optimized / DLL files
