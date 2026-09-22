@@ -64,6 +64,9 @@ puts "INFO: readout ILA is $ila"
 set_property -dict [list CONFIG.C_MON_TYPE {MIX}] [get_bd_cells $ila]
 connect_bd_net [get_bd_pins $ila/probe0] $trig_pin
 
+# Place the new ILA on the block design canvas
+set_property location {7 5237 2098} $ila
+
 validate_bd_design
 save_bd_design
 
