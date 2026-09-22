@@ -16,6 +16,17 @@ GUI ?= 0
 # so lower this on a machine that cannot hold 20 of them.
 JOBS ?= 20
 
+# ILA=1 builds the design's proj_ila.tcl variant, which adds ILAs on the
+# readout path, into top_ila/ instead of top/
+ILA ?= 0
+ifeq ($(ILA),1)
+PROJ_TCL    := proj_ila.tcl
+PROJ_SUFFIX := _ila
+else
+PROJ_TCL    := proj.tcl
+PROJ_SUFFIX :=
+endif
+
 # hw_server to connect to (host:port); Vivado starts a local one if none is running
 HW_SERVER ?= localhost:3121
 
@@ -40,6 +51,7 @@ help:
 	@echo "  DESIGN=<dir>      design under ../projects (default: $(DESIGN))"
 	@echo "  GUI=1             run bitstream in GUI mode instead of batch"
 	@echo "  JOBS=<n>          parallel synthesis jobs (default: $(JOBS))"
+	@echo "  ILA=1             build the readout-ILA variant into top_ila/"
 	@echo "  REMOTE=<target>   scp destination for copy"
 	@echo "  HW_SERVER=<url>   hw_server to connect to (default: $(HW_SERVER))"
 	@echo ""
@@ -48,7 +60,7 @@ help:
 
 # Fail early if the design does not exist, so targets do not fail inside Vivado
 check_design:
-	@test -f "$(DESIGN_DIR)/proj.tcl" || { echo "ERROR: no design '$(DESIGN)' in ../projects (expected $(DESIGN_DIR)/proj.tcl)" >&2; exit 1; }
+	@test -f "$(DESIGN_DIR)/$(PROJ_TCL)" || { echo "ERROR: design '$(DESIGN)' has no $(PROJ_TCL)" >&2; exit 1; }
 .PHONY: check_design
 
 # Fail if XILINXD_LICENSE_FILE is not set (needed by targets that run synthesis)
@@ -59,21 +71,21 @@ check_license:
 # Create the Vivado project without building it. proj.tcl is run from the design
 # directory, which is what its relative paths assume, so it needs no wrapper.
 project: check_design
-	cd $(DESIGN_DIR) && vivado -source proj.tcl
+	cd $(DESIGN_DIR) && vivado -source $(PROJ_TCL)
 .PHONY: project
 
 # Create the project and run implementation through bitstream generation
 bitstream: check_design check_license
 ifeq ($(GUI),1)
-	cd $(DESIGN_DIR) && JOBS=$(JOBS) vivado -mode gui -source $(TOOLS)/bitstream.tcl
+	cd $(DESIGN_DIR) && JOBS=$(JOBS) ILA=$(ILA) vivado -mode gui -source $(TOOLS)/bitstream.tcl
 else
-	cd $(DESIGN_DIR) && JOBS=$(JOBS) bash -c 'TIMEFORMAT="Elapsed time: %0lR"; time vivado -mode batch -source $(TOOLS)/bitstream.tcl'
+	cd $(DESIGN_DIR) && JOBS=$(JOBS) ILA=$(ILA) bash -c 'TIMEFORMAT="Elapsed time: %0lR"; time vivado -mode batch -source $(TOOLS)/bitstream.tcl'
 endif
 .PHONY: bitstream
 
 # Open the GUI of an already created project
 gui: check_design
-	vivado $(DESIGN_DIR)/top/top.xpr
+	vivado $(DESIGN_DIR)/top$(PROJ_SUFFIX)/top.xpr
 .PHONY: gui
 
 # Copy the design's out/ files to REMOTE

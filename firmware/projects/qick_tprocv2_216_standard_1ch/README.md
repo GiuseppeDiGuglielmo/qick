@@ -19,6 +19,40 @@ Build it with **Vivado 2023.1** — the version is fixed by the block design fil
   `qick_processor_0` core, port, time and fifo debug buses. Every build therefore emits an
   LTX file alongside the bitstream.
 
+## Two build variants
+
+`proj.tcl` builds the design as delivered. `proj_ila.tcl` builds the same design with two
+extra probes added on the signal path, into `top_ila/` instead of `top/`, so both can exist
+side by side:
+
+| | `proj.tcl` -> `top/` | `proj_ila.tcl` -> `top_ila/` |
+| --- | --- | --- |
+| `system_ila_1/2/3` on the tProc debug buses | yes | yes |
+| `system_ila_0` on the readout stream and trigger | no | yes |
+| `out/` name | `qick_216_tprocv2.*` | `qick_216_tprocv2_ila.*` |
+
+```sh
+cd ../../tools
+make bitstream              # plain
+make bitstream ILA=1        # with the readout ILA
+```
+
+`proj_ila.tcl` changes nothing on disk: it sources `proj.tcl` and then applies the probes to
+the in-memory block design, so `bd_2023-1.tcl` stays exactly as delivered. It adds
+
+* an AXI-Stream monitor, in "Data and Trigger" mode, on
+  `readout_wrapper/axis_dyn_readout_v1_0_m1_axis` — the readout output feeding the averager
+  buffer — clocked by `usp_rf_data_converter_0/clk_adc2`;
+* a native probe on `qick_processor_0_trig_10_o`, the readout trigger on tProc port 10.
+
+Vivado taps the stream through a new `Monitor`-mode port on `readout_wrapper`, so nothing in
+the data path is altered. The block design already contains ILAs, so the script identifies
+the one the debug automation adds rather than assuming a name, and fails loudly if the nets
+it expects are not there.
+
+These are the tProc v2 equivalents of what `ml-integration-tproc-v1-2026` probed
+(`axis_readout_v2_0_m1_axis` and `vect2bits_16_0_dout8`).
+
 `proj.tcl` and `timing.xdc` are unchanged from `qick_tprocv2_216_standard`.
 
 ### Debug access
