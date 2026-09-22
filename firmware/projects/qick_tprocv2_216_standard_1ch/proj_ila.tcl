@@ -67,4 +67,11 @@ connect_bd_net [get_bd_pins $ila/probe0] $trig_pin
 validate_bd_design
 save_bd_design
 
+# proj.tcl generated the block design's synthesis products before these ILAs
+# existed, and Vivado does not mark them stale afterwards, so synthesis would
+# read a netlist without the ILA in it. Regenerate them explicitly.
+set bd_file [get_files d_1.bd]
+reset_target all $bd_file
+generate_target all $bd_file
+
 # === END: ILAs ===============================================================
