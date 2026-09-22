@@ -53,6 +53,7 @@ help:
 	@echo "  JOBS=<n>          parallel synthesis jobs (default: $(JOBS))"
 	@echo "  ILA=1             build the readout-ILA variant into top_ila/"
 	@echo "  REMOTE=<target>   scp destination for copy"
+	@echo "  DRYRUN=1          copy: print what would be copied without copying"
 	@echo "  HW_SERVER=<url>   hw_server to connect to (default: $(HW_SERVER))"
 	@echo ""
 	@echo "Run 'source envsetup.sh' first to select Vivado and the license server."
@@ -90,8 +91,9 @@ gui: check_design
 
 # Copy the design's out/ files to REMOTE
 # Authenticates with an SSH key/agent, or export SSHPASS to use a password instead
+# DRYRUN=1 prints what would be copied without copying anything
 copy: check_design
-	@$(TOOLS)/copy.sh "$(REMOTE)" "$(DESIGN_DIR)/out"
+	@DRYRUN=$(DRYRUN) $(TOOLS)/copy.sh "$(REMOTE)" "$(DESIGN_DIR)/out"
 .PHONY: copy
 
 # Open the Hardware Manager and connect to hw_server (GUI)

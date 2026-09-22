@@ -11,6 +11,9 @@
 # Authentication is by SSH key/agent. If SSHPASS is set in the environment,
 # the password is used instead, via sshpass -e (it never appears on the command
 # line).
+#
+# If DRYRUN is set in the environment, no ssh/scp commands are run; the
+# commands that would have run are printed instead.
 
 TARGET=$1 #xilinx@192.168.1.59:~/jupyter_notebooks/qick_fermilab/fermilab
 SOURCE_DIR=$2 #../projects/qick_tprocv2_216_standard_1ch/out
@@ -64,11 +67,28 @@ fi
 
 echo "=============================================================="
 echo "Remote dir: $TARGET"
+if [ -n "$DRYRUN" ]; then
+    echo "Dry run: no files will be copied"
+fi
 
 # Create the remote directory (skipped for a local target without host:)
 MKDIR_OK=1
 if [[ "$TARGET" == *:* ]]; then
-    "${SSH[@]}" "${TARGET%%:*}" mkdir -p -- "${TARGET#*:}" || MKDIR_OK=0
+    if [ -n "$DRYRUN" ]; then
+        echo "Would run: ${SSH[*]} ${TARGET%%:*} mkdir -p -- ${TARGET#*:}"
+    else
+        "${SSH[@]}" "${TARGET%%:*}" mkdir -p -- "${TARGET#*:}" || MKDIR_OK=0
+    fi
+fi
+
+if [ -n "$DRYRUN" ]; then
+    echo "Would run: ${SCP[*]} ${FILES[*]} $TARGET"
+    for f in "${FILES[@]}"; do
+        echo "File would be copied: $(basename "$f")"
+    done
+    echo "Remote copy: DRY RUN"
+    echo "=============================================================="
+    exit 0
 fi
 
 if [ $MKDIR_OK -eq 1 ] && "${SCP[@]}" "${FILES[@]}" "$TARGET"; then
