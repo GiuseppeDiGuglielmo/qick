@@ -22,17 +22,20 @@ apply_bd_automation -rule xilinx.com:bd_rule:debug -dict [list \
 set_property -dict [list CONFIG.C_MON_TYPE {MIX}] [get_bd_cells system_ila_0]
 connect_bd_net [get_bd_pins system_ila_0/probe0] [get_bd_pins vect2bits_16_0/dout8]
 
+# Set coordinates for the ILA
+set_property location {3 1133 1139} [get_bd_cells system_ila_0]
+
 validate_bd_design
 # === END: ILAs ===============================================================
 
-reset_run impl_1
-reset_run synth_1
-launch_runs impl_1 -to_step write_bitstream -jobs 20
-wait_on_run -timeout 360 impl_1
-
-if {[get_property PROGRESS [get_runs impl_1]] != "100%"} {
-    error "ERROR: impl_1 did not complete successfully (progress: [get_property PROGRESS [get_runs impl_1]])"
-}
-
-open_run impl_1
-report_utilization -file "util_216${_xil_proj_name_suffix_}.rpt" -hierarchical -hierarchical_percentages
+#reset_run impl_1
+#reset_run synth_1
+#launch_runs impl_1 -to_step write_bitstream -jobs 20
+#wait_on_run -timeout 360 impl_1
+#
+#if {[get_property PROGRESS [get_runs impl_1]] != "100%"} {
+#    error "ERROR: impl_1 did not complete successfully (progress: [get_property PROGRESS [get_runs impl_1]])"
+#}
+#
+#open_run impl_1
+#report_utilization -file "util_216${_xil_proj_name_suffix_}.rpt" -hierarchical -hierarchical_percentages
