@@ -19,11 +19,12 @@ if { [info exists ::env(JOBS)] } {
 
 # The design's project scripts are layered, each sourcing the one below it:
 #   proj_ila.tcl (ILA=1) -> proj_dac.tcl (DAC=228|230) -> proj.tcl
-# Start from the topmost layer needed; the layers read DAC themselves.
+# Start from the topmost layer needed; the layers read DAC themselves. A design
+# with proj_dac.tcl always goes through it, so its builds are named by DAC.
 set proj_script "proj.tcl"
 if { [info exists ::env(ILA)] && $::env(ILA) ne "0" } {
     set proj_script "proj_ila.tcl"
-} elseif { [info exists ::env(DAC)] && $::env(DAC) eq "230" } {
+} elseif { [file exists "proj_dac.tcl"] || ([info exists ::env(DAC)] && $::env(DAC) eq "230") } {
     set proj_script "proj_dac.tcl"
 }
 if { ![file exists $proj_script] } {

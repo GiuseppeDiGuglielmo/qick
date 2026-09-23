@@ -35,8 +35,8 @@ side:
 
 | | DAC | ILA | project | `out/` name |
 | --- | --- | --- | --- | --- |
-| `make bitstream` | 228 | no | `top/` | `qick_216_tprocv2.*` |
-| `make bitstream ILA=1` | 228 | yes | `top_ila/` | `qick_216_tprocv2_ila.*` |
+| `make bitstream` | 228 | no | `top_dac228/` | `qick_216_tprocv2_dac228.*` |
+| `make bitstream ILA=1` | 228 | yes | `top_dac228_ila/` | `qick_216_tprocv2_dac228_ila.*` |
 | `make bitstream DAC=230` | 230 | no | `top_dac230/` | `qick_216_tprocv2_dac230.*` |
 | `make bitstream DAC=230 ILA=1` | 230 | yes | `top_dac230_ila/` | `qick_216_tprocv2_dac230_ila.*` |
 
@@ -59,7 +59,8 @@ port 8), so a bench wired for them sees only noise on the readout with this desi
 DAC tile 0 stays enabled and idle, so `timing.xdc` needs no change. After loading the
 bitstream, `print(soc)` shows `DAC tile 2, blk 0 is 0_230 on JHC3, or QICK box DAC port 8`
 with fs=6881.280 Msps and fabric=430.080 MHz. The envelope memory then holds 9.5 us instead
-of 6.8 us. `DAC=228` is the default and makes no changes.
+of 6.8 us. `DAC=228` is the default and leaves the block design as delivered; it only names the
+build `_dac228`, so that every bitstream of this design says which DAC it drives.
 
 ### Readout ILA: `proj_ila.tcl`
 
@@ -80,7 +81,8 @@ These are the tProc v2 equivalents of what `ml-integration-tproc-v1-2026` probed
 
 `timing.xdc` is unchanged from `qick_tprocv2_216_standard`. `proj.tcl` differs only by the
 optional `_xil_proj_name_suffix_`, which the layers above set to pick the project
-directory; left unset, `proj.tcl` builds the same `top/` project as the original.
+directory; left unset, as when `proj.tcl` is run on its own, it builds the same `top/`
+project as the original.
 
 ### Debug access
 

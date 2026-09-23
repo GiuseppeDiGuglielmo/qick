@@ -23,8 +23,8 @@
 # The Makefile in ../../tools drives this with "make bitstream ILA=1", which
 # also runs implementation.
 
-# Build into top_ila/ (top_dac230_ila/ with DAC=230) so the plain project in
-# top/ is left alone
+# Build into top_dac228_ila/ (top_dac230_ila/ with DAC=230) so the project
+# without the ILAs is left alone
 if { ![info exists _xil_proj_name_suffix_] } {
     set _xil_proj_name_suffix_ ""
 }

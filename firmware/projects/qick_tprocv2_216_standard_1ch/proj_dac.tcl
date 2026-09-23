@@ -5,7 +5,7 @@
 # (0_230 on JHC3, QICK box DAC port 8), the port the tProc v1 designs used, so a
 # bench wired for those works unchanged.
 #
-#   DAC=228  (default) the design as delivered, built into top/
+#   DAC=228  (default) the design as delivered, built into top_dac228/
 #   DAC=230  generator on 0_230, built into top_dac230/
 #
 # This is the middle layer of the project scripts:
@@ -34,10 +34,9 @@ if { $dac ni {228 230} } {
 if { ![info exists _xil_proj_name_suffix_] } {
     set _xil_proj_name_suffix_ ""
 }
-# Prepend, so that layers above append their own part after this one
-if { $dac == 230 } {
-    set _xil_proj_name_suffix_ "_dac230${_xil_proj_name_suffix_}"
-}
+# Prepend, so that layers above append their own part after this one. Both DACs
+# get a suffix, so every build of this design names its DAC.
+set _xil_proj_name_suffix_ "_dac${dac}${_xil_proj_name_suffix_}"
 
 source proj.tcl
 

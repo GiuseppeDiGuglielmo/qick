@@ -18,23 +18,25 @@ JOBS ?= 20
 
 # The project scripts are layered, each sourcing the one below it:
 #   proj_ila.tcl (ILA=1) -> proj_dac.tcl (DAC=228|230) -> proj.tcl
-# DAC=230 moves the generator to DAC 0_230 and builds into top_dac230*/;
+# A design with proj_dac.tcl builds into top_dac228*/ or top_dac230*/, and
+# DAC=230 moves its generator to DAC 0_230;
 # ILA=1 adds ILAs on the readout path and appends _ila to the project directory
 DAC ?= 228
 ILA ?= 0
 ifeq ($(filter $(DAC),228 230),)
 $(error DAC must be 228 or 230, got: $(DAC))
 endif
-# Start from the topmost layer needed. With DAC=228 proj_dac.tcl only sources
-# proj.tcl, so a plain build starts there and works for designs without layers.
+# Start from the topmost layer needed. A design without proj_dac.tcl builds
+# from proj.tcl into top/ when DAC=228; DAC=230 requires proj_dac.tcl.
+HAS_DAC_LAYER := $(if $(wildcard $(DESIGN_DIR)/proj_dac.tcl),1)
 ifeq ($(ILA),1)
 PROJ_TCL    := proj_ila.tcl
-else ifeq ($(DAC),230)
+else ifneq ($(HAS_DAC_LAYER)$(filter 230,$(DAC)),)
 PROJ_TCL    := proj_dac.tcl
 else
 PROJ_TCL    := proj.tcl
 endif
-PROJ_SUFFIX := $(if $(filter 230,$(DAC)),_dac230)$(if $(filter 1,$(ILA)),_ila)
+PROJ_SUFFIX := $(if $(HAS_DAC_LAYER),_dac$(DAC))$(if $(filter 1,$(ILA)),_ila)
 
 # hw_server to connect to (host:port); Vivado starts a local one if none is running
 HW_SERVER ?= localhost:3121
@@ -64,7 +66,7 @@ help:
 	@echo "  GUI=1             run bitstream in GUI mode instead of batch"
 	@echo "  JOBS=<n>          parallel synthesis jobs (default: $(JOBS))"
 	@echo "  DAC=228|230       generator DAC: 0_228 as delivered (default), or 0_230"
-	@echo "                    as in the tProc v1 designs, built into top_dac230*/"
+	@echo "                    as in the tProc v1 designs, built into top_dac<DAC>*/"
 	@echo "  ILA=1             add the readout ILAs, built into top*_ila/"
 	@echo "  REMOTE=<target>   scp destination for copy"
 	@echo "  DRYRUN=1          copy: print what would be copied without copying"

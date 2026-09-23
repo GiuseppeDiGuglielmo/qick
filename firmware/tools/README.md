@@ -24,7 +24,7 @@ make bitstream DESIGN=qick_tprocv2_216_standard     # a different design
 | `DESIGN` | `qick_tprocv2_216_standard_1ch` | design directory under `../projects` |
 | `GUI` | `0` | `GUI=1` runs `bitstream` in the GUI instead of batch |
 | `JOBS` | `20` | parallel synthesis jobs |
-| `DAC` | `228` | `DAC=230` builds the design's `proj_dac.tcl` variant, generator on DAC `0_230`, into `top_dac230*/` |
+| `DAC` | `228` | picks the generator DAC of a design with `proj_dac.tcl`, built into `top_dac228*/` or `top_dac230*/`; `DAC=230` needs that script |
 | `ILA` | `0` | `ILA=1` builds the design's `proj_ila.tcl` variant, with readout ILAs, into `top*_ila/` |
 | `REMOTE` | a board path derived from the branch name | scp destination for `copy` |
 | `HW_SERVER` | `localhost:3121` | hw_server that `hw-server` connects to |
@@ -45,7 +45,7 @@ and why the design can equally be built by hand the plain upstream way:
 cd ../projects/<design> && vivado -source proj.tcl
 ```
 
-**Build results are symlinks.** A design's `out/` holds links into `top/` (and `top_ila/`),
+**Build results are symlinks.** A design's `out/` holds links into its `top*/` project directories,
 following the convention of the upstream projects, so there is no packaging step. They dangle
 until the design is built; `make copy` warns about the ones that are not built yet and sends
 the rest, so a board can hold both variants under their distinct names.
