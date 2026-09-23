@@ -33,8 +33,11 @@ HW_SERVER ?= localhost:3121
 # Git branch this checkout is on, with / replaced by - (used in REMOTE)
 BRANCH ?= $(shell git rev-parse --abbrev-ref HEAD | tr / -)
 
-# scp destination of the copy target (override with REMOTE=user@host:path)
-REMOTE ?= xilinx@rfsoc216-ml01.dhcp.fnal.gov:~/jupyter_notebooks/qick-$(BRANCH)/qick_ml/216/$(BRANCH)
+# scp destination of the copy target (override with REMOTE=user@host:path).
+# Matches where ../notebooks/qick_ml/send_receive_pulse.ipynb looks for
+# bitstreams (216/$BRANCH, relative to the notebook), assuming the board
+# checkout mirrors this repo's layout under ~/jupyter_notebooks/qick-$(BRANCH).
+REMOTE ?= xilinx@rfsoc216-ml01.dhcp.fnal.gov:~/jupyter_notebooks/qick-$(BRANCH)/firmware/notebooks/qick_ml/216/$(BRANCH)
 
 help:
 	@echo "Targets:"
