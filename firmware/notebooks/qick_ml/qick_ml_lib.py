@@ -1,8 +1,8 @@
 """
 Support library for the send-receive-pulse ZCU216/QICK experiment (tProc v2).
 
-Provides the QICK program that fires a single readout pulse and captures the
-loopback ADC trace (LoopbackProgram, built on tProc v2's AveragerProgramV2), a
+The pulse program itself lives in the notebook (SinglePulseProgram, from
+docs/source/tutorials/01_Basic_Sequencing.ipynb). This module provides a
 couple of numeric formatting helpers for dumping I/Q samples as hex
 (float_to_hex32, int_to_twos_complement_hex32), and a set of MMIO-based
 helpers for driving the FPGA-resident NN classifier that scores each pulse
@@ -22,7 +22,6 @@ from ctypes import *
 import struct
 
 from pynq import MMIO
-from qick.asm_v2 import AveragerProgramV2
 
 # QickSoc/QickConfig handle the classifier helpers read/write through.
 soccfg = None
@@ -37,60 +36,6 @@ def set_soccfg(sc):
     """
     global soccfg
     soccfg = sc
-
-
-class LoopbackProgram(AveragerProgramV2):
-    """
-    tProc v2 QICK program that fires one readout pulse on a generator channel
-    and captures the decimated I/Q trace on the paired ADC channel(s), for a
-    simple DAC-to-ADC loopback measurement.
-
-    Unlike the tProc v1 version of this program, pulse/readout timing is
-    specified in microseconds and frequency in MHz (cfg["length"], cfg["sigma"],
-    cfg["readout_length"], cfg["trig_time"]), and gain is a float in [-1, 1]
-    rather than a raw DAC code.
-    """
-    def _initialize(self, cfg):
-        res_ch = cfg["res_ch"]
-
-        # set the nyquist zone
-        self.declare_gen(ch=res_ch, nqz=1)
-
-        # configure the readout length and downconversion frequency for every
-        # declared ADC channel
-        for ch in cfg["ro_chs"]:
-            self.declare_readout(ch=ch, length=cfg["readout_length"])
-            self.add_readoutconfig(ch=ch, name=f"ro{ch}", freq=cfg["pulse_freq"], gen_ch=res_ch)
-            self.send_readoutconfig(ch=ch, name=f"ro{ch}", t=0)
-
-        style = cfg["pulse_style"]
-
-        if style in ["flat_top", "arb"]:
-            sigma = cfg["sigma"]
-            self.add_gauss(ch=res_ch, name="measure_env", sigma=sigma, length=sigma * 5, even_length=True)
-
-        if style == "const":
-            self.add_pulse(ch=res_ch, name="measure", style=style,
-                            freq=cfg["pulse_freq"], length=cfg["length"],
-                            phase=cfg["res_phase"], gain=cfg["pulse_gain"])
-        elif style == "flat_top":
-            # The first half of the envelope ramps up the pulse, the second half ramps down the pulse
-            self.add_pulse(ch=res_ch, name="measure", style=style, envelope="measure_env",
-                            freq=cfg["pulse_freq"], length=cfg["length"],
-                            phase=cfg["res_phase"], gain=cfg["pulse_gain"])
-        elif style == "arb":
-            self.add_pulse(ch=res_ch, name="measure", style=style, envelope="measure_env",
-                            freq=cfg["pulse_freq"],
-                            phase=cfg["res_phase"], gain=cfg["pulse_gain"])
-
-    def _body(self, cfg):
-        # fire the pulse at t=0
-        # trigger all declared ADCs at cfg["trig_time"]
-        # pulse PMOD0_0 for a scope trigger
-        # the reps/final_delay loop (set on the program, not here) gives the
-        # tProc time to get back ahead of the clock before the next shot
-        self.pulse(ch=cfg["res_ch"], name="measure", t=0)
-        self.trigger(ros=cfg["ro_chs"], pins=[0], t=cfg["trig_time"])
 
 
 def float_to_hex32(f):
