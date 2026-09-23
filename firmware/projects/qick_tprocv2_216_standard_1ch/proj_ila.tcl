@@ -7,19 +7,30 @@
 #   - the readout output stream feeding the averager buffer
 #   - the readout trigger, tProc port 10
 #
+# This is the top layer of the project scripts:
+#
+#   proj_ila.tcl    optional readout ILAs (ILA=1)
+#     proj_dac.tcl  generator DAC (DAC=228|230)
+#       proj.tcl    the design as delivered
+#
 # The design sources are left untouched; everything here is applied to the
-# in-memory block design after proj.tcl has built it.
+# in-memory block design after the layers below have built it.
 #
 # Usage (from this directory):
 #   vivado -mode batch -source proj_ila.tcl
+#   DAC=230 vivado -mode batch -source proj_ila.tcl
 #
 # The Makefile in ../../tools drives this with "make bitstream ILA=1", which
 # also runs implementation.
 
-# Build into top_ila/ so the plain project in top/ is left alone
-set _xil_proj_name_suffix_ "_ila"
+# Build into top_ila/ (top_dac230_ila/ with DAC=230) so the plain project in
+# top/ is left alone
+if { ![info exists _xil_proj_name_suffix_] } {
+    set _xil_proj_name_suffix_ ""
+}
+append _xil_proj_name_suffix_ "_ila"
 
-source proj.tcl
+source proj_dac.tcl
 
 # === BEGIN: ILAs =============================================================
 

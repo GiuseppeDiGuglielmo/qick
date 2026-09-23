@@ -9,18 +9,22 @@
 #
 # Set the JOBS environment variable to limit parallel synthesis jobs. Each job
 # is a full Vivado process of roughly 2.5 GB, so the default of 20 needs a
-# large machine. Set ILA=1 to build the variant with the readout ILAs.
+# large machine. Set ILA=1 to build the variant with the readout ILAs, and
+# DAC=230 to move the generator to DAC 0_230.
 
 set jobs 20
 if { [info exists ::env(JOBS)] } {
     set jobs $::env(JOBS)
 }
 
-# ILA=1 selects the design's proj_ila.tcl, which adds ILAs on the readout path
-# and builds into top_ila/ instead of top/
+# The design's project scripts are layered, each sourcing the one below it:
+#   proj_ila.tcl (ILA=1) -> proj_dac.tcl (DAC=228|230) -> proj.tcl
+# Start from the topmost layer needed; the layers read DAC themselves.
 set proj_script "proj.tcl"
 if { [info exists ::env(ILA)] && $::env(ILA) ne "0" } {
     set proj_script "proj_ila.tcl"
+} elseif { [info exists ::env(DAC)] && $::env(DAC) eq "230" } {
+    set proj_script "proj_dac.tcl"
 }
 if { ![file exists $proj_script] } {
     error "ERROR: $proj_script not found, run this with the design directory as the working directory"
