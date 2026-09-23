@@ -22,8 +22,8 @@ ipython_config.py
 *.rpt
 vivado_pid*.str
 
-# Bitstreams deployed by "make copy" (qick_ml/216/<branch>/)
-qick_ml/216/
+# Bitstreams deployed by "make copy" (firmware/notebooks/qick_ml/216/<branch>/)
+firmware/notebooks/qick_ml/216/
 
 ### Python template
 # Byte-compiled / optimized / DLL files
