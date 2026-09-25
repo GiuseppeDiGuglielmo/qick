@@ -22,6 +22,9 @@ ipython_config.py
 *.rpt
 vivado_pid*.str
 
+# Keep the HLS resource summaries shipped with the NN IPs (qick_ml/ip/README.md)
+!qick_ml/ip/**/*.log
+
 # Firmware packages (firmware/package.sh)
 firmware/package/
 firmware/package.tar.gz
