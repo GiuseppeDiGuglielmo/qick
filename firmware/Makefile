@@ -2,11 +2,14 @@ help:
 	@echo "syn-zcu216                  create top_216 project (GUI, no build)"
 	@echo "syn-zcu216-orig             build top_216_orig (GUI=1 for gui mode)"
 	@echo "syn-zcu216-orig-ila         build top_216_orig_ila with ILAs (GUI=1 for gui mode)"
+	@echo "syn-zcu216-nn               build top_216_nn with the NN IP (GUI=1 for gui mode)"
 	@echo "gui-zcu216                  open top_216 project"
 	@echo "gui-zcu216-orig             open top_216_orig project"
 	@echo "gui-zcu216-orig-ila         open top_216_orig_ila project"
+	@echo "gui-zcu216-nn               open top_216_nn project"
 	@echo "package-zcu216-orig         collect top_216_orig .bit/.hwh/.ltx into package/"
 	@echo "package-zcu216-orig-ila     collect top_216_orig_ila .bit/.hwh/.ltx into package/"
+	@echo "package-zcu216-nn           collect top_216_nn .bit/.hwh/.ltx into package/"
 	@echo "copy-zcu216                 copy package/ to the board (REMOTE=user@host:path to override)"
 	@echo "                            uses SSH key/agent; export SSHPASS to use a password"
 	@echo "hw-server                   open Hardware Manager and connect to hw_server (GUI)"
@@ -15,17 +18,13 @@ help:
 	@echo "distclean-zcu216            remove the top_216 project dir"
 	@echo "distclean-zcu216-orig       remove the top_216_orig project dir"
 	@echo "distclean-zcu216-orig-ila   remove the top_216_orig_ila project dir"
+	@echo "distclean-zcu216-nn         remove the top_216_nn project dir"
 	@echo "distclean                   clean + remove all top_216* project dirs and packages"
 .PHONY: help
 
 GUI ?= 0
 
 -include proj_216.mk
-
-# Disabled: ip_local/ does not exist in this repo yet
-#check_ip:
-#	@ls ip_local
-#.PHONY: check_ip
 
 # hw_server to connect to (host:port); Vivado starts a local one if none is running
 HW_SERVER ?= localhost:3121
@@ -46,7 +45,7 @@ check_license:
 .PHONY: check_license
 
 # Generated Vivado project directories: top_216 plus any top_216_<suffix>
-# (orig, orig_ila, and nn once enabled). Globbed so distclean needs no per-project
+# (orig, orig_ila, nn). Globbed so distclean needs no per-project
 # target and works even if proj_216.mk is missing.
 PROJ_DIRS = $(wildcard top_216 top_216_*)
 
