@@ -36,6 +36,35 @@ source proj_dac.tcl
 
 open_bd_design "${proj_dir}/${_xil_proj_name_}.srcs/sources_1/bd/d_1/d_1.bd"
 
+# === BEGIN TEMPORARY: remove the processor ILAs and the debug bridge =========
+# Temporary workaround: drop the ILAs that ship in the block design
+# (system_ila_1/2/3 on the qick_processor debug buses) so that only the
+# readout ILA added below ends up in the build, and drop debug_bridge_0.
+# With the bridge in the design, the debug hub is reached through JTAG driven
+# by the PS over AXI (XVC) and is invisible on the physical JTAG chain; without
+# it Vivado builds a normal hub, so the ILAs show up after programming over
+# JTAG, as in the tProc v1 designs. Remove this block to get the processor
+# ILAs and the bridge back.
+delete_bd_objs \
+    [get_bd_nets qick_processor_0_t_fifo_do] \
+    [get_bd_nets qick_processor_0_t_debug_do] \
+    [get_bd_nets qick_processor_0_t_time_abs_o] \
+    [get_bd_cells system_ila_2]
+delete_bd_objs \
+    [get_bd_nets qick_processor_0_c_core_do] \
+    [get_bd_nets qick_processor_0_c_port_do] \
+    [get_bd_nets qick_processor_0_c_time_ref_do] \
+    [get_bd_nets qick_processor_0_c_debug_do] \
+    [get_bd_nets qick_processor_0_c_time_usr_do] \
+    [get_bd_nets qick_processor_0_c_proc_do] \
+    [get_bd_cells system_ila_1]
+delete_bd_objs \
+    [get_bd_nets qick_processor_0_ps_debug_do] \
+    [get_bd_cells system_ila_3]
+# Its AXI slave sits on ps8_0_axi_periph/M01_AXI, which is left unconnected
+delete_bd_objs [get_bd_cells debug_bridge_0]
+# === END TEMPORARY ===========================================================
+
 # The readout and its trigger both live inside the readout_wrapper hierarchy
 set ro_net   [get_bd_intf_nets readout_wrapper/axis_dyn_readout_v1_0_m1_axis]
 set trig_pin [get_bd_pins readout_wrapper/axis_avg_buffer_0/trigger]
