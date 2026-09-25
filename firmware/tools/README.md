@@ -9,6 +9,7 @@ Every target works on one design, selected with `DESIGN=<directory name>`:
 
 ```sh
 source envsetup.sh                                  # Vivado + XILINXD_LICENSE_FILE
+make designs                                        # list the values DESIGN= accepts
 make project                                        # create the project, no build
 make bitstream                                      # build through write_bitstream
 make bitstream ILA=1                                # ... with the readout ILAs

@@ -52,6 +52,7 @@ REMOTE ?= xilinx@rfsoc216-ml01.dhcp.fnal.gov:~/jupyter_notebooks/qick-$(BRANCH)/
 
 help:
 	@echo "Targets:"
+	@echo "  designs       list the designs usable as DESIGN="
 	@echo "  project       create the Vivado project (GUI, no build)"
 	@echo "  bitstream     build through write_bitstream and report utilization"
 	@echo "  gui           open the project created by a previous target"
@@ -76,6 +77,20 @@ help:
 	@echo ""
 	@echo "Run 'source envsetup.sh' first to select Vivado and the license server."
 .PHONY: help
+
+# List the designs under ../projects that can be built (those with a proj.tcl).
+# * marks the default; DAC and ILA show which options the design supports.
+designs:
+	@printf "  %-40s %-4s %s\n" "DESIGN" "DAC" "ILA"
+	@for dir in $(CURDIR)/../projects/*/; do \
+		test -f "$$dir/proj.tcl" || continue; \
+		name=$$(basename "$$dir"); \
+		mark=" "; test "$$name" = "$(DESIGN)" && mark="*"; \
+		dac=-; test -f "$$dir/proj_dac.tcl" && dac=yes; \
+		ila=-; test -f "$$dir/proj_ila.tcl" && ila=yes; \
+		printf "%s %-40s %-4s %s\n" "$$mark" "$$name" "$$dac" "$$ila"; \
+	done
+.PHONY: designs
 
 # Fail early if the design does not exist, so targets do not fail inside Vivado
 check_design:
