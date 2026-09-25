@@ -59,8 +59,9 @@ help:
 	@echo "  hw-server     open Hardware Manager and connect to hw_server (GUI)"
 	@echo "  hw-server-tcl same, in the Vivado Tcl shell (no GUI)"
 	@echo "  clean         remove Vivado logs, journals, reports and .Xil scratch"
-	@echo "  distclean     clean + remove the generated project directories, the"
-	@echo "                bitstreams deployed by copy, and other git-ignored files"
+	@echo "  distclean     clean + remove the generated project directories"
+	@echo "  clean-bitstreams"
+	@echo "                remove the bitstreams deployed by copy (on the board)"
 	@echo ""
 	@echo "Variables:"
 	@echo "  DESIGN=<dir>      design under ../projects (default: $(DESIGN))"
@@ -132,11 +133,14 @@ clean:
 	@rm -rf ../projects/*/*.log ../projects/*/*.jou ../projects/*/*.rpt ../projects/*/*.str ../projects/*/.Xil
 .PHONY: clean
 
-# Generated Vivado project directories, under any design, then every file
-# under firmware/ that .gitignore matches: the bitstreams deployed by copy
-# (../notebooks/qick_ml/216/), notebook checkpoints, Python caches and logs.
-# Run "git clean -ndX .." to see what that removes.
+# Generated Vivado project directories, under any design
 distclean: clean
 	@rm -rf $(wildcard ../projects/*/top ../projects/*/top_*)
-	@git clean -fdX ..
 .PHONY: distclean
+
+# Bitstreams deployed by copy, when this checkout is the board's. Kept out of
+# distclean, which only removes build outputs, so cleaning a build on the board
+# does not remove the bitstreams its notebooks load.
+clean-bitstreams:
+	@rm -rf ../notebooks/qick_ml/216
+.PHONY: clean-bitstreams
