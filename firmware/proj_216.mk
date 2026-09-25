@@ -30,6 +30,15 @@ else
 endif
 .PHONY: syn-zcu216-nn
 
+# Batch/GUI mode: create Vivado project with the NN IP and ILAs and run implementation
+syn-zcu216-nn-ila: check_license
+ifeq ($(GUI),1)
+	vivado -mode gui -source proj_216_nn_ila.tcl
+else
+	bash -c 'TIMEFORMAT="Elapsed time: %0lR"; time vivado -mode batch -source proj_216_nn_ila.tcl'
+endif
+.PHONY: syn-zcu216-nn-ila
+
 # Open GUI of the top_216 Vivado project created by syn-zcu216
 gui-zcu216:
 	vivado top_216/top_216.xpr
@@ -49,6 +58,11 @@ gui-zcu216-orig-ila:
 gui-zcu216-nn:
 	vivado top_216_nn/top_216.xpr
 .PHONY: gui-zcu216-nn
+
+# Open GUI of the top_216_nn_ila Vivado project created by syn-zcu216-nn-ila
+gui-zcu216-nn-ila:
+	vivado top_216_nn_ila/top_216.xpr
+.PHONY: gui-zcu216-nn-ila
 
 # Package BIT, HWH, and LTX files of top_216_orig into package/ (recreated on every run)
 package-zcu216-orig:
@@ -76,6 +90,15 @@ package-zcu216-nn:
 		top_216_nn \
 		qick_216_nn
 .PHONY: package-zcu216-nn
+
+# Package BIT, HWH, and LTX files of top_216_nn_ila into package/ (recreated on every run)
+package-zcu216-nn-ila:
+	@./package.sh \
+		top_216 \
+		d_1 \
+		top_216_nn_ila \
+		qick_216_nn_ila
+.PHONY: package-zcu216-nn-ila
 
 # Git branch this checkout is on, with / replaced by - (used in REMOTE)
 BRANCH ?= $(shell git rev-parse --abbrev-ref HEAD | tr / -)
@@ -108,3 +131,8 @@ distclean-zcu216-orig-ila:
 distclean-zcu216-nn:
 	@rm -rf top_216_nn
 .PHONY: distclean-zcu216-nn
+
+# Remove top_216_nn_ila project directory created by syn-zcu216-nn-ila
+distclean-zcu216-nn-ila:
+	@rm -rf top_216_nn_ila
+.PHONY: distclean-zcu216-nn-ila
