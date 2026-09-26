@@ -1,41 +1,45 @@
+# Per-build Vivado log, journal and scratch dir, so builds don't overwrite each
+# other's vivado.log/vivado.jou/.Xil: $(call vivado_out,<build>)
+vivado_out = -log vivado_$(1).log -journal vivado_$(1).jou -tempDir .Xil_$(1)
+
 # Create original Vivado project from proj_216.tcl (no implementation run)
 syn-zcu216:
-	vivado -source proj_216.tcl
+	vivado $(call vivado_out,216) -source proj_216.tcl
 .PHONY: syn-zcu216
 
 # Create original Vivado project and run implementation (batch/GUI mode)
 syn-zcu216-orig: check_license
 ifeq ($(GUI),1)
-	vivado -mode gui -source proj_216_orig.tcl
+	vivado -mode gui $(call vivado_out,orig) -source proj_216_orig.tcl
 else
-	bash -c 'TIMEFORMAT="Elapsed time: %0lR"; time vivado -mode batch -source proj_216_orig.tcl'
+	bash -c 'TIMEFORMAT="Elapsed time: %0lR"; time vivado -mode batch $(call vivado_out,orig) -source proj_216_orig.tcl'
 endif
 .PHONY: syn-zcu216-orig
 
 # Batch/GUI mode: create Vivado project with ILAs and run implementation
 syn-zcu216-orig-ila: check_license
 ifeq ($(GUI),1)
-	vivado -mode gui -source proj_216_orig_ila.tcl
+	vivado -mode gui $(call vivado_out,orig_ila) -source proj_216_orig_ila.tcl
 else
-	bash -c 'TIMEFORMAT="Elapsed time: %0lR"; time vivado -mode batch -source proj_216_orig_ila.tcl'
+	bash -c 'TIMEFORMAT="Elapsed time: %0lR"; time vivado -mode batch $(call vivado_out,orig_ila) -source proj_216_orig_ila.tcl'
 endif
 .PHONY: syn-zcu216-orig-ila
 
 # Batch/GUI mode: create Vivado project with the NN IP (BRAM + AXI-Lite) and run implementation
 syn-zcu216-nn: check_license
 ifeq ($(GUI),1)
-	vivado -mode gui -source proj_216_nn.tcl
+	vivado -mode gui $(call vivado_out,nn) -source proj_216_nn.tcl
 else
-	bash -c 'TIMEFORMAT="Elapsed time: %0lR"; time vivado -mode batch -source proj_216_nn.tcl'
+	bash -c 'TIMEFORMAT="Elapsed time: %0lR"; time vivado -mode batch $(call vivado_out,nn) -source proj_216_nn.tcl'
 endif
 .PHONY: syn-zcu216-nn
 
 # Batch/GUI mode: create Vivado project with the NN IP and ILAs and run implementation
 syn-zcu216-nn-ila: check_license
 ifeq ($(GUI),1)
-	vivado -mode gui -source proj_216_nn_ila.tcl
+	vivado -mode gui $(call vivado_out,nn_ila) -source proj_216_nn_ila.tcl
 else
-	bash -c 'TIMEFORMAT="Elapsed time: %0lR"; time vivado -mode batch -source proj_216_nn_ila.tcl'
+	bash -c 'TIMEFORMAT="Elapsed time: %0lR"; time vivado -mode batch $(call vivado_out,nn_ila) -source proj_216_nn_ila.tcl'
 endif
 .PHONY: syn-zcu216-nn-ila
 
