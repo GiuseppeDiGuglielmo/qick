@@ -39,8 +39,11 @@ validate_bd_design
 reset_run impl_1
 reset_run synth_1
 
-# Run post-route physical optimization: without it, NN_0 misses timing on
-# RFADC2_CLK by a few tens of ps (routing-dominated paths)
+# Close timing on RFADC2_CLK: NN_0 misses by a few tens of ps (routing-dominated
+# paths). Explore directives in every step plus aggressive post-route physical
+# optimization met timing on ml-integration-2024 (Vivado 2022.1, WNS +0.007 ns);
+# not yet checked with this branch's block design and Vivado 2023.1.
+set_property strategy Performance_ExplorePostRoutePhysOpt [get_runs impl_1]
 set_property STEPS.POST_ROUTE_PHYS_OPT_DESIGN.IS_ENABLED true [get_runs impl_1]
 set_property STEPS.POST_ROUTE_PHYS_OPT_DESIGN.ARGS.DIRECTIVE AggressiveExplore [get_runs impl_1]
 
