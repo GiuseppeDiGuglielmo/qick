@@ -17,6 +17,7 @@ ipython_config.py
 
 # Vivado (logs, journals, reports, and pid files; see "make clean")
 .Xil/
+.Xil_*/
 *.log
 *.jou
 *.rpt

@@ -56,7 +56,7 @@ PROJ_DIRS = $(wildcard top_216 top_216_*)
 # Vivado litter left in this directory: logs, journals, reports, pid files
 # (*.log covers hs_err_pid*.log and *.backup.log; *.str covers vivado_pid*.str)
 clean:
-	@rm -rf *.log *.jou *.rpt *.str .Xil
+	@rm -rf *.log *.jou *.rpt *.str .Xil .Xil_*
 .PHONY: clean
 
 distclean: clean
