@@ -39,6 +39,11 @@ validate_bd_design
 reset_run impl_1
 reset_run synth_1
 
+# Run post-route physical optimization: without it, NN_0 misses timing on
+# RFADC2_CLK by a few tens of ps (routing-dominated paths)
+set_property STEPS.POST_ROUTE_PHYS_OPT_DESIGN.IS_ENABLED true [get_runs impl_1]
+set_property STEPS.POST_ROUTE_PHYS_OPT_DESIGN.ARGS.DIRECTIVE AggressiveExplore [get_runs impl_1]
+
 # Run synthesis and implementation through bitstream generation
 launch_runs impl_1 -to_step write_bitstream -jobs 20
 wait_on_run -timeout 360 impl_1
