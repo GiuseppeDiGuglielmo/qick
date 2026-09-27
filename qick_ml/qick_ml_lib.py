@@ -205,17 +205,20 @@ def get_classifier_prediction(index=0):
     Args:
         index (int): The index of the prediction to retrieve. Default is 0.
 
+    Each prediction takes a 2-word slot. The current NN IP has a single output:
+    the logit is in the first word and the second word is never written (0).
+
     Returns:
-        tuple: A tuple containing the ground state logit and the excited state logit.
+        tuple: The logit word and the unused word, both as raw 32b words.
     """
     WORD_SIZE_BYTE = 4
     WORD_COUNT_PER_PREDICTION = 2
     # Access the MMIO interface of the BRAM
     mmio_bram = MMIO(soccfg.axi_blk_bram_ctrl_0.base_address, soccfg.axi_blk_bram_ctrl_0.size)
-    # Read the logits for the ground state and excited state
-    ground_state_logit = mmio_bram.read(index * WORD_COUNT_PER_PREDICTION * WORD_SIZE_BYTE + 0)
-    excited_state_logit = mmio_bram.read(index * WORD_COUNT_PER_PREDICTION * WORD_SIZE_BYTE + WORD_SIZE_BYTE)
-    return ground_state_logit, excited_state_logit
+    # Read the logit word and the unused word of the slot
+    logit_word = mmio_bram.read(index * WORD_COUNT_PER_PREDICTION * WORD_SIZE_BYTE + 0)
+    unused_word = mmio_bram.read(index * WORD_COUNT_PER_PREDICTION * WORD_SIZE_BYTE + WORD_SIZE_BYTE)
+    return logit_word, unused_word
 
 
 def get_classifier_predictions(index_lo=0, index_hi=0):
@@ -227,7 +230,7 @@ def get_classifier_predictions(index_lo=0, index_hi=0):
         index_hi (int): The upper index of the range of predictions to retrieve. Default is 0.
 
     Returns:
-        list: A list of tuples, each containing the ground state logit and the excited state logit.
+        list: A list of [logit word, unused word] pairs (see get_classifier_prediction).
     """
     WORD_SIZE_BYTE = 4
     WORD_COUNT_PER_PREDICTION = 2
@@ -236,9 +239,9 @@ def get_classifier_predictions(index_lo=0, index_hi=0):
     # TODO: You can read the whole memory area rather than one element at a time and append
     predictions = []
     for index in range(index_lo, index_hi + 1):
-        ground_state_logit = mmio_bram.read(index * WORD_COUNT_PER_PREDICTION * WORD_SIZE_BYTE + 0)
-        excited_state_logit = mmio_bram.read(index * WORD_COUNT_PER_PREDICTION * WORD_SIZE_BYTE + WORD_SIZE_BYTE)
-        predictions.append([ground_state_logit, excited_state_logit])
+        logit_word = mmio_bram.read(index * WORD_COUNT_PER_PREDICTION * WORD_SIZE_BYTE + 0)
+        unused_word = mmio_bram.read(index * WORD_COUNT_PER_PREDICTION * WORD_SIZE_BYTE + WORD_SIZE_BYTE)
+        predictions.append([logit_word, unused_word])
     return predictions
 
 
@@ -256,11 +259,17 @@ def print_classifier_buffer(index_lo, index_hi):
     print('INFO: buffer index : {:6}'.format(prediction_count))
     print('INFO: buffer size  : {:6} ({:6}KB)'.format(buffer_size, (buffer_size*4)/1024))
     print('INFO:')
+    print('INFO: <<< marks the next slot to be written; logit >= 0 means excited')
+    print('INFO:')
     for i in range(index_lo, index_hi + 1):
-        # Get the logits for each prediction and print them
-        ground_state_logit, excited_state_logit = get_classifier_prediction(i)
-        print('INFO: g [{:5d}] {:08x} ({}) {}'.format(i, ground_state_logit, to_float(ground_state_logit), '<<<' if prediction_count == i else ''))
-        print('INFO: e [{:5d}] {:08x} ({}) {}'.format(i, excited_state_logit, to_float(excited_state_logit), '<<<' if prediction_count == i else ''))
+        # Only the logit word is written by the NN IP; the second word of the slot stays 0
+        logit_word, unused_word = get_classifier_prediction(i)
+        state = 'excited' if to_float(logit_word) >= 0 else 'ground'
+        if i >= prediction_count:
+            state = '(empty)'
+        print('INFO: [{:5d}] logit {:08x} ({}) {:8} (unused {:08x}) {}'.format(
+            i, logit_word, to_float(logit_word), state, unused_word,
+            '<<<' if prediction_count == i else ''))
 
 
 # --- Alternate classifier addressing schemes (inactive) --------------------
