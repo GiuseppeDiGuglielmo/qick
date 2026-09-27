@@ -43,12 +43,20 @@ create_bd_cell -type ip -vlnv xilinx.com:ip:xlconstant:1.1 always_ready0
 set_property -dict [list CONFIG.CONST_WIDTH {2} CONFIG.CONST_VAL {3}] [get_bd_cells always_ready0]
 connect_bd_net [get_bd_pins always_ready0/dout] [get_bd_pins axis_broadcaster_0/m_axis_tready]
 
-# NN0 starts a window on the same tProc trigger as avg-buffer0
-connect_bd_net [get_bd_pins vect2bits_16_0/dout8] [get_bd_pins NN_0/trigger]
+# NN0 starts a window on the same tProc trigger as avg-buffer0. The trigger
+# comes from the tProc domain (clk_dac2), so resynchronize it into clk_adc2
+# first, like avg-buffer0 does internally (see hdl/nn_trigger_sync.v)
+add_files -norecurse -fileset [get_filesets sources_1] \
+    [file normalize "${orig_proj_dir}/hdl/nn_trigger_sync.v"]
+update_compile_order -fileset sources_1
+create_bd_cell -type module -reference nn_trigger_sync nn_trigger_sync_0
+connect_bd_net [get_bd_pins vect2bits_16_0/dout8] [get_bd_pins nn_trigger_sync_0/din]
+connect_bd_net [get_bd_pins nn_trigger_sync_0/dout] [get_bd_pins NN_0/trigger]
 
 # Clock/reset NN0 and broadcaster0 from the ADC2 domain, like readout0
 connect_bd_net [get_bd_pins usp_rf_data_converter_0/clk_adc2] \
-    [get_bd_pins NN_0/ap_clk] [get_bd_pins axis_broadcaster_0/aclk]
+    [get_bd_pins NN_0/ap_clk] [get_bd_pins axis_broadcaster_0/aclk] \
+    [get_bd_pins nn_trigger_sync_0/clk]
 connect_bd_net [get_bd_pins rst_adc2/peripheral_aresetn] \
     [get_bd_pins NN_0/ap_rst_n] [get_bd_pins axis_broadcaster_0/aresetn]
 
