@@ -68,7 +68,7 @@ gui-zcu216-nn-ila:
 	vivado top_216_nn_ila/top_216.xpr
 .PHONY: gui-zcu216-nn-ila
 
-# Package BIT, HWH, and LTX files of top_216_orig into package/ (recreated on every run)
+# Package BIT, HWH, and LTX files of top_216_orig into package/qick_216_orig/ (recreated on every run)
 package-zcu216-orig:
 	@./package.sh \
 		top_216 \
@@ -77,7 +77,7 @@ package-zcu216-orig:
 		qick_216_orig
 .PHONY: package-zcu216-orig
 
-# Package BIT, HWH, and LTX files of top_216_orig_ila into package/ (recreated on every run)
+# Package BIT, HWH, and LTX files of top_216_orig_ila into package/qick_216_orig_ila/ (recreated on every run)
 package-zcu216-orig-ila:
 	@./package.sh \
 		top_216 \
@@ -86,7 +86,7 @@ package-zcu216-orig-ila:
 		qick_216_orig_ila
 .PHONY: package-zcu216-orig-ila
 
-# Package BIT, HWH, and LTX files of top_216_nn into package/ (recreated on every run)
+# Package BIT, HWH, and LTX files of top_216_nn into package/qick_216_nn/ (recreated on every run)
 package-zcu216-nn:
 	@./package.sh \
 		top_216 \
@@ -95,7 +95,7 @@ package-zcu216-nn:
 		qick_216_nn
 .PHONY: package-zcu216-nn
 
-# Package BIT, HWH, and LTX files of top_216_nn_ila into package/ (recreated on every run)
+# Package BIT, HWH, and LTX files of top_216_nn_ila into package/qick_216_nn_ila/ (recreated on every run)
 package-zcu216-nn-ila:
 	@./package.sh \
 		top_216 \
@@ -110,10 +110,14 @@ BRANCH ?= $(shell git rev-parse --abbrev-ref HEAD | tr / -)
 # scp destination of copy-zcu216 (override with REMOTE=user@host:path)
 REMOTE ?= xilinx@rfsoc216-ml01.dhcp.fnal.gov:~/jupyter_notebooks/qick-$(BRANCH)/qick_ml/216/$(BRANCH)
 
-# Copy the files in package/ (created by package-zcu216-*) to REMOTE
+# Packaged builds copied by copy-zcu216: all of them (empty), or a list of
+# orig, orig_ila, nn, nn_ila (e.g. make copy-zcu216 BUILD=nn or BUILD="nn nn_ila")
+BUILD ?=
+
+# Copy the packaged builds in package/ (created by package-zcu216-*) to REMOTE
 # Authenticates with an SSH key/agent, or export SSHPASS to use a password instead
 copy-zcu216:
-	@./copy.sh "$(REMOTE)"
+	@./copy.sh "$(REMOTE)" $(addprefix qick_216_,$(BUILD))
 .PHONY: copy-zcu216
 
 # Remove top_216 project directory created by syn-zcu216
