@@ -49,9 +49,9 @@ DEFAULT_BUILD = 'nn'
 
 # Same as the notebook's "Load an excited state" cell
 CONFIG = {"res_ch": 0, "ro_chs": [0], "reps": 1, "relax_delay": 1.0,
-          "res_phase": 0, "pulse_style": "const", "length": 400,
+          "res_phase": 0, "pulse_style": "const", "length": 560,
           "readout_length": 770, "pulse_gain": 3000, "pulse_freq": 250,
-          "adc_trig_offset": 100, "soft_avgs": 1}
+          "adc_trig_offset": 45, "soft_avgs": 1}
 
 # Same as the notebook's classifier setup cell
 WINDOW_SIZE = 400
