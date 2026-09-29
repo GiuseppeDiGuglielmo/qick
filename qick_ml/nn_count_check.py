@@ -38,6 +38,9 @@ import time
 
 QICK_ML_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, QICK_ML_DIR)
+# Use this repo's own qick_lib (it matches this branch's firmware) instead of
+# whatever qick package is installed system-wide, as the notebook does
+sys.path.insert(0, os.path.join(os.path.dirname(QICK_ML_DIR), 'qick_lib'))
 
 from qick import QickSoc  # noqa: E402  (path set up above)
 import qick_ml_lib  # noqa: E402
