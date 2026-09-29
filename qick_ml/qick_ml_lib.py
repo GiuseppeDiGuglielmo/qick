@@ -4,7 +4,8 @@ Support library for the send-receive-pulse ZCU216/QICK experiment.
 Provides the QICK program that fires a single readout pulse and captures the
 loopback ADC trace (LoopbackProgram), a couple of numeric formatting helpers
 for dumping I/Q samples as hex (float_to_hex32, int_to_twos_complement_hex32),
-and a set of MMIO-based helpers for driving the FPGA-resident NN classifier
+a loopback phase calibration (measure_phase, calibrate_phase), and a set of
+MMIO-based helpers for driving the FPGA-resident NN classifier
 that scores each pulse (reset_classifier, configure_classifier,
 get_classifier_prediction_count, get_classifier_prediction,
 get_classifier_predictions, print_classifier_buffer).
@@ -18,6 +19,7 @@ with that handle before using any classifier helper.
 from ctypes import *
 import struct
 
+import numpy as np
 from pynq import MMIO
 from qick import AveragerProgram
 
@@ -110,6 +112,99 @@ def int_to_twos_complement_hex32(n):
     if n < 0:
         n = (1 << 32) + n  # "Wrap around" to get 32-bit two's complement
     return format(n, '08x')
+
+
+# --- Phase calibration ------------------------------------------------------
+# The DAC-to-ADC loopback phase changes on every bitstream load, and the NN
+# logit follows it (its sign flips at ~180 deg). Rotating the generator phase
+# (res_phase) so the pulse always reaches the ADC at the same phase makes the
+# logits repeatable across loads. This is a single-frequency version of the
+# QICK phase calibration in qick_demos/01_Phase_coherent_readout.ipynb.
+
+def _wrap_deg(deg):
+    """Wrap an angle in degrees to [-180, 180)."""
+    return (deg + 180.0) % 360.0 - 180.0
+
+
+def measure_phase(soc, config, n=2):
+    """
+    Measure the phase of the loopback pulse at the ADC.
+
+    Fires n pulses with LoopbackProgram. For each, I and Q are averaged over
+    the pulse plateau (the samples above half the peak magnitude) of the first
+    readout channel.
+
+    Args:
+        soc: The QickSoc instance.
+        config (dict): The LoopbackProgram configuration, including res_phase.
+        n (int): The number of pulses to average over.
+
+    Returns:
+        float: The circular mean phase in degrees, in [-180, 180).
+    """
+    z = 0
+    for _ in range(n):
+        iq = LoopbackProgram(soc, config).acquire_decimated(soc, progress=False)[0]
+        i, q = np.asarray(iq[0], float), np.asarray(iq[1], float)
+        on = np.hypot(i, q) > 0.5 * np.hypot(i, q).max()
+        z += np.exp(1j * np.arctan2(q[on].mean(), i[on].mean()))
+    return _wrap_deg(np.angle(z, deg=True))
+
+
+def calibrate_phase(soc, config, target_deg=60.0, n=2, tol_deg=10.0, tol_fine_deg=0.1,
+                    max_passes=5, debug=True):
+    """
+    Find the generator phase (res_phase) that brings the loopback pulse to the
+    ADC at target_deg.
+
+    Measures the phase with res_phase = 0 and with res_phase = 90 deg: the
+    phase moves by about +90 or -90 deg, which gives the direction in which
+    res_phase turns it (on the ZCU216 loopback it is -90). Then sets res_phase
+    to the difference from the target and corrects the remaining error again,
+    up to max_passes times, until it is below tol_fine_deg: the logit changes
+    by several percent per degree. Call it after each bitstream load and
+    before resetting the classifier: the calibration pulses also trigger the
+    NN.
+
+    Args:
+        soc: The QickSoc instance.
+        config (dict): The LoopbackProgram configuration; not modified.
+        target_deg (float): The phase the pulse should have at the ADC.
+        n (int): The number of pulses per phase measurement.
+        tol_deg (float): The largest accepted error; a larger one raises.
+        tol_fine_deg (float): The error the refinement aims for; a larger one
+            (up to tol_deg) only prints a warning.
+        max_passes (int): The largest number of refinement passes.
+        debug (bool): Print the measured and corrected phases.
+
+    Returns:
+        float: The res_phase value, in degrees, to put in config.
+
+    Raises:
+        RuntimeError: If the 90 deg probe does not move the phase by about
+            +-90 deg, or the phase is still more than tol_deg off the target.
+    """
+    raw = measure_phase(soc, dict(config, res_phase=0), n)
+    step = _wrap_deg(measure_phase(soc, dict(config, res_phase=90.0), n) - raw)
+    if abs(abs(step) - 90.0) > tol_deg:
+        raise RuntimeError('phase calibration failed: res_phase 90 deg moved the phase by {:.1f} deg'.format(step))
+    sign = 1 if step > 0 else -1
+    res_phase = _wrap_deg(sign * (target_deg - raw))
+    got = measure_phase(soc, dict(config, res_phase=res_phase), n)
+    passes = 0
+    while passes < max_passes and abs(_wrap_deg(target_deg - got)) >= tol_fine_deg:
+        res_phase = _wrap_deg(res_phase + sign * _wrap_deg(target_deg - got))
+        got = measure_phase(soc, dict(config, res_phase=res_phase), n)
+        passes += 1
+    err = abs(_wrap_deg(got - target_deg))
+    if debug:
+        print('INFO: phase calibration: raw {:.1f} deg, res_phase {:.2f} deg -> {:.2f} deg '
+              '(target {:.1f}, sign {:+d}, {} passes)'.format(raw, res_phase, got, target_deg, sign, passes))
+    if err > tol_deg:
+        raise RuntimeError('phase calibration failed: {:.1f} deg, target {:.1f} deg'.format(got, target_deg))
+    if err >= tol_fine_deg:
+        print('WARNING: phase calibration is {:.2f} deg off the target (aim {:.2f} deg)'.format(err, tol_fine_deg))
+    return res_phase
 
 
 # --- Classifier helpers -----------------------------------------------------
