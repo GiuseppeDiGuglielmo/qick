@@ -166,6 +166,12 @@ class QickMetadata:
     def trace_bus(self, blockname, portname):
         return self._trace_net(self.busparser, blockname, portname)
 
+    def trace_driver(self, blockname, portname):
+        """Like trace_sig, but for an input port: return only the port that drives its net.
+        trace_sig also returns the other inputs on a net that fans out.
+        """
+        return [x for x in self.trace_sig(blockname, portname) if self.sigparser.drivers.get('/'.join(x))]
+
     def _trace_net(self, parser, blockname, portname):
         """
         Find the block and port that connect to this block and port.
@@ -492,7 +498,8 @@ class QickMetadata:
         """Helper function for finding the tProc port that triggers a buffer.
         """
         # which tProc output bit triggers this buffer?
-        ((block, port),) = self.trace_sig(start_block, start_port)
+        # (the trigger net may also feed other blocks, e.g. an NN trigger synchronizer)
+        ((block, port),) = self.trace_driver(start_block, start_port)
         blocktype = self.mod2type(block)
         if blocktype=='qick_vec2bit' or 'vect2bits' in blocktype:
             # vect2bits/qick_vec2bit port names are of the form 'dout14'
@@ -547,6 +554,8 @@ class SigParser:
         self.nets = {}
         self.pins = {}
         self.freqs = {}
+        # True for ports that drive their net
+        self.drivers = {}
         for module in root.findall('./MODULES/MODULE'):
             fullpath = module.get('FULLNAME').lstrip('/')
             for netport in module.findall('./PORTS/PORT'):
@@ -554,6 +563,7 @@ class SigParser:
                 portname = fullpath + '/' + netport.get('NAME')
                 if 'CLKFREQUENCY' in netport.attrib: self.freqs[portname] = float(netport.get('CLKFREQUENCY'))
                 self.pins[portname] = netname
+                self.drivers[portname] = netport.get('DIR') == 'O'
                 if netname in self.nets:
                     self.nets[netname] |= set([portname])
                 else:
@@ -563,6 +573,8 @@ class SigParser:
             netname = netport.get('SIGNAME')
             portname = netport.get('NAME')
             self.pins[portname] = netname
+            # a top-level input drives the nets inside the design
+            self.drivers[portname] = netport.get('DIR') == 'I'
             if netname in self.nets:
                 self.nets[netname] |= set([portname])
             else:
