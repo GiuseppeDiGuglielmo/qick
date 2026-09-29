@@ -42,12 +42,14 @@ validate_bd_design
 reset_run impl_1
 reset_run synth_1
 
-# Close timing on RFADC2_CLK: with the ILAs added, NN_0 misses by up to
-# 0.23 ns with the NN build's strategy (Performance_ExplorePostRoutePhysOpt).
-# Retiming in phys_opt plus aggressive post-route physical optimization met
-# timing on ml-integration-2024 (Vivado 2022.1, WNS +0.045 ns); not yet
-# checked with this branch's block design and Vivado 2023.1.
-set_property strategy Performance_Retiming [get_runs impl_1]
+# Close timing on RFADC2_CLK (NN_0) and RFDAC2_CLK (tProc). On
+# ml-integration-2024 (Vivado 2022.1) the NN build's strategy missed
+# RFADC2_CLK by 0.23 ns with the ILAs and Performance_Retiming met timing.
+# With this branch's block design and Vivado 2023.1, Performance_Retiming
+# meets RFADC2_CLK (+0.124 ns) but misses RFDAC2_CLK by 0.124 ns, all 153
+# failing paths inside the tProc (routing-dominated). The NN build's
+# strategy meets both (RFADC2_CLK +0.125 ns, RFDAC2_CLK +0.006 ns).
+set_property strategy Performance_ExplorePostRoutePhysOpt [get_runs impl_1]
 set_property STEPS.POST_ROUTE_PHYS_OPT_DESIGN.IS_ENABLED true [get_runs impl_1]
 set_property STEPS.POST_ROUTE_PHYS_OPT_DESIGN.ARGS.DIRECTIVE AggressiveExplore [get_runs impl_1]
 
