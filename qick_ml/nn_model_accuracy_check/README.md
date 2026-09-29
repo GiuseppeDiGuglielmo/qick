@@ -45,10 +45,10 @@ simulates the first 20 shots (the HLS testbench shots), `SHOTS` random shots
 balanced over the classes (default 1000), the `WRONG` shots the C model
 misclassifies (100) and the `NEAR` shots closest to the decision threshold
 (100), split over `JOBS` parallel simulations (20). `make rtl ALL=1` simulates
-every test shot. A simulation takes about 0.4 s per shot per core, so
-1,200 shots take about a minute on 20 cores and all 100,000 about 85 minutes
-(an estimate from the sample, not run). It exits with an error if any logit
-differs, the latency changes, or the testbench reports a problem.
+every test shot. With 20 or more simulations in parallel a shot costs about
+one core-second, so the default 1,213 shots take about a minute and all
+100,000 about 87 minutes on 22 cores (measured). It exits with an error if any
+logit differs, the latency changes, or the testbench reports a problem.
 
 `tb_nn_axi.v` configures the IP over AXI-Lite (window_size 400, window_offset
 0, scaling_factor 1), pulses the trigger, streams the shot's 400 packed I/Q
@@ -100,3 +100,11 @@ RTL (`make rtl`, defaults): 1,213 shots (591 ground, 622 excited, including
 the misclassified and threshold-nearest ones), all 1,213 logits exactly equal
 to the C model's, 429 cycles from trigger to BRAM write on every shot, 62 s on
 20 cores. A corrupted C-model logit (one count off) is caught.
+
+RTL on all 100,000 test shots (`make rtl ALL=1 JOBS=22`, 5,207 s): every one of
+the 100,000 logits (50,000 ground, 50,000 excited) is exactly equal to the C
+model's, 429 cycles from trigger to BRAM write on every shot, so the RTL
+scores the same 96.014% accuracy / 92.028% fidelity. This covers the RTL of the
+IP zip (`hdl/verilog/`) as a whole, not only the NN() core, over the entire
+test set; it does not cover the free-running ADC stream timing or a nonzero
+window_offset (see above).
