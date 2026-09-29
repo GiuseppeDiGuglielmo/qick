@@ -12,7 +12,7 @@ import functools
 from tqdm.auto import tqdm
 
 from qick import obtain, get_version
-from .helpers import cosine, gauss, triang, DRAG
+from .helpers import to_int, cosine, gauss, triang, DRAG
 
 logger = logging.getLogger(__name__)
 
@@ -57,6 +57,27 @@ class QickConfig():
     def __setitem__(self, key, val):
         self._cfg[key] = val
 
+    def _describe_dac(self, dacname):
+        tile, block = [int(c) for c in dacname]
+        if self['board']=='ZCU111':
+            label = "DAC%d_T%d_CH%d or RF board output %d" % (tile + 228, tile, block, tile*4 + block)
+        elif self['board']=='ZCU216':
+            label = "%d_%d, on JHC%d" % (block, tile + 228, 1 + (block%2) + 2*(tile//2))
+        elif self['board']=='RFSoC4x2':
+            label = {'00': 'DAC_B', '20': 'DAC_A'}[dacname]
+        return "DAC tile %d, blk %d is %s" % (tile, block, label)
+
+    def _describe_adc(self, adcname):
+        tile, block = [int(c) for c in adcname]
+        if self['board']=='ZCU111':
+            rfbtype = "DC" if tile > 1 else "AC"
+            label = "ADC%d_T%d_CH%d or RF board %s input %d" % (tile + 224, tile, block, rfbtype, (tile%2)*2 + block)
+        elif self['board']=='ZCU216':
+            label = "%d_%d, on JHC%d" % (block, tile + 224, 5 + (block%2) + 2*(tile//2))
+        elif self['board']=='RFSoC4x2':
+            label = {'00': 'ADC_D', '01': 'ADC_C', '20': 'ADC_B', '21': 'ADC_A'}[adcname]
+        return "ADC tile %d, blk %d is %s" % (tile, block, label)
+
     def description(self):
         """Generate a printable description of the QICK configuration.
 
@@ -80,58 +101,44 @@ class QickConfig():
 
         lines.append("\n\t%d signal generator channels:" % (len(self['gens'])))
         for iGen, gen in enumerate(self['gens']):
-            lines.append("\t%d:\t%s - tProc output %d, envelope memory %d samples" %
-                         (iGen, gen['type'], gen['tproc_ch'], gen['maxlen']))
-            lines.append("\t\tDAC tile %s, blk %s, %d-bit DDS, fabric=%.3f MHz, f_dds=%.3f MHz" %
-                         (*gen['dac'], gen['b_dds'], gen['f_fabric'], gen['f_dds']))
+            dacname = gen['dac']
+            dac = self['dacs'][dacname]
+            buflen = gen['maxlen']/(gen['samps_per_clk']*gen['f_fabric'])
+            lines.append("\t%d:\t%s - envelope memory %d samples (%.3f us)" %
+                         (iGen, gen['type'], gen['maxlen'], buflen))
+            lines.append("\t\tfs=%.3f MHz, fabric=%.3f MHz, %d-bit DDS, range=%.3f MHz" %
+                         (dac['fs'], gen['f_fabric'], gen['b_dds'], gen['f_dds']))
+            lines.append("\t\t" + self._describe_dac(dacname))
 
         if self['iqs']:
             lines.append("\n\t%d constant-IQ outputs:" % (len(self['iqs'])))
             for iIQ, iq in enumerate(self['iqs']):
-                lines.append("\t%d:\tDAC tile %s, blk %s, fs=%.3f MHz" %
-                             (iIQ, *iq['dac'], iq['fs']))
+                dacname = iq['dac']
+                dac = self['dacs'][dacname]
+                lines.append("\t%d:\tfs=%.3f MHz" % (iIQ, *dacname, iq['fs']))
+                lines.append("\t\t" + self._describe_dac(dacname))
 
         lines.append("\n\t%d readout channels:" % (len(self['readouts'])))
         for iReadout, readout in enumerate(self['readouts']):
+            adcname = readout['adc']
+            adc = self['adcs'][adcname]
+            buflen = readout['buf_maxlen']/readout['f_fabric']
             if 'tproc_ctrl' in readout:
                 lines.append("\t%d:\t%s - controlled by tProc output %d" % (iReadout, readout['ro_type'], readout['tproc_ctrl']))
             else:
                 lines.append("\t%d:\t%s - controlled by PYNQ" % (iReadout, readout['ro_type']))
-            lines.append("\t\tADC tile %s, blk %s, %d-bit DDS, fabric=%.3f MHz, f_dds=%.3f MHz" %
-                         (*readout['adc'], readout['b_dds'], readout['f_fabric'], readout['f_dds']))
-            lines.append("\t\tmaxlen %d (avg) %d (decimated)" % (
-                readout['avg_maxlen'], readout['buf_maxlen']))
+            lines.append("\t\tfs=%.3f MHz, fabric=%.3f MHz, %d-bit DDS, range=%.3f MHz" %
+                         (adc['fs'], readout['f_fabric'], readout['b_dds'], readout['f_dds']))
+            lines.append("\t\tmaxlen %d accumulated, %d decimated (%.3f us)" % (
+                readout['avg_maxlen'], readout['buf_maxlen'], buflen))
             lines.append("\t\ttriggered by %s %d, pin %d, feedback to tProc input %d" % (
                 readout['trigger_type'], readout['trigger_port'], readout['trigger_bit'], readout['tproc_ch']))
-
-        lines.append("\n\t%d DACs:" % (len(self['dacs'])))
-        for dac in self['dacs']:
-            tile, block = [int(c) for c in dac]
-            if self['board']=='ZCU111':
-                label = "DAC%d_T%d_CH%d or RF board output %d" % (tile + 228, tile, block, tile*4 + block)
-            elif self['board']=='ZCU216':
-                label = "%d_%d, on JHC%d" % (block, tile + 228, 1 + (block%2) + 2*(tile//2))
-            elif self['board']=='RFSoC4x2':
-                label = {'00': 'DAC_B', '20': 'DAC_A'}[dac]
-            lines.append("\t\tDAC tile %d, blk %d is %s" %
-                         (tile, block, label))
-
-        lines.append("\n\t%d ADCs:" % (len(self['adcs'])))
-        for adc in self['adcs']:
-            tile, block = [int(c) for c in adc]
-            if self['board']=='ZCU111':
-                rfbtype = "DC" if tile > 1 else "AC"
-                label = "ADC%d_T%d_CH%d or RF board %s input %d" % (tile + 224, tile, block, rfbtype, (tile%2)*2 + block)
-            elif self['board']=='ZCU216':
-                label = "%d_%d, on JHC%d" % (block, tile + 224, 5 + (block%2) + 2*(tile//2))
-            elif self['board']=='RFSoC4x2':
-                label = {'00': 'ADC_D', '01': 'ADC_C', '20': 'ADC_B', '21': 'ADC_A'}[adc]
-            lines.append("\t\tADC tile %d, blk %d is %s" %
-                         (tile, block, label))
+            lines.append("\t\t" + self._describe_adc(adcname))
 
         lines.append("\n\t%d digital output pins:" % (len(tproc['output_pins'])))
         for iPin, (porttype, port, pin, name) in enumerate(tproc['output_pins']):
-            lines.append("\t%d:\t%s (%s %d, pin %d)" % (iPin, name, porttype, port, pin))
+            lines.append("\t%d:\t%s" % (iPin, name))
+            #lines.append("\t%d:\t%s (%s %d, pin %d)" % (iPin, name, porttype, port, pin))
 
         lines.append("\n\ttProc %s: program memory %d words, data memory %d words" %
                 (tproc['type'], tproc['pmem_size'], tproc['dmem_size']))
@@ -141,17 +148,20 @@ class QickConfig():
         if "ddr4_buf" in self._cfg:
             buf = self['ddr4_buf']
             buflist = [bufnames.index(x) for x in buf['readouts']]
-            lines.append("\n\tDDR4 memory buffer: %d samples, %d samples/transfer" % (buf['maxlen'], buf['burst_len']))
-            lines.append("\t\twired to readouts %s, triggered by %s %d, pin %d" % (
-                buflist, buf['trigger_type'], buf['trigger_port'], buf['trigger_bit']))
+            buflen = buf['maxlen']/self['readouts'][buflist[0]]['f_fabric']
+            lines.append("\n\tDDR4 memory buffer: %d samples (%.3f sec), %d samples/transfer" % (buf['maxlen'], buflen/1e6, buf['burst_len']))
+            lines.append("\t\twired to readouts %s" % (buflist))
+            #lines.append("\t\twired to readouts %s, triggered by %s %d, pin %d" % (
+            #    buflist, buf['trigger_type'], buf['trigger_port'], buf['trigger_bit']))
 
         if "mr_buf" in self._cfg:
             buf = self['mr_buf']
             buflist = [bufnames.index(x) for x in buf['readouts']]
-            lines.append("\n\tMR buffer: %d samples, wired to readouts %s, triggered by %s %d, pin %d" % (
-                buf['maxlen'], buflist, buf['trigger_type'], buf['trigger_port'], buf['trigger_bit']))
-            #lines.append("\t\twired to readouts %s, triggered by %s %d, pin %d" % (
-            #    buflist, buf['trigger_type'], buf['trigger_port'], buf['trigger_bit']))
+            buflen = buf['maxlen']/self['adcs'][self['readouts'][buflist[0]]['adc']]['fs']
+            lines.append("\n\tMR buffer: %d samples (%.3f us), wired to readouts %s" % (
+                buf['maxlen'], buflen, buflist))
+            #lines.append("\n\tMR buffer: %d samples, wired to readouts %s, triggered by %s %d, pin %d" % (
+            #    buf['maxlen'], buflist, buf['trigger_type'], buf['trigger_port'], buf['trigger_bit']))
 
         return "\nQICK configuration:\n"+"\n".join(lines)
 
@@ -185,54 +195,85 @@ class QickConfig():
         """
         return json.dumps(self._cfg, indent=4)
 
-    def calc_fstep(self, dict1, dict2):
-        """Finds the least common multiple of the frequency steps of two channels (typically a generator and readout)
+    def calc_fstep_int(self, dict1, other_dicts):
+        """Finds the multiplier that needs to be applied to a channel's frequency step size to allow this channel to be frequency-matched with another channel.
+
+        Parameters
+        ----------
+        dict1 : dict
+            config dict for this channel
+        other_dicts : list of dict
+            config dict for the other channel(s)
+
+        Returns
+        -------
+        int
+            frequency step multiplier for the first channel
+        """
+        refclk = self['refclk_freq']
+        # Calculate least common multiple of sampling frequencies.
+
+        alldicts = [dict1] + other_dicts
+        # The DDS ranges are related to the refclk by fs_mult and fdds_div, both integers: f_dds = refclk*fs_mult/fdds_div
+        # So we can find a common div:
+        max_div = np.lcm.reduce([d['fdds_div'] for d in alldicts])
+        # and the max of the bit resolutions:
+        b_max = max([d['b_dds'] for d in alldicts])
+
+        # so the frequency steps are both divisible by a "common divisor" of refclk/max_div/2**b_max
+        # and these multipliers from the common divisor to the channel steps are always integer
+        fsmults = [d['fs_mult'] * (max_div//d['fdds_div']) * 2**(b_max - d['b_dds']) for d in alldicts]
+
+        # the LCM of those multipliers will give us a common multiple of the channel steps
+        mult_lcm = np.lcm.reduce(fsmults)
+        # so mult_lcm times the common divisor gives us a common step size that is divisible by all channel steps
+        # we want the common step divided by the channel 1 step:
+        return mult_lcm//fsmults[0]
+
+    def ch_fstep(self, dict1):
+        """Finds the frequency step size of a single channel (generator or readout).
 
         Parameters
         ----------
         dict1 : dict
             config dict for one channel
-        dict2 : dict
-            config dict for the other channel
 
         Returns
         -------
         float
-            frequency step common to the two channels
+            frequency step for this channel
         """
-        refclk = self['refclk_freq']
-        # Calculate least common multiple of sampling frequencies.
+        return dict1['fs_mult'] * (self['refclk_freq']/dict1['fdds_div']) / 2**dict1['b_dds']
 
-        # The DDS ranges are related to the refclk by fs_mult and fdds_div, both integers.
-        # So we can find a common div:
-        max_div = np.lcm(dict1['fdds_div'], dict2['fdds_div'])
-        # and the max of the bit resolutions:
-        b_max = max(dict1['b_dds'], dict2['b_dds'])
+    def calc_fstep(self, dicts):
+        """Finds the least common multiple of the frequency steps of two or more channels (typically a generator and readout)
+        For proper frequency matching, you should only use frequencies that are evenly divisible by this value.
+        The order of the parameters does not matter.
 
-        # so the frequency steps are both divisible by a common divisor of refclk/max_div/2**b_max
+        Parameters
+        ----------
+        dicts : list of dict
+            config dict for the channels
 
-        # multipliers from common divisor to the channel steps - always integer
-        fsmult1 = dict1['fs_mult'] * (max_div//dict1['fdds_div']) * 2**(b_max - dict1['b_dds'])
-        fsmult2 = dict2['fs_mult'] * (max_div//dict2['fdds_div']) * 2**(b_max - dict2['b_dds'])
+        Returns
+        -------
+        float
+            frequency step common to all channels
+        """
+        # find the multiplier from channel 1's minimum step size to the common step size
+        step_int1 = self.calc_fstep_int(dicts[0], dicts[1:])
+        # multiply channel 1's step size by the multiplier
+        return step_int1 * self.ch_fstep(dicts[0])
 
-        # the LCM of those multipliers will give us a common multiple of the channel steps
-        mult_lcm = np.lcm(fsmult1, fsmult2)
-        # Calculate a common fstep_lcm, which is divisible by both step sizes of both channels.
-        # We should only use frequencies that are evenly divisible by fstep_lcm.
-        # now multiply the common divisor by the LCM to get the common step
-        return (refclk/max_div) * mult_lcm / 2**b_max
-
-    def roundfreq(self, f, dict1, dict2):
-        """Round a frequency to the LCM of the frequency steps of two channels (typically a generator and readout).
+    def roundfreq(self, f, dicts):
+        """Round a frequency to the LCM of the frequency steps of two or more channels (typically a generator and readout).
 
         Parameters
         ----------
         f : float or array
             frequency (MHz)
-        dict1 : dict
-            config dict for one channel
-        dict2 : dict
-            config dict for the other channel
+        dicts : list of dict
+            config dict for the channels
 
         Returns
         -------
@@ -240,7 +281,7 @@ class QickConfig():
             rounded frequency (MHz)
 
         """
-        fstep = self.calc_fstep(dict1, dict2)
+        fstep = self.calc_fstep(dicts)
         return np.round(f/fstep) * fstep
 
     def freq2int(self, f, thisch, otherch=None):
@@ -264,11 +305,10 @@ class QickConfig():
 
         """
         if otherch is None:
-            f_round = f
+            step_int = 1
         else:
-            f_round = self.roundfreq(f, thisch, otherch)
-        k_i = np.round(f_round*(2**thisch['b_dds'])/thisch['f_dds'])
-        return np.int64(k_i)
+            step_int = self.calc_fstep_int(thisch, [otherch])
+        return to_int(f, 1/self.ch_fstep(thisch), parname='freq', quantize=step_int)
 
     def int2freq(self, r, thisch):
         """Converts register value to MHz.
@@ -397,7 +437,7 @@ class QickConfig():
             Re-formatted frequency
 
         """
-        return self.roundfreq(f, self['gens'][gen_ch], self['readouts'][ro_ch])
+        return self.roundfreq(f, [self['gens'][gen_ch], self['readouts'][ro_ch]])
 
     def deg2reg(self, deg, gen_ch=0):
         """Converts degrees into phase register values; numbers greater than 360 will effectively be wrapped.
@@ -420,7 +460,7 @@ class QickConfig():
             b_phase = 16
         else:
             b_phase = 32
-        return int(deg*2**b_phase//360) % 2**b_phase
+        return to_int(deg, 2**b_phase/360, parname='phase') % 2**b_phase
 
     def reg2deg(self, reg, gen_ch=0):
         """Converts phase register values into degrees.
@@ -503,7 +543,8 @@ class QickConfig():
             fclk = self['readouts'][ro_ch]['f_fabric']
         else:
             fclk = self['tprocs'][0]['f_time']
-        return np.int64(np.round(obtain(us)*fclk))
+        #return np.int64(np.round(obtain(us)*fclk))
+        return to_int(obtain(us), fclk, parname='length')
 
 
 class DummyIp:
@@ -531,36 +572,46 @@ class AbsQickProgram:
                       'cycles2us', 'us2cycles',
                       'deg2reg', 'reg2deg']
 
+
     def __init__(self, soccfg):
         """
         Constructor method
         """
         self.soccfg = soccfg
         self.tproccfg = self.soccfg['tprocs'][0]
+        self._init_declarations()
+        self._init_instructions()
 
+        # Attributes to dump when saving the program to JSON.
+        self.dump_keys = ['envelopes', 'ro_chs', 'gen_chs']
+
+    def _init_declarations(self):
+        """Initialize data structures for keeping track of program declarations.
+        Structures that are filled directly by user code or a make_program() should be initialized here.
+        This will typically mean macros, channels and envelopes.
+        Concrete subclasses will extend this method to add more data structures.
+        This should be called at class initialization.
+        If a program is filled using a make_program() that is called during compilation, this should also be called before make_program().
+        """
+        logger.debug("init_declarations")
         # Pulse envelopes.
-        self.envelopes = [{} for ch in soccfg['gens']]
+        self.envelopes = [{} for ch in self.soccfg['gens']]
         # readout channels to configure before running the program
         self.ro_chs = OrderedDict()
         # signal generator channels to configure before running the program
         self.gen_chs = OrderedDict()
 
+    def _init_instructions(self):
+        """Initialize data structures for keeping track of program instructions.
+        Structures that are filled automatically at compilation should be initialized here.
+        This will typically mean the ASM list.
+        Concrete subclasses will extend this method to add more data structures.
+        This should be called at class initialization and before compilation.
+        """
+        logger.debug("init_instructions")
         # Timestamps, for keeping track of pulse and readout end times.
-        self._gen_ts = [0]*len(soccfg['gens'])
-        self._ro_ts = [0]*len(soccfg['readouts'])
-
-        # tProc address of the rep counter, must be defined
-        self.counter_addr = None
-
-        # data dimensions, must be defined:
-        # list of loop dimensions, outermost loop first
-        self.loop_dims = None
-        # which loop level to average over (0 is outermost)
-        self.avg_level = None
-
-        # threshold and angle for single-shot discrimination, if desired
-        self.shot_threshold = None
-        self.shot_angle = None
+        self._gen_ts = [0]*len(self.soccfg['gens'])
+        self._ro_ts = [0]*len(self.soccfg['readouts'])
 
     def __getattr__(self, a):
         """
@@ -576,6 +627,26 @@ class AbsQickProgram:
             return getattr(self.soccfg, a)
         else:
             return object.__getattribute__(self, a)
+
+    def dump_prog(self):
+        """
+        Dump the program to a dictionary.
+        This output contains all the information necessary to run the program.
+        In other words, it will have the low-level ASM and pulse+envelope data, but not higher-level structures.
+        Caution: don't modify the sub-dictionaries of this dict!
+        You will be modifying the original program (this is not a deep copy).
+        """
+        progdict = {}
+        for key in self.dump_keys:
+            progdict[key] = getattr(self, key)
+        return progdict
+
+    def load_prog(self, progdict):
+        """
+        Load the program from a dictionary.
+        """
+        for key in self.dump_keys:
+            setattr(self, key, progdict[key])
 
     def config_all(self, soc, load_pulses=True):
         """
@@ -596,6 +667,30 @@ class AbsQickProgram:
         # Configure the readout down converters
         self.config_readouts(soc)
 
+    def run(self, soc, load_prog=True, load_pulses=True, start_src="internal"):
+        """Load the program into the tProcessor and start it.
+        Because there is in general no way to tell when a program is done running, there is no guarantee that the program will be done before this method returns.
+        If you want that guarantee, use run_rounds().
+
+        Parameters
+        ----------
+        soc : QickSoc
+            The QickSoc that will execute this program.
+        load_prog : bool
+            Load the program before starting the tProc.
+        load_pulses : bool
+            Load the generator envelopes before starting the tProc.
+            If load_prog is False, load_pulses is ignored.
+        start_src: str
+            "internal" (tProc starts immediately) or "external" (each round waits for an external trigger).
+        """
+        if load_prog:
+            self.config_all(soc, load_pulses=load_pulses)
+        # configure tproc for internal/external start
+        soc.start_src(start_src)
+        # run the assembly program
+        # if start_src="external", it won't actually start until it sees a pulse
+        soc.start_tproc()
 
     def declare_readout(self, ch, length, freq=None, sel='product', gen_ch=None):
         """Add a channel to the program's list of readouts.
@@ -720,7 +815,7 @@ class AbsQickProgram:
             soc.set_nyquist(ch, cfg['nqz'])
             soc.set_mixer_freq(ch, cfg['mixer_freq'], cfg['ro_ch'])
             if cfg['mux_freqs'] is not None:
-                soc.set_mux_freqs(ch, freqs=cfg['mux_freqs'], gains=cfg['mux_gains'])
+                soc.set_mux_freqs(ch, freqs=cfg['mux_freqs'], gains=cfg['mux_gains'], ro_ch=cfg['ro_ch'])
 
     def add_envelope(self, ch, name, idata=None, qdata=None):
         """Adds a waveform to the waveform library within the program.
@@ -871,8 +966,14 @@ class AbsQickProgram:
                         addr=pulse['addr'])
 
     def reset_timestamps(self, gen_t0=None):
+        # used by init and sync_all()
         self._gen_ts = [0]*len(self._gen_ts) if gen_t0 is None else gen_t0.copy()
         self._ro_ts = [0]*len(self._ro_ts)
+
+    def decrement_timestamps(self, t):
+        # used by sync() in v2
+        self._gen_ts = [max(0, x-t) for x in self._gen_ts]
+        self._ro_ts = [max(0, x-t) for x in self._ro_ts]
 
     def get_timestamp(self, gen_ch=None, ro_ch=None):
         if gen_ch is not None and ro_ch is not None:
@@ -906,7 +1007,107 @@ class AbsQickProgram:
         if ros: timestamps += list(self._ro_ts)
         return max(timestamps)
 
-    def acquire(self, soc, soft_avgs, reads_per_rep=None, load_pulses=True, start_src="internal", progress=False):
+class AcquireMixin:
+    """Adds acquire() and acquire_decimated() methods for acquiring readout data, and run_rounds() for running repeatedly without acquisition.
+    Program classes that use this mixin must call setup_acquire() after _init_prog() and before acquire()/acquire_decimated().
+    """
+    def __init__(self, *args, **kwargs):
+        # pass through any init arguments
+        super().__init__(*args, **kwargs)
+
+        # Attributes to dump when saving the program to JSON.
+        self.dump_keys += ['counter_addr', 'reads_per_shot', 'loop_dims', 'avg_level']
+
+        # measurements from the most recent acquisition
+        # raw I/Q data without normalizing to window length or averaging over reps
+        self.d_buf = None
+        # shot-by-shot threshold classification
+        self.shots = None
+
+    def _init_declarations(self):
+        super()._init_declarations()
+
+        # tProc address of the rep counter, must be defined
+        self.counter_addr = None
+
+        # data dimensions, must be defined:
+        # number of times each readout is triggered in a single shot
+        self.reads_per_shot = None
+        # list of loop dimensions, outermost loop first
+        self.loop_dims = None
+        # which loop level to average over (0 is outermost)
+        self.avg_level = None
+
+    def setup_counter(self, counter_addr, loop_dims):
+        """Set the parameters needed to track the progress of the program.
+        This is a subset of setup_acquire(), appropriate for programs where you have no readouts.
+        You should use this if you're updating a tProc counter and want to use it to track program progress.
+
+        Parameters
+        ----------
+        counter_addr : int
+            The special tProc address holding the number of shots read out thus far.
+        loop_dims : list of int
+            List of loop dimensions, outermost loop first.
+        """
+        self.counter_addr = counter_addr
+        self.loop_dims = loop_dims
+
+    def setup_acquire(self, counter_addr, loop_dims, avg_level):
+        """Set the parameters needed to define the data acquisition.
+        Since the number of readouts per shot is set based on calls to trigger(), this should be called after the program has been fully defined.
+
+        Parameters
+        ----------
+        counter_addr : int
+            The special tProc address holding the number of shots read out thus far.
+        loop_dims : list of int
+            List of loop dimensions, outermost loop first.
+        avg_level : int
+            Which loop level to average over (0 is outermost).
+        """
+        self.setup_counter(counter_addr, loop_dims)
+        self.avg_level = avg_level
+        # TODO: this doesn't work unless trigger macros have been processed
+        self.reads_per_shot = [ro['trigs'] for ro in self.ro_chs.values()]
+
+    def set_reads_per_shot(self, reads_per_shot):
+        """Override the default count of readout triggers per shot.
+        This should be called after setup_acquire().
+        You probably shouldn't be using this method; the default value is usually correct.
+
+        Parameters
+        ----------
+        reads_per_shot : int or list of int
+            Number of readout triggers per shot.
+            If int, all declared readout channels use this value.
+        """
+        try:
+            self.reads_per_shot = [int(reads_per_shot)]*len(self.ro_chs)
+        except TypeError:
+            self.reads_per_shot = reads_per_shot
+
+    def get_raw(self):
+        """Get the raw integer I/Q values before normalizing to the readout window or averaging across reps.
+
+        Returns
+        -------
+        list of ndarray
+            Array of I/Q values for each readout channel.
+        """
+        return self.d_buf
+
+    def get_shots(self):
+        """Get the shot-by-shot threshold decisions.
+
+        Returns
+        -------
+        list of ndarray
+            Array of shots for each readout channel.
+        """
+        return self.shots
+
+    def acquire(self, soc, soft_avgs=1, load_pulses=True, start_src="internal", threshold=None, angle=None, progress=True):
         """Acquire data using the accumulated readout.
 
         Parameters
@@ -915,44 +1116,44 @@ class AbsQickProgram:
             Qick object
         soft_avgs : int
             number of times to rerun the program, averaging results in software (aka "rounds")
-        reads_per_rep : int
-            number of readout triggers in the loop body
-            by default, this is automatically detected based on calls to trigger()
         load_pulses : bool
             if True, load pulse envelopes
         start_src: str
             "internal" (tProc starts immediately) or "external" (each round waits for an external trigger)
+        threshold : float or list of float
+            The threshold(s) to apply to the I values after rotation.
+            Length-normalized units (same units as the output of acquire()).
+            If scalar, the same threshold will be applied to all readout channels.
+            A list must have length equal to the number of declared readout channels.
+        angle : float or list of float
+            The angle to rotate the I/Q values by before applying the threshold.
+            Units of radians.
+            If scalar, the same angle will be applied to all readout channels.
+            A list must have length equal to the number of declared readout channels.
         progress: bool
             if true, displays progress bar
 
         Returns
         -------
         ndarray
-            raw accumulated IQ values (int32)
-            if rounds>1, only the last round is kept
-            dimensions : (n_ch, n_expts*n_reps*n_reads, 2)
-
-        ndarray
             averaged IQ values (float)
             divided by the length of the RO window, and averaged over reps and rounds
-            if shot_threshold is defined, the I values will be the fraction of points over threshold
+            if threshold is defined, the I values will be the fraction of points over threshold
             dimensions for a simple averaging program: (n_ch, n_reads, 2)
             dimensions for a program with multiple expts/steps: (n_ch, n_reads, n_expts, 2)
         """
-
         self.config_all(soc, load_pulses=load_pulses)
+
+        if any([x is None for x in [self.counter_addr, self.loop_dims, self.avg_level]]):
+            raise RuntimeError("data dimensions need to be defined with setup_acquire() before calling acquire()")
 
         # configure tproc for internal/external start
         soc.start_src(start_src)
 
         n_ro = len(self.ro_chs)
-        if reads_per_rep is not None:
-            for ro_ch in self.ro_chs.values():
-                ro_ch['trigs'] = reads_per_rep
-        reads_per_rep = [ro['trigs'] for ro in self.ro_chs.values()]
 
         total_count = functools.reduce(operator.mul, self.loop_dims)
-        d_buf = [np.zeros((total_count*nreads, 2), dtype=np.int32) for nreads in reads_per_rep]
+        self.d_buf = [np.zeros((*self.loop_dims, nreads, 2), dtype=np.int32) for nreads in self.reads_per_shot]
         self.stats = []
 
         # select which tqdm progress bar to show
@@ -966,7 +1167,6 @@ class AbsQickProgram:
 
         # avg_d doesn't have a specific shape here, so that it's easier for child programs to write custom _average_buf
         avg_d = None
-        shots = None
         for ir in tqdm(range(soft_avgs), disable=hiderounds):
             # Configure and enable buffer capture.
             self.config_bufs(soc, enable_avg=True, enable_buf=False)
@@ -974,27 +1174,29 @@ class AbsQickProgram:
             count = 0
             with tqdm(total=total_count, disable=hidereps) as pbar:
                 soc.start_readout(total_count, counter_addr=self.counter_addr,
-                                       ch_list=list(self.ro_chs), reads_per_rep=reads_per_rep)
+                                       ch_list=list(self.ro_chs), reads_per_shot=self.reads_per_shot)
                 while count<total_count:
                     new_data = obtain(soc.poll_data())
                     for new_points, (d, s) in new_data:
-                        for ii, nreads in enumerate(reads_per_rep):
-                            d_buf[ii][count*nreads:(count+new_points)*nreads] = d[ii]
+                        for ii, nreads in enumerate(self.reads_per_shot):
+                            # use reshape to view the d_buf array in a shape that matches the raw data
+                            self.d_buf[ii].reshape((-1,2))[count*nreads:(count+new_points)*nreads] = d[ii]
                         count += new_points
                         self.stats.append(s)
                         pbar.update(new_points)
 
             # if we're thresholding, apply the threshold before averaging
-            if self.shot_threshold is None:
-                d_reps = d_buf
+            if threshold is None:
+                d_reps = self.d_buf
+                round_d = self._average_buf(d_reps, self.reads_per_shot)
             else:
-                d_reps = [np.zeros_like(d) for d in d_buf]
-                shots = self.get_single_shots(d_buf)
-                for i, ch_shot in enumerate(shots):
+                d_reps = [np.zeros_like(d) for d in self.d_buf]
+                self.shots = self._apply_threshold(self.d_buf, threshold, angle)
+                for i, ch_shot in enumerate(self.shots):
                     d_reps[i][...,0] = ch_shot
+                round_d = self._average_buf(d_reps, self.reads_per_shot, length_norm=False)
 
             # sum over rounds axis
-            round_d = self._average_buf(d_reps, reads_per_rep)
             if avg_d is None:
                 avg_d = round_d
             else:
@@ -1003,28 +1205,30 @@ class AbsQickProgram:
         # divide total by rounds
         for d in avg_d: d /= soft_avgs
 
-        return d_buf, avg_d, shots
+        return avg_d
 
-    def _average_buf(self, d_reps: np.ndarray, reads_per_rep: list) -> np.ndarray:
+    def _average_buf(self, d_reps: np.ndarray, reads_per_shot: list, length_norm: bool=True) -> np.ndarray:
         """
         calculate averaged data in a data acquire round. This function should be overwritten in the child qick program
         if the data is created in a different shape.
 
         :param d_reps: buffer data acquired in a round
-        :param reads_per_rep: readouts per experiment
+        :param reads_per_shot: readouts per experiment
+        :param length_norm: normalize by readout window length (disable for thresholded values)
         :return: averaged iq data after each round.
         """
-        averaged_dims = self.loop_dims.copy()
-        del averaged_dims[self.avg_level]
-        avg_d = [np.zeros((nreads, *averaged_dims, 2)) for nreads in reads_per_rep]
+        avg_d = []
         for i_ch, ro in enumerate(self.ro_chs.values()):
-            nreads = reads_per_rep[i_ch]
-            for ii in range(nreads):
-                avg_d[i_ch][ii] = d_reps[i_ch][ii::nreads, :].reshape((*self.loop_dims, 2)).sum(axis=self.avg_level) / (self.loop_dims[self.avg_level] * ro['length'])
+            # average over the avg_level
+            avg = d_reps[i_ch].sum(axis=self.avg_level) / self.loop_dims[self.avg_level]
+            if length_norm:
+                avg /= ro['length']
+            # the reads_per_shot axis should be the first one
+            avg_d.append(np.moveaxis(avg, -2, 0))
 
         return avg_d
 
-    def get_single_shots(self, d_buf):
+    def _apply_threshold(self, d_buf, threshold, angle):
         """
         This method converts the raw I/Q data to single shots according to the threshold and rotation angle
 
@@ -1032,6 +1236,16 @@ class AbsQickProgram:
         ----------
         d_buf : list of ndarray
             Raw IQ data
+        threshold : float or list of float
+            The threshold(s) to apply to the I values after rotation.
+            Length-normalized units (same units as the output of acquire()).
+            If scalar, the same threshold will be applied to all readout channels.
+            A list must have length equal to the number of declared readout channels.
+        angle : float or list of float
+            The angle to rotate the I/Q values by before applying the threshold.
+            Units of radians.
+            If scalar, the same angle will be applied to all readout channels.
+            A list must have length equal to the number of declared readout channels.
 
         Returns
         -------
@@ -1041,17 +1255,15 @@ class AbsQickProgram:
         """
         # try to convert threshold to list of floats; if that fails, assume it's already a list
         try:
-            thresholds = [float(self.shot_threshold)]*len(self.ro_chs)
+            thresholds = [float(threshold)]*len(self.ro_chs)
         except TypeError:
-            thresholds = self.shot_threshold
+            thresholds = threshold
         # angle is 0 if not specified
-        if self.shot_angle is None:
-            angles = [0.0]*len(self.ro_chs)
-        else:
-            try:
-                angles = [float(self.shot_angle)]*len(self.ro_chs)
-            except TypeError:
-                angles = self.shot_angle
+        if angle is None: angle = 0.0
+        try:
+            angles = [float(angle)]*len(self.ro_chs)
+        except TypeError:
+            angles = angle
 
         shots = []
         for i, ch in enumerate(self.ro_chs):
@@ -1059,8 +1271,110 @@ class AbsQickProgram:
             shots.append(np.heaviside(rotated - thresholds[i], 0))
         return shots
 
+    def get_time_axis(self, ro_index):
+        """Get an array usable as the time axis for plotting decimated data.
 
-    def acquire_decimated(self, soc, soft_avgs, reads_per_rep=None, load_pulses=True, start_src="internal", progress=True):
+        Parameters
+        ----------
+        ro_index : int
+            Index of the readout channel in this program.
+            The first readout declared in your program has index 0 and it will have index 0 in the output array, etc.
+
+        Returns
+        -------
+        ndarray of float
+            An array starting at 0 and spaced by the time (in us) per decimated sample.
+        """
+        ch, ro = list(self.ro_chs.items())[ro_index]
+        return self.soccfg.cycles2us(ro_ch=ch, cycles=np.arange(ro['length']))
+
+    def get_time_axis_ddr4(self, ro_ch, data):
+        """Get an array usable as the time axis for plotting DDR4 data.
+
+        Parameters
+        ----------
+        ro_ch : int
+            readout channel (index in 'readouts' list)
+        data : ndarray
+            DDR4 data array, the returned array will have the same length.
+
+        Returns
+        -------
+        ndarray of float
+            An array starting at 0 and spaced by the time (in us) per decimated sample.
+        """
+        return self.soccfg.cycles2us(ro_ch=ro_ch, cycles=np.arange(data.shape[0]))
+
+    def get_time_axis_mr(self, ro_ch, data):
+        """Get an array usable as the time axis for plotting MR data.
+
+        Parameters
+        ----------
+        ro_ch : int
+            readout channel (index in 'readouts' list)
+        data : ndarray
+            MR data array, the returned array will have the same length.
+
+        Returns
+        -------
+        ndarray of float
+            An array starting at 0 and spaced by the time (in us) per MR sample.
+        """
+        return np.arange(data.shape[0])/self.soccfg['readouts'][ro_ch]['fs']
+
+    def run_rounds(self, soc, rounds=1, load_pulses=True, start_src="internal", progress=True):
+        """Run the program and wait until it completes, once or multiple times.
+        No data will be saved.
+
+        Parameters
+        ----------
+        soc : QickSoc
+            Qick object
+        rounds : int
+            number of times to rerun the program
+        load_pulses : bool
+            if True, load pulse envelopes
+        start_src: str
+            "internal" (tProc starts immediately) or "external" (each round waits for an external trigger)
+        progress: bool
+            if true, displays progress bar
+        """
+        self.config_all(soc, load_pulses=load_pulses)
+
+        if any([x is None for x in [self.counter_addr, self.loop_dims]]):
+            raise RuntimeError("data dimensions need to be defined with setup_acquire() before calling run_rounds()")
+
+        # configure tproc for internal/external start
+        soc.start_src(start_src)
+
+        total_count = functools.reduce(operator.mul, self.loop_dims)
+
+        # select which tqdm progress bar to show
+        hiderounds = True
+        hidereps = True
+        if progress:
+            if rounds>1:
+                hiderounds = False
+            else:
+                hidereps = False
+
+        # run each round
+        for ii in tqdm(range(rounds), disable=hiderounds):
+            # make sure count variable is reset to 0
+            soc.set_tproc_counter(addr=self.counter_addr, val=0)
+
+            # run the assembly program
+            # if start_src="external", you must pulse the trigger input once for every round
+            soc.start_tproc()
+
+            count = 0
+            with tqdm(total=total_count, disable=hidereps) as pbar:
+                while count < total_count:
+                    newcount = soc.get_tproc_counter(addr=self.counter_addr)
+                    pbar.update(newcount-count)
+                    count = newcount
+
+    def acquire_decimated(self, soc, soft_avgs, load_pulses=True, start_src="internal", progress=True):
         """Acquire data using the decimating readout.
 
         Parameters
@@ -1069,9 +1383,6 @@ class AbsQickProgram:
             Qick object
         soft_avgs : int
             number of times to rerun the program, averaging results in software (aka "rounds")
-        reads_per_rep : int
-            number of readout triggers in the loop body
-            by default, this is automatically detected based on calls to trigger()
         load_pulses : bool
             if True, load pulse envelopes
         start_src: str
@@ -1089,26 +1400,28 @@ class AbsQickProgram:
         """
         self.config_all(soc, load_pulses=load_pulses)
 
+        if any([x is None for x in [self.counter_addr, self.loop_dims, self.avg_level]]):
+            raise RuntimeError("data dimensions need to be defined with setup_acquire() before calling acquire_decimated()")
+
         # configure tproc for internal/external start
         soc.start_src(start_src)
-
-        if reads_per_rep is not None:
-            for ro_ch in self.ro_chs.values():
-                ro_ch['trigs'] = reads_per_rep
-        reads_per_rep = [ro['trigs'] for ro in self.ro_chs.values()]
 
         total_count = functools.reduce(operator.mul, self.loop_dims)
 
         # Initialize data buffers
-        d_buf = []
+        # buffer for decimated data
+        dec_buf = []
         for ch, ro in self.ro_chs.items():
             maxlen = self.soccfg['readouts'][ch]['buf_maxlen']
             if ro['length']*ro['trigs']*total_count > maxlen:
                 raise RuntimeError("Warning: requested readout length (%d x %d trigs x %d reps) exceeds buffer size (%d)"%(ro['length'], ro['trigs'], total_count, maxlen))
-            d_buf.append(np.zeros((ro['length']*total_count*ro['trigs'], 2), dtype=float))
+            dec_buf.append(np.zeros((ro['length']*total_count*ro['trigs'], 2), dtype=float))
 
         # for each soft average, run and acquire decimated data
         for ii in tqdm(range(soft_avgs), disable=not progress):
+            # buffer for accumulated data (for convenience/debug)
+            self.d_buf = []
+
             # Configure and enable buffer capture.
             self.config_bufs(soc, enable_avg=True, enable_buf=True)
 
@@ -1124,23 +1437,24 @@ class AbsQickProgram:
                 count = soc.get_tproc_counter(addr=self.counter_addr)
 
             for ii, (ch, ro) in enumerate(self.ro_chs.items()):
-                d_buf[ii] += obtain(soc.get_decimated(ch=ch,
+                dec_buf[ii] += obtain(soc.get_decimated(ch=ch,
                                     address=0, length=ro['length']*ro['trigs']*total_count))
+                self.d_buf.append(obtain(soc.get_accumulated(ch=ch, address=0, length=ro['trigs']*total_count).reshape((*self.loop_dims, ro['trigs'], 2))))
 
         onetrig = all([ro['trigs']==1 for ro in self.ro_chs.values()])
 
         # average the decimated data
         if total_count == 1 and onetrig:
             # simple case: data is 1D (one rep and one shot), just average over rounds
-            return [d/soft_avgs for d in d_buf]
+            return [d/soft_avgs for d in dec_buf]
         else:
             # split the data into the individual reps
             result = []
             for ii, (ch, ro) in enumerate(self.ro_chs.items()):
                 if onetrig or total_count==1:
-                    d_reshaped = d_buf[ii].reshape(total_count*ro['trigs'], -1, 2)/soft_avgs
+                    d_reshaped = dec_buf[ii].reshape(total_count*ro['trigs'], -1, 2)/soft_avgs
                 else:
-                    d_reshaped = d_buf[ii].reshape(total_count, ro['trigs'], -1, 2)/soft_avgs
+                    d_reshaped = dec_buf[ii].reshape(total_count, ro['trigs'], -1, 2)/soft_avgs
                 result.append(d_reshaped)
             return result
 

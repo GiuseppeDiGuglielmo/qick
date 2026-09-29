@@ -8,6 +8,7 @@ import xrfdc
 import numpy as np
 import time
 import queue
+from collections import OrderedDict
 from . import bitfile_path, obtain, get_version
 from .ip import SocIp, QickMetadata
 from .parser import parse_to_bin
@@ -102,13 +103,13 @@ class RFDC(xrfdc.RFdc):
         """
         super().__init__(description)
         # Nyquist zone for each channel
-        self.nqz_dict = {}
+        self.nqz_dict = {'dac': {}, 'adc': {}}
         # Rounded NCO frequency for each channel
         self.mixer_dict = {}
 
     def configure(self, soc):
-        self.daccfg = soc.dacs
-        self.adccfg = soc.adcs
+        self.daccfg = soc['dacs']
+        self.adccfg = soc['adcs']
 
     def set_mixer_freq(self, dacname, f, force=False, reset=False):
         """
@@ -172,36 +173,63 @@ class RFDC(xrfdc.RFdc):
             self.mixer_dict[dacname] = self.dac_tiles[tile].blocks[channel].MixerSettings['Freq']
             return self.mixer_dict[dacname]
 
-    def set_nyquist(self, dacname, nqz, force=False):
+    def set_nyquist(self, blockname, nqz, blocktype='dac', force=False):
         """
-        Sets DAC channel to operate in Nyquist zone nqz.
-        This setting doesn't change the output frequencies:
+        Sets channel to operate in Nyquist zone nqz.
+        This setting doesn't change the DAC output frequencies:
         you will always have some power at both the demanded frequency and its image(s).
         Setting the NQZ to 2 increases output power in the 2nd/3rd Nyquist zones.
         See "RF-DAC Nyquist Zone Operation" in PG269.
 
-        :param dacname: DAC channel (2-digit string)
-        :type dacname: int
+        :param blockname: channel ID (2-digit string)
+        :type blockname: int
         :param nqz: Nyquist zone (1 or 2)
         :type nqz: int
+        :param blocktype: 'dac' or 'adc'
+        :type blocktype: str
         :param force: force update, even if the setting is the same
         :type force: bool
         """
         if nqz not in [1,2]:
             raise RuntimeError("Nyquist zone must be 1 or 2")
-        tile, channel = [int(a) for a in dacname]
-        if not force and self.get_nyquist(dacname) == nqz:
+        if blocktype not in ['dac','adc']:
+            raise RuntimeError("Block type must be adc or dac")
+        tile, channel = [int(a) for a in blockname]
+        if not force and self.get_nyquist(blockname, blocktype) == nqz:
             return
-        self.dac_tiles[tile].blocks[channel].NyquistZone = nqz
-        self.nqz_dict[dacname] = nqz
+        if blocktype=='dac':
+            self.dac_tiles[tile].blocks[channel].NyquistZone = nqz
+        else:
+            self.adc_tiles[tile].blocks[channel].NyquistZone = nqz
+        self.nqz_dict[blocktype][blockname] = nqz
 
-    def get_nyquist(self, dacname):
+    def get_nyquist(self, blockname, blocktype='dac'):
+        """
+        Get the current Nyquist zone setting for a channel.
+
+        Parameters
+        ----------
+        blockname : str
+            Channel ID (2-digit string)
+        blocktype : str
+            'dac' or 'adc'
+
+        Returns
+        -------
+        int
+            NQZ setting (1 or 2)
+        """
+        if blocktype not in ['dac','adc']:
+            raise RuntimeError("Block type must be adc or dac")
         try:
-            return self.nqz_dict[dacname]
+            return self.nqz_dict[blocktype][blockname]
         except KeyError:
-            tile, channel = [int(a) for a in dacname]
-            self.nqz_dict[dacname] = self.dac_tiles[tile].blocks[channel].NyquistZone
-            return self.nqz_dict[dacname]
+            tile, channel = [int(a) for a in blockname]
+            if blocktype=='dac':
+                self.nqz_dict[blocktype][blockname] = self.dac_tiles[tile].blocks[channel].NyquistZone
+            else:
+                self.nqz_dict[blocktype][blockname] = self.adc_tiles[tile].blocks[channel].NyquistZone
+            return self.nqz_dict[blocktype][blockname]
 
 
 class QickSoc(Overlay, QickConfig):
@@ -349,9 +377,10 @@ class QickSoc(Overlay, QickConfig):
                 self.readouts.append(buf.readout)
 
         # Sort the lists.
-        # We order gens by the tProc port number and buffers by the switch port number.
+        # We order gens by the tProc port number and tProc mux port number (if present).
+        # We order buffers by the switch port number.
         # Those orderings are important, since those indices get used in programs.
-        self.gens.sort(key=lambda x: x['tproc_ch'])
+        self.gens.sort(key=lambda x:(x['tproc_ch'], x._cfg.get('tmux_ch')))
         self.avg_bufs.sort(key=lambda x: x.switch_ch)
         # The IQ and readout orderings aren't critical for anything.
         self.iqs.sort(key=lambda x: x.dac)
@@ -382,8 +411,6 @@ class QickSoc(Overlay, QickConfig):
             pass
 
         # Fill the config dictionary with driver parameters.
-        self['dacs'] = list(self.dacs.keys())
-        self['adcs'] = list(self.adcs.keys())
         self['gens'] = [gen.cfg for gen in self.gens]
         self['iqs'] = [iq.cfg for iq in self.iqs]
 
@@ -446,8 +473,8 @@ class QickSoc(Overlay, QickConfig):
         dac_fabric_freqs = []
         adc_fabric_freqs = []
         refclk_freqs = []
-        self.dacs = {}
-        self.adcs = {}
+        self['dacs'] = OrderedDict()
+        self['adcs'] = OrderedDict()
 
         for iTile in range(4):
             if rf_config['C_DAC%d_Enable' % (iTile)] != '1':
@@ -466,12 +493,14 @@ class QickSoc(Overlay, QickConfig):
             for iBlock in range(4):
                 if rf_config['C_DAC_Slice%d%d_Enable' % (iTile, iBlock)] != 'true':
                     continue
+                # define a 2-digit "name" that we'll use to refer to this channel
+                chname = "%d%d" % (iTile, iBlock)
                 interpolation = int(rf_config['C_DAC_Interpolation_Mode%d%d' % (iTile, iBlock)])
-                self.dacs["%d%d" % (iTile, iBlock)] = {'fs': fs,
-                                                       'fs_div': fs_div,
-                                                       'fs_mult': fs_mult,
-                                                       'f_fabric': f_fabric,
-                                                       'interpolation': interpolation}
+                self['dacs'][chname] = {'fs': fs,
+                                       'fs_div': fs_div,
+                                       'fs_mult': fs_mult,
+                                       'f_fabric': f_fabric,
+                                       'interpolation': interpolation}
 
         for iTile in range(4):
             if rf_config['C_ADC%d_Enable' % (iTile)] != '1':
@@ -494,12 +523,14 @@ class QickSoc(Overlay, QickConfig):
                 else:
                     if rf_config['C_ADC_Slice%d%d_Enable' % (iTile, iBlock)] != 'true':
                         continue
+                # define a 2-digit "name" that we'll use to refer to this channel
+                chname = "%d%d" % (iTile, iBlock)
                 decimation = int(rf_config['C_ADC_Decimation_Mode%d%d' % (iTile, iBlock)])
-                self.adcs["%d%d" % (iTile, iBlock)] = {'fs': fs,
-                                                       'fs_div': fs_div,
-                                                       'fs_mult': fs_mult,
-                                                       'f_fabric': f_fabric,
-                                                       'decimation': decimation}
+                self['adcs'][chname] = {'fs': fs,
+                                       'fs_div': fs_div,
+                                       'fs_mult': fs_mult,
+                                       'f_fabric': f_fabric,
+                                       'decimation': decimation}
 
         def get_common_freq(freqs):
             """
@@ -820,12 +851,25 @@ class QickSoc(Overlay, QickConfig):
         if self.TPROC_VERSION == 1:
             self.tproc.start()
         elif self.TPROC_VERSION == 2:
-            self.tproc.proc_stop()
-            self.tproc.proc_start()
+            self.tproc.stop()
+            self.tproc.start()
+
+    def stop_tproc(self):
+        """
+        Stop the tProc.
+        This is somewhat slow (tens of ms) for tProc v1.
+        """
+        if self.TPROC_VERSION == 1:
+            # there's no easy way to stop v1 - we need to reset and reload
+            self.tproc.reset()
+            # reload the program (since the reset will have wiped it out)
+            self.tproc.reload_program()
+        elif self.TPROC_VERSION == 2:
+            self.tproc.stop()
 
     def set_tproc_counter(self, addr, val):
         """
-        Initialize the tProc rep counter.
+        Initialize the tProc shot counter.
         Parameters
         ----------
         addr : int
@@ -841,7 +885,7 @@ class QickSoc(Overlay, QickConfig):
 
     def get_tproc_counter(self, addr):
         """
-        Read the tProc rep counter.
+        Read the tProc shot counter.
         For tProc V1, this accesses the data memory at the given address.
         For tProc V2, this accesses one of the two special AXI-readable registers.
 
@@ -878,26 +922,26 @@ class QickSoc(Overlay, QickConfig):
         self.start_src("internal")
         self.start_tproc()
 
-    def start_readout(self, total_reps, counter_addr=1, ch_list=None, reads_per_rep=1, stride=None):
+    def start_readout(self, total_shots, counter_addr=1, ch_list=None, reads_per_shot=1, stride=None):
         """
         Start a streaming readout of the accumulated buffers.
 
-        :param total_count: Number of data points expected
-        :type total_count: int
-        :param counter_addr: Data memory address for the loop counter
+        :param total_shots: Final value expected for the shot counter
+        :type total_shots: int
+        :param counter_addr: Data memory address for the shot counter
         :type counter_addr: int
         :param ch_list: List of readout channels
         :type ch_list: list of int
-        :param reads_per_rep: Number of data points to expect per counter increment
-        :type reads_per_rep: list of int
+        :param reads_per_shot: Number of data points to expect per counter increment
+        :type reads_per_shot: list of int
         :param stride: Default number of measurements to transfer at a time.
         :type stride: int
         """
         ch_list = obtain(ch_list)
-        reads_per_rep = obtain(reads_per_rep)
+        reads_per_shot = obtain(reads_per_shot)
         if ch_list is None: ch_list = [0, 1]
-        if isinstance(reads_per_rep, int):
-            reads_per_rep = [reads_per_rep]*len(ch_list)
+        if isinstance(reads_per_shot, int):
+            reads_per_shot = [reads_per_shot]*len(ch_list)
         streamer = self.streamer
 
         if not streamer.readout_worker.is_alive():
@@ -909,9 +953,7 @@ class QickSoc(Overlay, QickConfig):
         if streamer.readout_running():
             print("cleaning up previous readout: stopping tProc and streamer loop")
             # stop the tProc
-            self.tproc.reset()
-            # reload the program (since the reset will have wiped it out)
-            self.tproc.reload_program()
+            self.stop_tproc()
             # tell the readout to stop (this will break the readout loop)
             streamer.stop_readout()
             streamer.done_flag.wait()
@@ -928,11 +970,11 @@ class QickSoc(Overlay, QickConfig):
             self.poll_data(totaltime=-1, timeout=0.1)
             print("buffer cleared")
 
-        streamer.total_count = total_reps
+        streamer.total_count = total_shots
         streamer.count = 0
 
         streamer.done_flag.clear()
-        streamer.job_queue.put((total_reps, counter_addr, ch_list, reads_per_rep, stride))
+        streamer.job_queue.put((total_shots, counter_addr, ch_list, reads_per_shot, stride))
 
     def poll_data(self, totaltime=0.1, timeout=None):
         """

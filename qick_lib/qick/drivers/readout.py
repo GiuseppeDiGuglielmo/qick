@@ -101,6 +101,9 @@ class AxisReadoutV2(SocIp, AbsReadout):
         blocktype = soc.metadata.mod2type(block)
         if blocktype == "axis_broadcaster":
                 ((block, port),) = soc.metadata.trace_bus(block, 'M00_AXIS')
+        # TODO: This is a workaround to filter out NN modules
+        #if block != "NN_0":
+        #    self.buffer = getattr(soc, block)
         self.buffer = getattr(soc, block)
 
         #print("%s: ADC tile %s block %s, buffer %s"%(self.fullpath, *self.adc, self.buffer.fullpath))
@@ -136,7 +139,7 @@ class AxisReadoutV2(SocIp, AbsReadout):
         # calculate the exact frequency we expect to see
         ro_freq = f
         if gen_ch is not None: # calculate the frequency that will be applied to the generator
-            ro_freq = self.soc.roundfreq(f, self.soc['gens'][gen_ch], self.cfg)
+            ro_freq = self.soc.roundfreq(f, [self.soc['gens'][gen_ch], self.cfg])
         if gen_ch is not None and self.soc.gens[gen_ch].HAS_MIXER:
             ro_freq += self.soc.gens[gen_ch].get_mixer_freq()
         ro_freq = ro_freq % self['f_dds']
@@ -277,7 +280,7 @@ class AxisPFBReadoutV2(SocIp, AbsReadout):
         # calculate the exact frequency we expect to see
         ro_freq = f
         if gen_ch is not None: # calculate the frequency that will be applied to the generator
-            ro_freq = self.soc.roundfreq(f, self.soc['gens'][gen_ch], self.cfg)
+            ro_freq = self.soc.roundfreq(f, [self.soc['gens'][gen_ch], self.cfg])
         if gen_ch is not None and self.soc.gens[gen_ch].HAS_MIXER:
             ro_freq += self.soc.gens[gen_ch].get_mixer_freq()
 
@@ -506,7 +509,11 @@ class AxisAvgBuffer(SocIp):
         self.switch_ch = switch_avg_ch
 
         # which tProc output bit triggers this buffer?
-        ((block, port),) = soc.metadata.trace_sig(self.fullpath, 'trigger')
+        #print(soc.metadata.trace_sig(self.fullpath, 'trigger'))
+        #((block, port),) = soc.metadata.trace_sig(self.fullpath, 'trigger')
+        # TODO: This is a workaround to filter out NN triggers
+        filtered_couples = [couple for couple in soc.metadata.trace_sig(self.fullpath, 'trigger') if 'vect2bits' in couple[0]] 
+        ((block, port),) = filtered_couples
         # vect2bits/qick_vec2bit port names are of the form 'dout14'
         self.cfg['trigger_bit'] = int(port[4:])
 
@@ -521,17 +528,20 @@ class AxisAvgBuffer(SocIp):
         self.cfg['trigger_port'], self.cfg['trigger_type'] = getattr(soc, block).port2ch(port)
 
         # which tProc input port does this buffer drive?
-        ((block, port),) = soc.metadata.trace_bus(self.fullpath, 'm2_axis')
-        # jump through an axis_clk_cnvrt
-        while soc.metadata.mod2type(block) == "axis_clock_converter":
-            ((block, port),) = soc.metadata.trace_bus(block, 'M_AXIS')
-        # port names are of the form 's1_axis'
-        # subtract 1 to get the channel number (s0 comes from the DMA)
-        if soc.metadata.mod2type(block) in ["axis_tproc64x32_x8", "qick_processor"]:
-            # ask the tproc to translate this port name to a channel number
-            self.cfg['tproc_ch'], _ = getattr(soc, block).port2ch(port)
-        else:
-            # this buffer doesn't feed back into the tProc
+        try:
+            ((block, port),) = soc.metadata.trace_bus(self.fullpath, 'm2_axis')
+            # jump through an axis_clk_cnvrt
+            while soc.metadata.mod2type(block) == "axis_clock_converter":
+                ((block, port),) = soc.metadata.trace_bus(block, 'M_AXIS')
+            # port names are of the form 's1_axis'
+            # subtract 1 to get the channel number (s0 comes from the DMA)
+            if soc.metadata.mod2type(block) in ["axis_tproc64x32_x8", "qick_processor"]:
+                # ask the tproc to translate this port name to a channel number
+                self.cfg['tproc_ch'], _ = getattr(soc, block).port2ch(port)
+            else:
+                # this buffer doesn't feed back into the tProc
+                self.cfg['tproc_ch'] = -1
+        except:
             self.cfg['tproc_ch'] = -1
 
         # print("%s: readout %s, switch %d, trigger %d, tProc port %d"%
@@ -663,6 +673,10 @@ class AxisAvgBuffer(SocIp):
         # Disable buffering.
         self.disable_buf()
 
+        if length >= self['buf_maxlen']:
+            raise RuntimeError("requested length=%d longer or equal to decimated buffer size=%d" %
+                               (length, self['buf_maxlen']))
+
         # Set registers.
         self.buf_addr_reg = address
         self.buf_len_reg = length
@@ -680,7 +694,7 @@ class AxisAvgBuffer(SocIp):
         """
 
         if length >= self['buf_maxlen']:
-            raise RuntimeError("length=%d longer or equal to %d" %
+            raise RuntimeError("requested length=%d longer or equal to decimated buffer size=%d" %
                                (length, self['buf_maxlen']))
 
         # pad the transfer size to an even number (odd lengths seem to break the DMA)
