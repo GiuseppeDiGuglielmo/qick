@@ -1,7 +1,11 @@
-# Host side of the NN ILA capture (Vivado batch). Args: hw_server ltx outdir shots rdir
-# For each shot: arm the ILA on a rising edge of probe1 (the trigger NN_0 sees),
-# tell the board to fire (ssh touch go_<i>), wait for the capture, save it as CSV.
-lassign $argv hw_url ltx outdir shots rdir
+# Host side of the ILA capture (Vivado batch).
+# Args: hw_server ltx outdir shots rdir [trigger_probe]
+# For each shot: arm the ILA on a rising edge of the trigger probe (default
+# probe1_1, the trigger NN_0 sees in nn_ila; use probe0_1, the tProc trigger, for
+# orig_ila), tell the board to fire (ssh touch go_<i>), wait for the capture,
+# save it as CSV.
+lassign $argv hw_url ltx outdir shots rdir trig_probe
+if {$trig_probe eq ""} { set trig_probe probe1_1 }
 set remote xilinx@rfsoc216-ml01.dhcp.fnal.gov
 
 proc rexists {path} {
@@ -32,7 +36,8 @@ refresh_hw_device $dev
 set ila [lindex [get_hw_ilas -of_objects $dev] 0]
 puts "CAP ILA $ila depth [get_property CONTROL.DATA_DEPTH $ila]"
 foreach p [get_hw_probes -of_objects $ila] { puts "CAP probe $p width [get_property WIDTH $p]" }
-set trig [get_hw_probes -of_objects $ila -filter {NAME =~ *probe1_1*}]
+set trig [get_hw_probes -of_objects $ila -filter "NAME =~ *${trig_probe}*"]
+if {$trig eq ""} { puts "CAP ERROR no probe matching $trig_probe"; exit 1 }
 puts "CAP trigger probe $trig"
 
 set_property CONTROL.TRIGGER_CONDITION AND $ila
