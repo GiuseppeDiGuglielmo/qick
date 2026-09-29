@@ -47,7 +47,7 @@ from qick_ml_lib import (LoopbackProgram, to_float, reset_classifier,  # noqa: E
 
 DEFAULT_BUILD = 'nn'
 
-# Same as the notebook's "Load an excited state" cell
+# Same as the notebook's "Loopback pulse configuration" cell
 CONFIG = {"res_ch": 0, "ro_chs": [0], "reps": 1, "relax_delay": 1.0,
           "res_phase": 0, "pulse_style": "const", "length": 560,
           "readout_length": 770, "pulse_gain": 3000, "pulse_freq": 250,
