@@ -7,8 +7,8 @@ next to it with the HLS and post-synthesis resource estimates.
 The zips are build products of the HLS projects in
 [ml-quantum-readout](https://github.com/GiuseppeDiGuglielmo/ml-quantum-readout),
 which does not track them, so they are kept here. Next to each IP there is also
-a zip of the HLS project it was built from, used by the C-model accuracy check
-in `qick_ml/nn_c_model_accuracy_check/`.
+a zip of the HLS project it was built from, used by the NN accuracy check
+in `qick_ml/nn_model_accuracy_check/`.
 
 ## Provenance
 
