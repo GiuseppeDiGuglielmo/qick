@@ -1,0 +1,4 @@
+# C model library copied here for analyze.py, and capture directories
+libnn_eval.so
+cap_*/
+__pycache__/
