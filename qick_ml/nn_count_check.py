@@ -55,7 +55,7 @@ CONFIG = {"res_ch": 0, "ro_chs": [0], "reps": 1, "relax_delay": 1.0,
 
 # Same as the notebook's classifier setup cell
 WINDOW_SIZE = 400
-WINDOW_OFFSET = 30
+WINDOW_OFFSET = 95
 SCALING_FACTOR = 1
 
 
