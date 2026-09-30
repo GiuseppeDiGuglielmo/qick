@@ -1,13 +1,14 @@
 `timescale 1 ns / 1 ps
 // Testbench for NN_axi (the RTL of the NN IP). Configures the IP over
-// AXI-Lite (window_size 400, window_offset 0, scaling_factor 1), then for each
+// AXI-Lite (window_size 400, window_offset 0, scaling_factor from +gain), then for each
 // shot pulses the trigger, streams the shot's 400 packed (I,Q) samples and
 // prints the BRAM write. The stream source advances only on a TVALID & TREADY
 // handshake: this checks the trigger, load, compute and output path, not the
 // timing against the free-running ADC stream.
 //
-// Plusargs: +hex=<file> (one 32-bit word per sample, Q in [29:16], I in [13:0],
-// 400 words per shot), +nshots=<n>. Output lines:
+// Plusargs: +hex=<file> (one 32-bit word per sample, Q in [31:16], I in [15:0],
+// 16-bit two's complement as the readout sends them, 400 words per shot),
+// +nshots=<n>, +gain=<scaling_factor> (default 1). Output lines:
 //   W shot=<i> cycle=<c> addr=<a> data=<float32 bits, hex>
 //   S shot=<i> latency_cycles=<n> consumed=<total samples read so far>
 module tb_nn_axi;
@@ -91,12 +92,13 @@ module tb_nn_axi;
         end
     endtask
 
-    integer nshots, target, t0;
+    integer nshots, gain, target, t0;
     reg [8*512-1:0] hexfile;   // path, up to 512 characters
     reg [31:0] rd;
     initial begin
         if (!$value$plusargs("nshots=%d", nshots)) nshots = 1;
         if (!$value$plusargs("hex=%s", hexfile)) hexfile = "shots.hex";
+        if (!$value$plusargs("gain=%d", gain)) gain = 1;
         if (nshots > MAXSHOTS) begin
             $display("ERROR nshots %0d > MAXSHOTS %0d", nshots, MAXSHOTS);
             $finish;
@@ -107,7 +109,7 @@ module tb_nn_axi;
         repeat (10) @(posedge ap_clk);
         axi_write(6'h10, SAMPLES);         // window_size
         axi_write(6'h18, 0);               // window_offset
-        axi_write(6'h20, 1);               // scaling_factor
+        axi_write(6'h20, gain);            // scaling_factor
         axi_write(6'h28, 0);               // out_reset
         repeat (20) @(posedge ap_clk);
         for (nshot = 0; nshot < nshots; nshot = nshot + 1) begin
