@@ -6,7 +6,8 @@
 #   make         unzip the HLS project into build/ and build libnn_eval.so
 #   make run     C model on the full test set, write result.json and logits.npy
 #   make rtl     RTL simulation of a sample of shots, compared with logits.npy
-#                (SHOTS, WRONG, NEAR, JOBS; ALL=1 simulates every shot)
+#                (SHOTS, WRONG, NEAR, JOBS; ALL=1 simulates every shot;
+#                GAIN=k tests the IP's input gain, NODIVIDE=1 its wrap-around)
 #   make clean   remove build/, the library and the results
 #
 # Override the paths on the command line, e.g. make run DATA=/path/to/000_770
@@ -23,6 +24,9 @@ SHOTS ?= 1000
 WRONG ?= 100
 NEAR ?= 100
 JOBS ?= 20
+# RTL check: scaling_factor (input gain) written to the IP; the shots are
+# streamed at 1/GAIN unless NODIVIDE=1
+GAIN ?= 1
 
 BUILD := build
 HLS_PRJ := $(BUILD)/$(PRJ)
@@ -51,6 +55,8 @@ help:  ## Show this help
 	@echo "  NEAR     rtl: shots nearest the threshold  [$(NEAR)]"
 	@echo "  JOBS     rtl: parallel simulations         [$(JOBS)]"
 	@echo "  ALL=1    rtl: simulate every test shot (about 85 min on 20 cores)"
+	@echo "  GAIN     rtl: IP input gain (scaling_factor)  [$(GAIN)]"
+	@echo "  NODIVIDE=1 rtl: stream shots unscaled (wrap-around test)"
 
 all: $(LIB)  ## Unzip the HLS project into build/ and build libnn_eval.so
 
@@ -79,9 +85,10 @@ $(IP_STAMP): $(IP_ZIP)
 logits.npy: $(LIB)
 	$(MAKE) run
 
-rtl: $(IP_STAMP) logits.npy tb_nn_axi.v  ## RTL simulation vs the C model on a sample: rtl_result.json
+rtl: $(IP_STAMP) logits.npy tb_nn_axi.v $(LIB)  ## RTL simulation vs the C model on a sample: rtl_result.json
 	$(PYTHON) rtl_check.py --ip-rtl $(IP_DIR)/hdl/verilog --data $(DATA) \
-	    --random $(SHOTS) --wrong $(WRONG) --near $(NEAR) --jobs $(JOBS) $(if $(ALL),--all)
+	    --random $(SHOTS) --wrong $(WRONG) --near $(NEAR) --jobs $(JOBS) $(if $(ALL),--all) \
+	    --gain $(GAIN) $(if $(NODIVIDE),--no-divide) --lib ./$(LIB)
 
 clean:  ## Remove build/, the library and the results
 	rm -rf $(BUILD) $(LIB) result.json logits.npy rtl_result.json

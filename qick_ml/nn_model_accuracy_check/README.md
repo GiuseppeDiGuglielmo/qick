@@ -51,9 +51,18 @@ one core-second, so the default 1,213 shots take about a minute and all
 logit differs, the latency changes, or the testbench reports a problem.
 
 `tb_nn_axi.v` configures the IP over AXI-Lite (window_size 400, window_offset
-0, scaling_factor 1), pulses the trigger, streams the shot's 400 packed I/Q
-samples (Q in bits 29:16, I in 13:0) and prints the BRAM write, a float32 word
-holding the integer logit. The sample source advances only on a
+0, scaling_factor from `GAIN`), pulses the trigger, streams the shot's 400
+packed I/Q samples (16-bit two's complement, Q in bits 31:16, I in 15:0, as
+the readout sends them) and prints the BRAM write, a float32 word holding the
+integer logit.
+
+`make rtl GAIN=k` checks the IP's input gain (`scaling_factor`, see
+`../ip/README.md`): the shots are streamed at 1/g scale, round(x / g) for the
+effective gain g, as a replay through a loopback at 1/g would arrive, and each
+RTL logit must equal the C model on the low 14 bits of round(x / g) * g,
+computed with `libnn_eval.so`. `NODIVIDE=1` streams the shots unscaled, so the
+products overflow 14 bits and the wrap-around is checked too. With `GAIN=1`
+(the default) the comparison is with `logits.npy`, as before. The sample source advances only on a
 TVALID & TREADY handshake, so this checks trigger, load, compute and output;
 it does not model the timing against the free-running ADC stream or a nonzero
 window_offset (the board ILA measurements cover those).
