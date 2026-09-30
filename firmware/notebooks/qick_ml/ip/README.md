@@ -20,7 +20,7 @@ in `firmware/notebooks/qick_ml/nn_model_accuracy_check/`.
 |---|---|
 | md5 | `b6b173a94ec75848b567d9d6d15d2298` |
 | Source repo | `git@github.com:GiuseppeDiGuglielmo/ml-quantum-readout.git`, branch `nn-axi-input-gain` (from `dev`) |
-| Source commit | `74402e3` (2026-09-30), "Use scaling_factor as NN input gain" (on `f2361c7`; not pushed yet) |
+| Source commit | `74402e3` (2026-09-30), "Use scaling_factor as NN input gain" (on `f2361c7`) |
 | HLS project | `hls_models/vivado_hls/two_layers_w400_ternary_h4_s100_20240528_hls4ml_prj/` |
 | Model | dense 800 → 4 → 1 (400 I/Q samples in, one logit out), ternary weights, window starting at sample 100, trained on the 2024-05-28 dataset |
 | Tool | Vivado HLS 2020.1.1 |
