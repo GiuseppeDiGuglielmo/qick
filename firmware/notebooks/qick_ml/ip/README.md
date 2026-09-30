@@ -10,8 +10,7 @@ The zips are build products of the HLS projects in
 [ml-quantum-readout](https://github.com/GiuseppeDiGuglielmo/ml-quantum-readout),
 which does not track them, so they are kept here. Next to each IP there is also
 a zip of the HLS project it was built from, used by the NN accuracy check
-(`qick_ml/nn_model_accuracy_check/` on the `ml-integration-tproc-v1-2026`
-branch; not yet ported here).
+in `firmware/notebooks/qick_ml/nn_model_accuracy_check/`.
 
 ## Provenance
 

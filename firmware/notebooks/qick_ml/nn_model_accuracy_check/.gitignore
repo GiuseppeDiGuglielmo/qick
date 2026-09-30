@@ -1,0 +1,5 @@
+build/
+libnn_eval.so
+result.json
+rtl_result.json
+logits.npy
