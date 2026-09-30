@@ -8,9 +8,11 @@ The traces are the 20240528 QICK ZCU216 dataset the NN IP
 770 samples, I/Q interleaved, 14-bit integers). The NN sees trace samples
 100-499. Each trace is resampled to the DAC rate (6881.28 Msps) and played as
 an arbitrary envelope on the generator (ArbPulseProgram), so that it reaches
-the readout, and the NN, as it was recorded: same scale, same phase, same
-sample positions. The NN IP does not scale its input (scaling_factor is not
-used), so the replay must be 1:1.
+the readout, and the NN, as it was recorded: same phase, same sample
+positions, and the same scale, or 1/g of it with the NN's input gain set to g
+(its scaling_factor register, 1, 2, 4 or 8, see ../ip/README.md): the
+loopback cannot reach the dataset's amplitude with an arbitrary envelope, so
+the replay runs at 1/g and the NN multiplies it back.
 
 This is the tProc v2 counterpart of the tProc v1 notebooks in
 qick_dev/qick_ml/readout_mock/ (readout_mock_malab*.ipynb), which replayed
@@ -20,8 +22,8 @@ Contents:
   - load_dataset, select_shots: the traces (the 20 HLS testbench shots in the
     IP project zip, or the full test set copied from the NAS)
   - ArbPulseProgram, trace_to_envelope, rect_envelope: the replay
-  - measure_full_scale, align_timing, check_iq_orientation, replay_error,
-    refine_calibration: the calibrations
+  - measure_full_scale, nn_gain_for, align_timing, check_iq_orientation,
+    replay_error, refine_calibration: the calibrations
   - run_shots, score: the NN run
 
 It reuses qick_ml_lib (one directory up) for the phase calibration, the pulse
@@ -290,7 +292,9 @@ def trace_to_envelope(dataset, i, cal, soccfg, gen_ch, margin=20):
         i (int): The shot index.
         cal (dict): scale (DAC units per ADC unit), conj (negate Q), lead
             (zero DAC samples before the trace), trim (optional complex
-            factor applied to the trace first, from refine_calibration).
+            factor applied to the trace first, from refine_calibration),
+            nn_gain (optional, the NN's input gain g: the trace is replayed
+            at 1/g of its recorded scale).
         soccfg: The QickConfig.
         gen_ch (int): The generator channel.
         margin (int): The readout samples replayed on each side of the
@@ -323,7 +327,7 @@ def trace_to_envelope(dataset, i, cal, soccfg, gen_ch, margin=20):
     z = _resample(z, int(round(n))) * cal.get('trim', 1)
     if cal.get('conj'):
         z = z.conj()
-    z = z * cal['scale']
+    z = z * cal['scale'] / cal.get('nn_gain', 1)
 
     lead = int(cal.get('lead', 0))
     env = np.zeros((lead + len(z) + _pad_to(lead + len(z), spc), 2))
@@ -382,6 +386,25 @@ def measure_full_scale(soc, cfg, fractions=(0.05, 0.1, 0.2, 0.3), debug=True):
         print('INFO: full scale ({:.0f} DAC units) -> |IQ| {:.0f} ADC units '
               '(linear fit, residual {:.2%})'.format(maxv, k * maxv, resid))
     return k * maxv, resid
+
+
+def nn_gain_for(peak, full_scale, gains=(1, 2, 4, 8)):
+    """
+    The smallest NN input gain g (a scaling_factor value) for which a replay
+    at 1/g of the dataset's scale fits the loopback: peak / g <= full_scale.
+
+    Args:
+        peak (float): The dataset's peak |IQ| (ADC units).
+        full_scale (float): The readout magnitude of a full-scale envelope
+            (measure_full_scale).
+
+    Returns:
+        int: The gain, or None if even the largest one is not enough.
+    """
+    for g in gains:
+        if peak / g <= full_scale:
+            return g
+    return None
 
 
 def check_iq_orientation(soc, cfg, amp, debug=True):
@@ -519,15 +542,24 @@ def replay_error(data, captured, max_lag=2.0):
             'corr_q': float(np.corrcoef(d[:, 1], c[:, 1])[0, 1])}
 
 
-def refine_calibration(soc, dataset, idx, cal, cfg, margin=20, debug=True):
+def refine_calibration(soc, dataset, idx, cal, cfg, margin=20, trim_magnitude=False, debug=True):
     """
     Correct the calibration with replays of real traces.
 
     The amplitude and phase calibrations use a rectangle, which only has
     content at the carrier; the traces are broadband, and the loopback's
     response is not flat over +-150 MHz. Replays the shots idx, fits
-    captured = g * data on each (replay_error), and folds the mean g into
-    cal['trim'] and the mean lag into cal['lead'].
+    captured = g * data on each (replay_error, with data at 1/cal['nn_gain']
+    of the recorded scale), and folds the mean g into cal['trim'] and the
+    mean lag into cal['lead'].
+
+    By default only the angle of g goes into the trim, not its magnitude.
+    The fit weighs the whole band, and the DAC and ADC filters attenuate the
+    traces' high-frequency noise, so |g| comes out below 1 even when the
+    signal the NN responds to (mostly low frequency) has the right scale,
+    which the rectangle calibration sets at the carrier: folding |g| in made
+    the board logits ~15% too large on the testbench shots (2026-09-30).
+    trim_magnitude=True folds it in too.
 
     Returns:
         tuple: The refined calibration (a new dict) and the replay_error of
@@ -538,10 +570,11 @@ def refine_calibration(soc, dataset, idx, cal, cfg, margin=20, debug=True):
     for i in idx:
         env, _ = trace_to_envelope(dataset, i, cal, soc, cfg['gen_ch'], margin)
         iq = acquire_trace(soc, dict(cfg, env=env))
-        errs.append(replay_error(dataset.window(i), iq[WINDOW_START:WINDOW_START + WINDOW_SIZE]))
+        errs.append(replay_error(dataset.window(i) / cal.get('nn_gain', 1),
+                                 iq[WINDOW_START:WINDOW_START + WINDOW_SIZE]))
     g = np.mean([e['gain'] * np.exp(1j * np.radians(e['angle_deg'])) for e in errs])
     lag = np.mean([e['lag'] for e in errs])
-    new = dict(cal, trim=cal.get('trim', 1) / g)
+    new = dict(cal, trim=cal.get('trim', 1) / (g if trim_magnitude else g / abs(g)))
     lead = int(round(cal.get('lead', 0) - lag * f_dac / F_RO))
     if lead < 0:
         print('WARNING: the replay is {:.2f} samples late; it needs a later trigger '

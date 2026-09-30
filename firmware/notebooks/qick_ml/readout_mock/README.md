@@ -7,9 +7,13 @@ offline one.
 
 The traces are the QICK ZCU216 20240528 dataset the NN was trained on. Each
 trace is resampled to the DAC rate and played as an arbitrary envelope, then
-captured by readout 0, which feeds the NN. The NN IP does not scale its input,
-so the notebook calibrates the replay to be 1:1 with the recording (scale,
-phase, I/Q orientation and sample timing) before the run.
+captured by readout 0, which feeds the NN. The notebook calibrates the replay
+to match the recording (phase, I/Q orientation, sample timing and scale)
+before the run. The loopback reaches only about a third of the dataset's
+amplitude with an arbitrary envelope, so the replay runs at 1/g of the
+recorded scale and the NN's input gain (its `scaling_factor` register, see
+`../ip/README.md`) multiplies it back by g; the notebook picks the smallest g
+of 1, 2, 4 and 8 that fits, 4 on the ZCU216 loopback.
 
 This is the tProc v2 counterpart of the tProc v1 notebooks in
 `qick_dev/qick_ml/readout_mock/` (`readout_mock_malab*.ipynb`). Those replayed
@@ -34,7 +38,7 @@ NN's HLS testbench, from `tb_data/` in
 `../ip/20240528/two_layers_w400_ternary_h4_s100_20240528_hls4ml_prj.zip`. They
 are the first and the last 10 shots of the test set. They carry no labels and
 only samples 100-499, but they come with the exact logits of the C
-simulation. A 1:1 replay reproduces those logits, so they check the replay
+simulation. A faithful replay reproduces those logits, so they check the replay
 shot by shot without anything else to copy.
 
 The accuracy needs the test set: `X_test_000_770.npy` (100,000 x 1540,
@@ -66,10 +70,11 @@ loads `../216/<branch>/qick_216_tprocv2_dac<DAC>_nn.bit`, so the cabling is
 the same as for `../send_receive_pulse.ipynb`. The calibration cells print
 what they measure:
 
-1. Amplitude: the readout magnitude a full-scale envelope reaches. It must be
-   at or above the dataset's peak |IQ| (~3500 ADC units), or the replay clips.
-   The notebook stops if it falls short. Lowering the ADC attenuation or
-   changing the carrier frequency can fix it.
+1. Amplitude: the readout magnitude a full-scale envelope reaches, and the
+   NN input gain g that fits: the replay at 1/g must stay at or below it
+   (the dataset's peak |IQ| is ~3500 ADC units; the loopback reaches ~1130,
+   so g = 4). The notebook stops if even g = 8 falls short. Lowering the ADC
+   attenuation or changing the carrier frequency can help.
 2. Timing: the window's first sample on trace sample 100, to a fraction of a
    sample.
 3. Phase and I/Q orientation.
