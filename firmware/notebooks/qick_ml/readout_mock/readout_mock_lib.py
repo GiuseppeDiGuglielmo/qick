@@ -451,6 +451,14 @@ def align_timing(soc, cfg, amp, margin=20, debug=True):
         raise RuntimeError('The replay lands {:.1f} samples early even with the trigger at the '
                            'pulse start: the loopback latency is shorter than expected'.format(-err))
     r1 = edge(trig_time, 0)
+    # The lead can only delay the pulse, so it has to land early here. The
+    # step above assumes exactly cyc samples per tick, and the edge can come
+    # out a fraction of a sample late: move the trigger one more tick then
+    for _ in range(3):
+        if r1 <= EDGE_TARGET:
+            break
+        trig_time += 1 / f_time
+        r1 = edge(trig_time, 0)
     lead = max(0, int(round((EDGE_TARGET - r1) * f_dac / F_RO)))
     r2 = edge(trig_time, lead)
     if debug:
