@@ -18,16 +18,16 @@ in `firmware/notebooks/qick_ml/nn_model_accuracy_check/`.
 
 | | |
 |---|---|
-| md5 | `8e7e8128f5134f96b2b5a9b530be4fe8` |
-| Source repo | `git@github.com:GiuseppeDiGuglielmo/ml-quantum-readout.git`, branch `dev` |
-| Source commit | `f2361c7` (2026-09-28), "Fix NN_axi window start" |
+| md5 | `b6b173a94ec75848b567d9d6d15d2298` |
+| Source repo | `git@github.com:GiuseppeDiGuglielmo/ml-quantum-readout.git`, branch `nn-axi-input-gain` (from `dev`) |
+| Source commit | `74402e3` (2026-09-30), "Use scaling_factor as NN input gain" (on `f2361c7`; not pushed yet) |
 | HLS project | `hls_models/vivado_hls/two_layers_w400_ternary_h4_s100_20240528_hls4ml_prj/` |
 | Model | dense 800 → 4 → 1 (400 I/Q samples in, one logit out), ternary weights, window starting at sample 100, trained on the 2024-05-28 dataset |
 | Tool | Vivado HLS 2020.1.1 |
 | Patched | no (no Floating-Point sub-cores; zip is the unmodified HLS export) |
 | Part / clock | `xczu49dr-ffvf1760-2-e`, 3.0 ns target (1.813 ns after synthesis) |
-| Resources (post-synthesis) | 29361 LUT (6.9%), 26447 FF (3.1%), 0 BRAM, 0 DSP |
-| History | `f893fb1` (2024-10-30, md5 `f5986643...`): original IP. `ca2d146` (qick `4eafcd5f`): trigger read every cycle (`volatile`), one input sample per cycle, output index fix. `f2361c7` (qick `44dc7dc5`): exact window start. |
+| Resources (post-synthesis) | 29387 LUT (6.9%), 26457 FF (3.1%), 0 BRAM, 0 DSP (`8e7e8128`: 29361 LUT, 26447 FF) |
+| History | `f893fb1` (2024-10-30, md5 `f5986643...`): original IP. `ca2d146` (qick `4eafcd5f`): trigger read every cycle (`volatile`), one input sample per cycle, output index fix. `f2361c7` (qick `44dc7dc5`, md5 `8e7e8128...`): exact window start. `nn-axi-input-gain` (md5 `b6b173a9...`): `scaling_factor` is an input gain. |
 
 Interface:
 
@@ -38,7 +38,15 @@ Interface:
   - `window_size` 0x10
   - `window_offset` 0x18 (in samples: the window starts 5 + `window_offset`
     samples after the trigger; 95 puts it at trace sample 100)
-  - `scaling_factor` 0x20
+  - `scaling_factor` 0x20 (input gain, since md5 `b6b173a9...`: every I
+    and Q sample is shifted left by log2 of the gain before it enters the
+    window; the gain is a power of two, 1, 2, 4 or 8, from bits 3:0: other
+    values round down, 9-15 give 8, and 0, the value after reset, gives 1.
+    The NN keeps the low 14 bits of the product, as it always kept bits
+    13:0 of each sample, so a product that does not fit wraps around. It is
+    re-read while the IP waits for a trigger, so a new value applies to the
+    next window. With gain 1 the IP is bit-exact with `8e7e8128...`, and the
+    timing from the trigger to the window and to the BRAM write is the same)
   - `out_reset` 0x28
   - `out_offset` 0x30 (read-only prediction count)
 
