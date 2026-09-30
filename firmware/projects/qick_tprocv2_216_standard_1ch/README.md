@@ -17,7 +17,8 @@ Build it with **Vivado 2023.1** — the version is fixed by the block design fil
   `CLK104_CLK_SPI_MUX_SEL_LS` pins are commented out in `ios.xdc`.
 * **Debug is part of the block design.** `debug_bridge_0` plus `system_ila_1/2/3` probe the
   `qick_processor_0` core, port, time and fifo debug buses. Every build therefore emits an
-  LTX file alongside the bitstream.
+  LTX file alongside the bitstream. `ILA=1` builds replace them with their own ILA (see
+  [Debug access](#debug-access)).
 
 ## Build variants
 
@@ -45,7 +46,8 @@ side:
 
 (run from `../../tools`). `NN=1` also works with `DAC=228` (`top_dac228_nn*/`), but `out/`
 only has links for the DAC 230 NN builds, the DAC the tProc v1 NN results were taken on.
-`system_ila_1/2/3` on the tProc debug buses are in every variant.
+`system_ila_1/2/3` on the tProc debug buses and `debug_bridge_0` are in every variant
+without `ILA=1`; `proj_ila.tcl` removes them.
 
 ### Generator DAC: `proj_dac.tcl`
 
@@ -75,6 +77,10 @@ build `_dac228`, so that every bitstream of this design says which DAC it drives
   `readout_wrapper/axis_dyn_readout_v1_0_m1_axis` — the readout output feeding the averager
   buffer — clocked by `usp_rf_data_converter_0/clk_adc2`;
 * a native probe on `qick_processor_0_trig_10_o`, the readout trigger on tProc port 10.
+
+Before adding it, `proj_ila.tcl` deletes `system_ila_1/2/3` and `debug_bridge_0` (a block
+marked TEMPORARY in the script), so the readout ILA is the only one in the build and sits on
+the physical JTAG chain (see [Debug access](#debug-access)).
 
 Vivado taps the stream through a new `Monitor`-mode port on `readout_wrapper`, so nothing in
 the data path is altered. The block design already contains ILAs, so the script identifies
@@ -123,12 +129,26 @@ project as the original.
 
 ### Debug access
 
-`debug_bridge_0` is configured with `C_DEBUG_MODE 2`, so the ILAs are reached over the AXI
-debug bridge from the PS rather than over JTAG:
+How the ILAs are reached depends on the build:
+
+* **Without `ILA=1`**, `debug_bridge_0` (`C_DEBUG_MODE 2`) drives the debug hub of
+  `system_ila_1/2/3` from the PS over AXI (Xilinx Virtual Cable). The hub is not on the
+  board's physical JTAG chain, so Hardware Manager connected over JTAG does not see these
+  ILAs.
+* **With `ILA=1`**, `proj_ila.tcl` removes the bridge and the processor ILAs, and Vivado
+  builds an ordinary debug hub on the JTAG chain. After the PS loads the bitstream, Hardware
+  Manager finds the readout ILA (or the NN ILA with `NN=1`) through whichever hw_server has
+  the board's JTAG cable, with the `.ltx` next to the bitstream in `out/`:
 
 ```sh
-cd ../../tools && make hw-server        # or hw-server-tcl for no GUI
+cd ../../tools && make hw-server HW_SERVER=<host>:<port>   # or hw-server-tcl for no GUI
 ```
+
+On the Fermilab bench the JTAG cable hangs off another machine, reached through an ssh
+tunnel (`HW_SERVER=localhost:3120`). The NN ILA capture tools in
+[`../../notebooks/qick_ml/ila_tools/`](../../notebooks/qick_ml/ila_tools/README.txt) use
+the same route in Vivado batch mode; they captured the `dac230_nn_ila` build this way on
+2026-09-29.
 
 ## Reference configuration
 
