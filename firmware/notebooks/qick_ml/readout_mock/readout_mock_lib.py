@@ -25,6 +25,7 @@ Contents:
   - measure_full_scale, nn_gain_for, align_timing, check_iq_orientation,
     replay_error, refine_calibration: the calibrations
   - run_shots, score: the NN run
+  - memory_report: the board's free memory
 
 It reuses qick_ml_lib (one directory up) for the phase calibration, the pulse
 edge finder and the classifier helpers.
@@ -74,6 +75,40 @@ MD5_Y = '8c9cce1821372380371ade5f0ccfd4a2'
 # model (qick_ml/nn_model_accuracy_check/ on the tProc v1 branch)
 C_MODEL_ACCURACY = 0.96014
 C_MODEL_FIDELITY = 0.92028
+
+
+# --- Memory -------------------------------------------------------------------
+
+def memory_report(label='', warn_mb=500):
+    """
+    Print the board's available memory, the swap in use and this process's
+    resident memory (from /proc), and warn when the available memory falls
+    below warn_mb. The ZCU216 has 3.9 GB of RAM and 1 GB of swap on the SD
+    card; when both fill up it stops responding (it needed a power cycle on
+    2026-09-30), so keep an eye on it and close the kernels you do not need.
+
+    Returns:
+        dict: available_mb, swap_used_mb, process_mb.
+    """
+    info = {}
+    with open('/proc/meminfo') as f:
+        for line in f:
+            k, v = line.split(':', 1)
+            info[k] = int(v.split()[0]) // 1024      # kB -> MB
+    rss = 0
+    with open('/proc/self/status') as f:
+        for line in f:
+            if line.startswith('VmRSS:'):
+                rss = int(line.split()[1]) // 1024
+    out = {'available_mb': info.get('MemAvailable', 0),
+           'swap_used_mb': info.get('SwapTotal', 0) - info.get('SwapFree', 0),
+           'process_mb': rss}
+    print('Memory{}: {} MB available of {} MB, swap used {} of {} MB, this kernel {} MB'.format(
+        ' ({})'.format(label) if label else '', out['available_mb'], info.get('MemTotal', 0),
+        out['swap_used_mb'], info.get('SwapTotal', 0), out['process_mb']))
+    if out['available_mb'] < warn_mb:
+        print('WARNING: less than {} MB available: close other notebooks/kernels before going on'.format(warn_mb))
+    return out
 
 
 # --- Dataset ------------------------------------------------------------------

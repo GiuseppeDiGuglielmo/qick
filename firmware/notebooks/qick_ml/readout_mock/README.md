@@ -33,8 +33,8 @@ current IP no longer has.
 
 ## Dataset
 
-By default the notebook replays 2000 shots of the test set (`N_SHOTS = 2000`,
-1000 per class, random with `SEED = 0`): `X_test_000_770.npy` (100,000 x
+By default the notebook replays 1000 shots of the test set (`N_SHOTS = 1000`,
+500 per class, random with `SEED = 0`): `X_test_000_770.npy` (100,000 x
 1540, samples 0-769 with I/Q interleaved) and `y_test_000_770.npy` (0 =
 ground, 1 = excited). They are on the NAS at
 `/nas/work/research/quantum/readout/data/qick_data/20240528/000_770/`, which
@@ -87,15 +87,26 @@ what they measure:
    as a trim; the remaining RMS difference is what the DAC and ADC filters
    change.
 
-The NN run replays one program per shot, about 0.2 s each, so the default
-2000 shots take about 7 minutes.
+The NN run replays one program per shot, 0.1-0.2 s each (0.2 s on tProc v2,
+0.08-0.15 s on tProc v1), so the default 1000 shots take a few minutes.
 
 ## Expected results
 
-With the testbench shots, the board logits should follow the C-simulation
-logits (the notebook prints both, and their correlation). Shot 4 (+11k) sits
-close to the threshold. With the test set, the offline reference is the C
-model on all 100,000 shots: 96.014% accuracy, 92.028% fidelity
-(`qick_ml/nn_model_accuracy_check/` on the `ml-integration-tproc-v1-2026`
-branch). The replay is not perfect, so expect the board to score somewhat
-lower.
+With the test set, the offline reference is the C model: 96.014% accuracy,
+92.028% fidelity on all 100,000 shots (`../nn_model_accuracy_check/`), and
+96.20% on the default 1000 shots (seed 0). Measured on the ZCU216 on
+2026-09-30 (nn builds, NN input gain 4), board against the C model on the
+same shots:
+
+| branch                         | shots | board          | C model |
+|--------------------------------|-------|----------------|---------|
+| `ml-integration-tproc-v2-2026` | 2000  | 96.15%, 96.30% | 96.15%  |
+| `ml-integration-tproc-v1-2026` | 1000  | 96.40%         | 96.20%  |
+| `ml-integration-2024`          | 1000  | 96.20%         | 96.20%  |
+
+The board logits are 1.000-1.001 x the C model's (correlation 0.9995); the
+few shots where the two disagree sit at the threshold (|logit| below ~12k,
+against a typical ~370k), so they go either way from run to run. With the
+testbench shots, the board logits should follow the C-simulation logits (the
+notebook prints both, and their correlation); shot 4 (+11k) sits close to the
+threshold.
