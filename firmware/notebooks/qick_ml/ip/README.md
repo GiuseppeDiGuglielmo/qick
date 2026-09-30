@@ -19,7 +19,7 @@ in `firmware/notebooks/qick_ml/nn_model_accuracy_check/`.
 | | |
 |---|---|
 | md5 | `b6b173a94ec75848b567d9d6d15d2298` |
-| Source repo | `git@github.com:GiuseppeDiGuglielmo/ml-quantum-readout.git`, branch `nn-axi-input-gain` (from `dev`) |
+| Source repo | `git@github.com:GiuseppeDiGuglielmo/ml-quantum-readout.git`, branch `dev` |
 | Source commit | `74402e3` (2026-09-30), "Use scaling_factor as NN input gain" (on `f2361c7`) |
 | HLS project | `hls_models/vivado_hls/two_layers_w400_ternary_h4_s100_20240528_hls4ml_prj/` |
 | Model | dense 800 → 4 → 1 (400 I/Q samples in, one logit out), ternary weights, window starting at sample 100, trained on the 2024-05-28 dataset |
@@ -27,7 +27,7 @@ in `firmware/notebooks/qick_ml/nn_model_accuracy_check/`.
 | Patched | no (no Floating-Point sub-cores; zip is the unmodified HLS export) |
 | Part / clock | `xczu49dr-ffvf1760-2-e`, 3.0 ns target (1.813 ns after synthesis) |
 | Resources (post-synthesis) | 29387 LUT (6.9%), 26457 FF (3.1%), 0 BRAM, 0 DSP (`8e7e8128`: 29361 LUT, 26447 FF) |
-| History | `f893fb1` (2024-10-30, md5 `f5986643...`): original IP. `ca2d146` (qick `4eafcd5f`): trigger read every cycle (`volatile`), one input sample per cycle, output index fix. `f2361c7` (qick `44dc7dc5`, md5 `8e7e8128...`): exact window start. `nn-axi-input-gain` (md5 `b6b173a9...`): `scaling_factor` is an input gain. |
+| History | `f893fb1` (2024-10-30, md5 `f5986643...`): original IP. `ca2d146` (qick `4eafcd5f`): trigger read every cycle (`volatile`), one input sample per cycle, output index fix. `f2361c7` (qick `44dc7dc5`, md5 `8e7e8128...`): exact window start. `74402e3` (md5 `b6b173a9...`): `scaling_factor` is an input gain. |
 
 Interface:
 
