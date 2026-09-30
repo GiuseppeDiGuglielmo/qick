@@ -14,6 +14,8 @@ make project                                        # create the project, no bui
 make bitstream                                      # build through write_bitstream
 make bitstream ILA=1                                # ... with the readout ILAs
 make bitstream DAC=230 ILA=1                        # ... and the generator on DAC 0_230
+make bitstream DAC=230 NN=1                         # ... with the NN classifier instead
+make bitstream DAC=230 NN=1 ILA=1                   # ... with the ILAs on the NN
 make copy                                           # send out/ to the board
 make bitstream DESIGN=qick_tprocv2_216_standard     # a different design
 ```
@@ -26,6 +28,7 @@ make bitstream DESIGN=qick_tprocv2_216_standard     # a different design
 | `GUI` | `0` | `GUI=1` runs `bitstream` in the GUI instead of batch |
 | `JOBS` | `20` | parallel synthesis jobs |
 | `DAC` | `228` | picks the generator DAC of a design with `proj_dac.tcl`, built into `top_dac228*/` or `top_dac230*/`; `DAC=230` needs that script |
+| `NN` | `0` | `NN=1` builds the design's `proj_nn.tcl` variant, with the NN classifier, into `top*_nn*/` |
 | `ILA` | `0` | `ILA=1` builds the design's `proj_ila.tcl` variant, with readout ILAs, into `top*_ila/` |
 | `REMOTE` | a board path derived from the branch name | scp destination for `copy` |
 | `HW_SERVER` | `localhost:3121` | hw_server that `hw-server` connects to |
@@ -51,11 +54,12 @@ following the convention of the upstream projects, so there is no packaging step
 until the design is built; `make copy` warns about the ones that are not built yet and sends
 the rest, so a board can hold both variants under their distinct names.
 
-**`ILA=1` and `DAC=230` are per design.** They select `proj_ila.tcl` or `proj_dac.tcl` next
-to the design's `proj.tcl`, which is where design-specific edits belong; a design without
-the script is rejected before Vivado starts. The scripts are layered (`proj_ila.tcl` sources
-`proj_dac.tcl`, which sources `proj.tcl`), so the two options combine, and each combination
-builds into its own `top*/` directory.
+**`ILA=1`, `NN=1` and `DAC=230` are per design.** They select `proj_ila.tcl`, `proj_nn.tcl`
+or `proj_dac.tcl` next to the design's `proj.tcl`, which is where design-specific edits
+belong; a design without the script is rejected before Vivado starts. The scripts are
+layered (`proj_ila.tcl` sources `proj_nn.tcl`, which sources `proj_dac.tcl`, which sources
+`proj.tcl`), so the options combine, and each combination builds into its own `top*/`
+directory.
 
 **Generated files are ignored.** `top*/` is covered by `firmware/.gitignore`, and logs,
 journals and reports by the repository `.gitignore`. `make clean` sweeps the leftovers,

@@ -25,22 +25,27 @@ The project scripts are layered. Each one sources the one below it and then edit
 in-memory block design, so `bd_2023-1.tcl` stays exactly as delivered:
 
 ```
-proj_ila.tcl        ILA=1          adds the readout ILA
-  └─ proj_dac.tcl   DAC=228|230    picks the generator's DAC
-       └─ proj.tcl                 the design as delivered
+proj_ila.tcl             ILA=1          adds the readout ILA (on the NN with NN=1)
+  └─ proj_nn.tcl         NN=1           adds the NN classifier on readout 0
+       └─ proj_dac.tcl   DAC=228|230    picks the generator's DAC
+            └─ proj.tcl                 the design as delivered
 ```
 
 Every combination builds into its own project directory, so all of them can exist side by
 side:
 
-| | DAC | ILA | project | `out/` name |
-| --- | --- | --- | --- | --- |
-| `make bitstream` | 228 | no | `top_dac228/` | `qick_216_tprocv2_dac228.*` |
-| `make bitstream ILA=1` | 228 | yes | `top_dac228_ila/` | `qick_216_tprocv2_dac228_ila.*` |
-| `make bitstream DAC=230` | 230 | no | `top_dac230/` | `qick_216_tprocv2_dac230.*` |
-| `make bitstream DAC=230 ILA=1` | 230 | yes | `top_dac230_ila/` | `qick_216_tprocv2_dac230_ila.*` |
+| | DAC | NN | ILA | project | `out/` name |
+| --- | --- | --- | --- | --- | --- |
+| `make bitstream` | 228 | no | no | `top_dac228/` | `qick_216_tprocv2_dac228.*` |
+| `make bitstream ILA=1` | 228 | no | yes | `top_dac228_ila/` | `qick_216_tprocv2_dac228_ila.*` |
+| `make bitstream DAC=230` | 230 | no | no | `top_dac230/` | `qick_216_tprocv2_dac230.*` |
+| `make bitstream DAC=230 ILA=1` | 230 | no | yes | `top_dac230_ila/` | `qick_216_tprocv2_dac230_ila.*` |
+| `make bitstream DAC=230 NN=1` | 230 | yes | no | `top_dac230_nn/` | `qick_216_tprocv2_dac230_nn.*` |
+| `make bitstream DAC=230 NN=1 ILA=1` | 230 | yes | yes | `top_dac230_nn_ila/` | `qick_216_tprocv2_dac230_nn_ila.*` |
 
-(run from `../../tools`). `system_ila_1/2/3` on the tProc debug buses are in every variant.
+(run from `../../tools`). `NN=1` also works with `DAC=228` (`top_dac228_nn*/`), but `out/`
+only has links for the DAC 230 NN builds, the DAC the tProc v1 NN results were taken on.
+`system_ila_1/2/3` on the tProc debug buses are in every variant.
 
 ### Generator DAC: `proj_dac.tcl`
 
@@ -78,6 +83,38 @@ it expects are not there.
 
 These are the tProc v2 equivalents of what `ml-integration-tproc-v1-2026` probed
 (`axis_readout_v2_0_m1_axis` and `vect2bits_16_0_dout8`).
+
+With `NN=1` the ILA watches the NN instead, as the tProc v1 branch's nn_ila build does: an
+AXI-Stream monitor on the NN input (`readout_wrapper_axis_broadcaster_0_M02_AXIS`), a BRAM
+monitor on the prediction writes (`NN_0_out_r_PORTA`), the raw trigger on probe0 and the
+resynchronized trigger the NN sees on probe1, 4096 samples deep, so one capture spans a
+trigger and the prediction write that follows it.
+
+### NN classifier: `proj_nn.tcl`
+
+`NN=1` adds the hls4ml readout classifier `l2_w400_ternary_h4_s100` (400 I/Q samples in,
+one logit out; see [`../../notebooks/qick_ml/ip/README.md`](../../notebooks/qick_ml/ip/README.md)),
+ported from `ml-integration-tproc-v1-2026`:
+
+* `NN_0` (`xilinx.com:hls:NN_axi:1.0`), unpacked from the IP zip into a local IP repository
+  inside the project directory, on `clk_adc2` and the ADC2 reset.
+* Its input is a third output (`M02_AXIS`) of `readout_wrapper/axis_broadcaster_0`, which
+  already splits the readout between the averager and the DDR buffer. The broadcaster has no
+  tready, so the NN cannot back-pressure the readout.
+* Its trigger is tProc port 10, the averager's trigger, through `nn_trigger_sync_0`
+  ([`hdl/nn_trigger_sync.v`](hdl/nn_trigger_sync.v)), a 3-flop synchronizer from the tProc
+  timing clock (`clk_dac2`) into `clk_adc2`. Without it the NN drops triggers and miscounts
+  predictions.
+* It writes one logit per pulse into `blk_bram_0`, which the PS reads through
+  `axi_blk_bram_ctrl_0` at `0x4_0030_0000` (128K); its registers are at `0x4_002C_0000`.
+  The cell names `NN_0` and `axi_blk_bram_ctrl_0` are the ones
+  `../../notebooks/qick_ml/qick_ml_lib.py` looks up.
+* Implementation uses `Performance_ExplorePostRoutePhysOpt` with post-route phys_opt
+  `AggressiveExplore`, which closed timing on `RFADC2_CLK` for the tProc v1 NN builds.
+
+The trigger net now feeds two blocks, so this branch's `qick_lib` traces the averager's
+trigger to its driver (`QickMetadata.trace_driver`); upstream's `trace_trigger` fails on
+it with "too many values to unpack".
 
 `timing.xdc` is unchanged from `qick_tprocv2_216_standard`. `proj.tcl` differs only by the
 optional `_xil_proj_name_suffix_`, which the layers above set to pick the project
