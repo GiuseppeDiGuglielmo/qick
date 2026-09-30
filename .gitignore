@@ -29,6 +29,9 @@ firmware/notebooks/qick_ml/216/
 # (firmware/notebooks/qick_ml/ip/README.md)
 !firmware/notebooks/qick_ml/ip/**/*.log
 
+# Results written by firmware/notebooks/qick_ml/nn_count_check.py
+firmware/notebooks/qick_ml/nn_count_check_*.json
+
 ### Python template
 # Byte-compiled / optimized / DLL files
 __pycache__/
