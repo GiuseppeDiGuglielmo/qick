@@ -25,6 +25,10 @@ vivado_pid*.str
 # Bitstreams deployed by "make copy" (firmware/notebooks/qick_ml/216/<branch>/)
 firmware/notebooks/qick_ml/216/
 
+# Keep the HLS resource summaries shipped with the NN IPs
+# (firmware/notebooks/qick_ml/ip/README.md)
+!firmware/notebooks/qick_ml/ip/**/*.log
+
 ### Python template
 # Byte-compiled / optimized / DLL files
 __pycache__/
