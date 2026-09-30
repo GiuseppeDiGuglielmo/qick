@@ -59,7 +59,7 @@ DEFAULT_DAC = 230
 
 # Same as the notebook's "Loopback pulse configuration" cell
 CONFIG = {'gen_ch': 0, 'ro_ch': 0, 'freq': 250.0, 'pulse_len': 400 / 307.2,
-          'phase': 0, 'gain': 3000 / 32766, 'trig_time': 0.12, 'ro_len': 2.5}
+          'phase': 0, 'gain': 3000 / 32766, 'trig_time': 62 / 430.08, 'ro_len': 2.5}
 FINAL_DELAY = 1.0
 
 # Same as the notebook's classifier setup cell
