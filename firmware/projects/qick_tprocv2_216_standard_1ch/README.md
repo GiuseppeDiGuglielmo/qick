@@ -145,8 +145,10 @@ and the trigger and tile assignments are what must match.
 
 ## Software
 
-The ML notebook and helper library from the tProc v1 branch
-(`ml-integration-tproc-v1-2026`) are **not** on this branch: they are built on
-`AveragerProgram`, which is tProc v1 only, and will not run against this firmware. Porting
-them to the v2 API is follow-up work; `docs/source/tutorials/00_Getting_Started.ipynb` is
-the v2 send/receive-pulse reference.
+The ML notebook [`../../notebooks/qick_ml/send_receive_pulse.ipynb`](../../notebooks/qick_ml/send_receive_pulse.ipynb)
+and its helper library `qick_ml_lib.py` are ported from the tProc v1 branch
+(`ml-integration-tproc-v1-2026`) to the tProc v2 API (`AveragerProgramV2`). They load one of
+this design's builds (`BUILD = 'orig' | 'ila' | 'nn' | 'nn_ila'`), run the NN loopback
+experiment (a 400-sample pulse on trace samples 100-499, phase-calibrated to 60 deg) and read
+the NN predictions. They import this repo's `qick_lib`, which the NN builds need (see
+"NN classifier" above).
