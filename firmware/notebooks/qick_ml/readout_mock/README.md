@@ -33,35 +33,40 @@ current IP no longer has.
 
 ## Dataset
 
-By default (`DATA_DIR = None`) the notebook replays the 20 test shots of the
-NN's HLS testbench, from `tb_data/` in
-`../ip/20240528/two_layers_w400_ternary_h4_s100_20240528_hls4ml_prj.zip`. They
-are the first and the last 10 shots of the test set. They carry no labels and
-only samples 100-499, but they come with the exact logits of the C
-simulation. A faithful replay reproduces those logits, so they check the replay
-shot by shot without anything else to copy.
-
-The accuracy needs the test set: `X_test_000_770.npy` (100,000 x 1540,
-samples 0-769 with I/Q interleaved) and `y_test_000_770.npy` (0 = ground,
-1 = excited). They are on the NAS at
+By default the notebook replays 2000 shots of the test set (`N_SHOTS = 2000`,
+1000 per class, random with `SEED = 0`): `X_test_000_770.npy` (100,000 x
+1540, samples 0-769 with I/Q interleaved) and `y_test_000_770.npy` (0 =
+ground, 1 = excited). They are on the NAS at
 `/nas/work/research/quantum/readout/data/qick_data/20240528/000_770/`, which
-the board does not mount. Copy them from a host that has the NAS:
+the board does not mount. The X file is float64 (1.2 GB); the notebook reads
+an exact int16 copy of it (308 MB; the values are 14-bit integers). Make it on
+a host that has the NAS and copy both files to the board:
 
-    scp /nas/work/research/quantum/readout/data/qick_data/20240528/000_770/{X,y}_test_000_770.npy \
+    python3 -c "import numpy as np; \
+        X = np.load('/nas/work/research/quantum/readout/data/qick_data/20240528/000_770/X_test_000_770.npy', mmap_mode='r'); \
+        np.save('X_test_000_770_int16.npy', np.asarray(X).astype(np.int16))"
+    ssh xilinx@<board> mkdir -p /home/xilinx/data/20240528/000_770
+    scp X_test_000_770_int16.npy \
+        /nas/work/research/quantum/readout/data/qick_data/20240528/000_770/y_test_000_770.npy \
         xilinx@<board>:/home/xilinx/data/20240528/000_770/
 
-and set `DATA_DIR = '/home/xilinx/data/20240528/000_770'`. The notebook
-memory-maps the files, and `N_SHOTS` picks a balanced random subset. To copy
-less, keep only the NN window (samples 100-499) as int16, on the host:
+(On rfsoc216-ml01 they are there since 2026-09-30.) The notebook reads them
+from `DATA_DIR` (`X_NAME` is the int16 file) and memory-maps them;
+`N_SHOTS = None` replays all 100,000 (about 5.5 hours at 0.2 s per shot). The
+checksums (`check_md5=True`) only match the original float64 file.
 
-    python3 -c "import numpy as np; X = np.load('X_test_000_770.npy', mmap_mode='r'); \
-        np.save('X_test_w100_500.npy', np.asarray(X[:, 200:1000]).astype(np.int16))"
+With `DATA_DIR = None` the notebook replays instead the 20 test shots of the
+NN's HLS testbench, from `tb_data/` in
+`../ip/20240528/two_layers_w400_ternary_h4_s100_20240528_hls4ml_prj.zip`, with
+nothing to copy. They are the first and the last 10 shots of the test set.
+They carry no labels and only samples 100-499, but they come with the exact
+logits of the C simulation. A faithful replay reproduces those logits, so they
+check the replay shot by shot.
 
-and in the notebook call `rm.load_dataset(DATA_DIR, x_name='X_test_w100_500.npy')`.
-`load_dataset` accepts this 800-column form. The replay then pads the
-20-sample margins on each side by mirroring the window instead of using the
-recorded samples. Keep the full file if you can; the checksums
-(`check_md5=True`) only match the original.
+`load_dataset` also accepts a window-only file (800 columns, samples 100-499),
+e.g. `np.asarray(X[:, 200:1000]).astype(np.int16)`, set with `X_NAME`; the
+replay then pads the 20-sample margins by mirroring the window instead of
+using the recorded samples.
 
 ## Running
 
@@ -82,9 +87,8 @@ what they measure:
    as a trim; the remaining RMS difference is what the DAC and ADC filters
    change.
 
-The NN run replays one program per shot. Its speed shows in the run cell;
-measure it on the 20 testbench shots before choosing `N_SHOTS` for the test
-set.
+The NN run replays one program per shot, about 0.2 s each, so the default
+2000 shots take about 7 minutes.
 
 ## Expected results
 
