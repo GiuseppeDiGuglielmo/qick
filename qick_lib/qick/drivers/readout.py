@@ -99,6 +99,10 @@ class AxisReadoutV2(SocIp, AbsReadout):
         # what buffer does this readout drive?
         ((block, port),) = soc.metadata.trace_bus(self.fullpath, 'm1_axis')
         blocktype = soc.metadata.mod2type(block)
+        if blocktype == "axis_readout_replay":
+            # readout replay buffer (ML designs, firmware/replay_216.tcl): passes the readout on to m_axis
+            ((block, port),) = soc.metadata.trace_bus(block, 'm_axis')
+            blocktype = soc.metadata.mod2type(block)
         if blocktype == "axis_broadcaster":
                 ((block, port),) = soc.metadata.trace_bus(block, 'M00_AXIS')
         # TODO: This is a workaround to filter out NN modules
@@ -475,6 +479,11 @@ class AxisAvgBuffer(SocIp):
         if blocktype == "axis_broadcaster":
                 ((block, port),) = soc.metadata.trace_bus(block, 'S_AXIS')
                 blocktype = soc.metadata.mod2type(block)
+
+        if blocktype == "axis_readout_replay":
+            # readout replay buffer (ML designs, firmware/replay_216.tcl): follow the live readout input
+            ((block, port),) = soc.metadata.trace_bus(block, 's_axis')
+            blocktype = soc.metadata.mod2type(block)
 
         if blocktype == "axis_readout_v3":
             # the V3 readout block has no registers, so it doesn't get a PYNQ driver
