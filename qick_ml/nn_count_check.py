@@ -129,7 +129,7 @@ def run_phase(bitfile, prog_cls, cfg, shots, extra_shots, label):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__.split('\n\n')[0])
-    parser.add_argument('--build', default=DEFAULT_BUILD, choices=['nn', 'nn_ila'])
+    parser.add_argument('--build', default=DEFAULT_BUILD, choices=['nn', 'nn_ila', 'nn_replay', 'nn_replay_ila'])
     parser.add_argument('--shots', type=int, default=30)
     parser.add_argument('--extra-shots', type=int, default=5)
     parser.add_argument('--wide-width', type=int, default=100,

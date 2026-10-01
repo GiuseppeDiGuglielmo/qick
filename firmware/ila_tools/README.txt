@@ -21,9 +21,10 @@ Files
   ila_capture.tcl  host side (Vivado batch), arms the ILA on a trigger probe:
                    probe1_1 by default (nn_ila: the trigger NN_0 sees),
                    probe0_1 for orig_ila (the tProc trigger)
-  ila_shots_wo.py  board side, loads qick_216_<build>.bit (--build nn_ila or
-                   orig_ila), fires the shots and saves the decimated I/Q trace
-                   of each shot in shots.json, with a --window-offset option.
+  ila_shots_wo.py  board side, loads qick_216_<build>.bit (--build nn_ila,
+                   nn_replay_ila or orig_ila), fires the shots and saves the
+                   decimated I/Q trace of each shot in shots.json, with a
+                   --window-offset option.
                    Runs from the board's checkout of this repo: bitstream from
                    qick_ml/216/<branch>/, driver from this repo's qick_lib,
                    pulse and window settings from qick_ml/nn_count_check.py
@@ -62,6 +63,11 @@ commit as the host's. <B> is the board's checkout of this repo, e.g.
 For orig_ila, pass --build orig_ila on the board, and on the host its .ltx
 (../package/qick_216_orig_ila/qick_216_orig_ila.ltx) and probe0_1 as the
 sixth argument of ila_capture.tcl.
+
+For the nn_replay_ila build (readout replay player, in live mode after the
+bitstream load), pass --build nn_replay_ila on the board and its .ltx
+(../package/qick_216_nn_replay_ila/qick_216_nn_replay_ila.ltx) on the host;
+the probes and analyze.py are the same as for nn_ila.
 
 The first captures (2026-09-28, branch ml-integration-2024) ran an earlier
 version of ila_shots_wo.py that imported its settings and helpers from a
