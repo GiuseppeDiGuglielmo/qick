@@ -279,6 +279,9 @@ class QickMetadata:
                 next_port = 's_axis'
             elif next_type == "axis_reorder_iq_v1":
                 next_port = 's_axis'
+            elif next_type == "axis_readout_replay":
+                # readout replay buffer (ML designs, proj_replay.tcl): follow the live readout input
+                next_port = 's_axis'
             else:
                 raise RuntimeError("failed to trace back from %s - unrecognized IP block %s" % (start_block, next_block))
 
@@ -334,6 +337,9 @@ class QickMetadata:
             elif blocktype == "axis_register_slice_nb":
                 to_check.append((block, "m_axis"))
             elif blocktype == "axis_reorder_iq_v1":
+                to_check.append((block, "m_axis"))
+            elif blocktype == "axis_readout_replay":
+                # readout replay buffer (ML designs, proj_replay.tcl): passes the readout on to m_axis
                 to_check.append((block, "m_axis"))
             elif blocktype == "qick_xtalk" and port == 'wave_i':
                 # we only want to trace the "primary" xtalk port
