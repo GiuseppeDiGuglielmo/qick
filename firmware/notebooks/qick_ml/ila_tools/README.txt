@@ -24,9 +24,10 @@ Files
                    probe1_1 by default (nn_ila: the trigger NN_0 sees),
                    probe0_1 for the ila build (the tProc trigger)
   ila_shots_wo.py  board side, loads qick_216_tprocv2_dac<DAC>_<build>.bit
-                   (--build nn_ila or ila, --dac 230 by default), fires the
-                   shots and saves the decimated I/Q trace of each shot in
-                   shots.json, with a --window-offset option. Runs from the
+                   (--build nn_ila, nn_replay_ila or ila, --dac 230 by
+                   default), fires the shots and saves the decimated I/Q
+                   trace of each shot in shots.json, with a --window-offset
+                   option. Runs from the
                    board's checkout of this repo: bitstream from
                    firmware/notebooks/qick_ml/216/<branch>/, driver from this
                    repo's qick_lib, program from qick_ml_lib.py, pulse and
@@ -68,3 +69,8 @@ this design's out/ directory,
 For the ila build, pass --build ila on the board, and on the host its .ltx
 (<OUT>/qick_216_tprocv2_dac230_ila.ltx) and probe0_1 as the sixth argument
 of ila_capture.tcl.
+
+For the nn_replay_ila build (readout replay player, in live mode after the
+bitstream load), pass --build nn_replay_ila on the board and its .ltx
+(<OUT>/qick_216_tprocv2_dac230_nn_replay_ila.ltx) on the host; the probes
+and analyze.py are the same as for nn_ila.

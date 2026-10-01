@@ -134,7 +134,7 @@ def run_phase(bitfile, prog_cls, cfg, shots, extra_shots, label, width_cycles):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__.split('\n\n')[0])
-    parser.add_argument('--build', default=DEFAULT_BUILD, choices=['nn', 'nn_ila'])
+    parser.add_argument('--build', default=DEFAULT_BUILD, choices=['nn', 'nn_ila', 'nn_replay', 'nn_replay_ila'])
     parser.add_argument('--dac', type=int, default=DEFAULT_DAC, choices=[228, 230],
                         help='Generator DAC of the build (default {})'.format(DEFAULT_DAC))
     parser.add_argument('--shots', type=int, default=30)

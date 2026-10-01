@@ -60,7 +60,7 @@ def pulse_iq(iq):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('--build', default='nn_ila', choices=['nn_ila', 'ila'])
+    ap.add_argument('--build', default='nn_ila', choices=['nn_ila', 'ila', 'nn_replay_ila'])
     ap.add_argument('--dac', type=int, default=230, choices=[228, 230])
     ap.add_argument('--shots', type=int, default=20)
     ap.add_argument('--dir', default='/tmp/ila_capture')
