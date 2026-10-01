@@ -26,10 +26,11 @@ The project scripts are layered. Each one sources the one below it and then edit
 in-memory block design, so `bd_2023-1.tcl` stays exactly as delivered:
 
 ```
-proj_ila.tcl             ILA=1          adds the readout ILA (on the NN with NN=1)
-  └─ proj_nn.tcl         NN=1           adds the NN classifier on readout 0
-       └─ proj_dac.tcl   DAC=228|230    picks the generator's DAC
-            └─ proj.tcl                 the design as delivered
+proj_ila.tcl                  ILA=1          adds the readout ILA (on the NN with NN=1)
+  └─ proj_replay.tcl          REPLAY=1       adds the readout replay buffer
+       └─ proj_nn.tcl         NN=1           adds the NN classifier on readout 0
+            └─ proj_dac.tcl   DAC=228|230    picks the generator's DAC
+                 └─ proj.tcl                 the design as delivered
 ```
 
 Every combination builds into its own project directory, so all of them can exist side by
@@ -43,6 +44,8 @@ side:
 | `make bitstream DAC=230 ILA=1` | 230 | no | yes | `top_dac230_ila/` | `qick_216_tprocv2_dac230_ila.*` |
 | `make bitstream DAC=230 NN=1` | 230 | yes | no | `top_dac230_nn/` | `qick_216_tprocv2_dac230_nn.*` |
 | `make bitstream DAC=230 NN=1 ILA=1` | 230 | yes | yes | `top_dac230_nn_ila/` | `qick_216_tprocv2_dac230_nn_ila.*` |
+| `make bitstream DAC=230 NN=1 REPLAY=1` | 230 | yes | no | `top_dac230_nn_replay/` | `qick_216_tprocv2_dac230_nn_replay.*` |
+| `make bitstream DAC=230 NN=1 REPLAY=1 ILA=1` | 230 | yes | yes | `top_dac230_nn_replay_ila/` | `qick_216_tprocv2_dac230_nn_replay_ila.*` |
 
 (run from `../../tools`). `NN=1` also works with `DAC=228` (`top_dac228_nn*/`), but `out/`
 only has links for the DAC 230 NN builds, the DAC the tProc v1 NN results were taken on.
@@ -126,6 +129,29 @@ it with "too many values to unpack".
 optional `_xil_proj_name_suffix_`, which the layers above set to pick the project
 directory; left unset, as when `proj.tcl` is run on its own, it builds the same `top/`
 project as the original.
+
+### Readout replay: `proj_replay.tcl`
+
+`REPLAY=1` inserts `axis_readout_replay_0` ([`hdl/axis_readout_replay.v`](hdl/axis_readout_replay.v))
+in `readout_wrapper`, between the readout's decimated output
+(`axis_dyn_readout_v1_0/m1_axis`) and `axis_broadcaster_0`, so the averager, the DDR buffer
+and the NN all see its output. In live mode it passes the readout through, registered (one
+cycle later than without it); in replay mode it streams stored I/Q words from a BRAM after
+each readout trigger (tProc port 10; with `NN=1`, the copy `nn_trigger_sync_0` already
+resynchronized into `clk_adc2`, so the replay and the NN window are locked; a second
+synchronizer on the raw trigger caught its edge a cycle apart on ~14% of the shots):
+
+* `replay_bram_0` (`blk_mem_gen`, 64K x 32-bit words, ~57 BRAM36): the PS on port A through
+  `replay_bram_ctrl_0` at `0x4_0040_0000` (256 KB), the player on port B in `clk_adc2`.
+* `replay_ctrl_0` / `replay_ctrl_1` (`axi_gpio`) at `0x4_002D_0000` / `0x4_002E_0000`: mode,
+  index reset, shot length and count, start delay, status.
+
+QICK has no such block, and `QickSoc` traces each averager back to its readout through a
+fixed list of stream blocks: this branch's `qick_lib` (`ip.py`, `trace_back` and
+`trace_forward`) passes through `axis_readout_replay`, so the readout configuration works
+as usual. The
+notebook and the register map are in
+[`../../notebooks/qick_ml/readout_replay/`](../../notebooks/qick_ml/readout_replay/README.md).
 
 ### Debug access
 

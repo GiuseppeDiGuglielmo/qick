@@ -10,7 +10,8 @@
 # Set the JOBS environment variable to limit parallel synthesis jobs. Each job
 # is a full Vivado process of roughly 2.5 GB, so the default of 20 needs a
 # large machine. Set ILA=1 to build the variant with the readout ILAs, NN=1 to
-# add the NN classifier, and DAC=230 to move the generator to DAC 0_230.
+# add the NN classifier, REPLAY=1 to add the readout replay buffer, and
+# DAC=230 to move the generator to DAC 0_230.
 
 set jobs 20
 if { [info exists ::env(JOBS)] } {
@@ -18,12 +19,15 @@ if { [info exists ::env(JOBS)] } {
 }
 
 # The design's project scripts are layered, each sourcing the one below it:
-#   proj_ila.tcl (ILA=1) -> proj_nn.tcl (NN=1) -> proj_dac.tcl (DAC=228|230) -> proj.tcl
+#   proj_ila.tcl (ILA=1) -> proj_replay.tcl (REPLAY=1) -> proj_nn.tcl (NN=1)
+#   -> proj_dac.tcl (DAC=228|230) -> proj.tcl
 # Start from the topmost layer needed; the layers read DAC themselves. A design
 # with proj_dac.tcl always goes through it, so its builds are named by DAC.
 set proj_script "proj.tcl"
 if { [info exists ::env(ILA)] && $::env(ILA) ne "0" } {
     set proj_script "proj_ila.tcl"
+} elseif { [info exists ::env(REPLAY)] && $::env(REPLAY) ne "" && $::env(REPLAY) ne "0" } {
+    set proj_script "proj_replay.tcl"
 } elseif { [info exists ::env(NN)] && $::env(NN) ne "" && $::env(NN) ne "0" } {
     set proj_script "proj_nn.tcl"
 } elseif { [file exists "proj_dac.tcl"] || ([info exists ::env(DAC)] && $::env(DAC) eq "230") } {

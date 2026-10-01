@@ -16,10 +16,11 @@
 #
 # This is the top layer of the project scripts:
 #
-#   proj_ila.tcl        optional readout ILAs (ILA=1)
-#     proj_nn.tcl       optional NN classifier (NN=1)
-#       proj_dac.tcl    generator DAC (DAC=228|230)
-#         proj.tcl      the design as delivered
+#   proj_ila.tcl            optional readout ILAs (ILA=1)
+#     proj_replay.tcl       optional readout replay buffer (REPLAY=1)
+#       proj_nn.tcl         optional NN classifier (NN=1)
+#         proj_dac.tcl      generator DAC (DAC=228|230)
+#           proj.tcl        the design as delivered
 #
 # The design sources are left untouched; everything here is applied to the
 # in-memory block design after the layers below have built it.
@@ -39,7 +40,7 @@ if { ![info exists _xil_proj_name_suffix_] } {
 }
 append _xil_proj_name_suffix_ "_ila"
 
-source proj_nn.tcl
+source proj_replay.tcl
 
 # === BEGIN: ILAs =============================================================
 
