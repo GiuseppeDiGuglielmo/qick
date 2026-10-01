@@ -4,15 +4,21 @@ help:
 	@echo "syn-zcu216-orig-ila         build top_216_orig_ila with ILAs (GUI=1 for gui mode)"
 	@echo "syn-zcu216-nn               build top_216_nn with the NN IP (GUI=1 for gui mode)"
 	@echo "syn-zcu216-nn-ila           build top_216_nn_ila with the NN IP and ILAs (GUI=1 for gui mode)"
+	@echo "syn-zcu216-nn-replay        build top_216_nn_replay with the NN IP and the readout replay buffer (GUI=1 for gui mode)"
+	@echo "syn-zcu216-nn-replay-ila    build top_216_nn_replay_ila with the NN IP, the replay buffer and ILAs (GUI=1 for gui mode)"
 	@echo "gui-zcu216                  open top_216 project"
 	@echo "gui-zcu216-orig             open top_216_orig project"
 	@echo "gui-zcu216-orig-ila         open top_216_orig_ila project"
 	@echo "gui-zcu216-nn               open top_216_nn project"
 	@echo "gui-zcu216-nn-ila           open top_216_nn_ila project"
+	@echo "gui-zcu216-nn-replay        open top_216_nn_replay project"
+	@echo "gui-zcu216-nn-replay-ila    open top_216_nn_replay_ila project"
 	@echo "package-zcu216-orig         collect top_216_orig .bit/.hwh/.ltx into package/qick_216_orig/"
 	@echo "package-zcu216-orig-ila     collect top_216_orig_ila .bit/.hwh/.ltx into package/qick_216_orig_ila/"
 	@echo "package-zcu216-nn           collect top_216_nn .bit/.hwh/.ltx into package/qick_216_nn/"
 	@echo "package-zcu216-nn-ila       collect top_216_nn_ila .bit/.hwh/.ltx into package/qick_216_nn_ila/"
+	@echo "package-zcu216-nn-replay    collect top_216_nn_replay .bit/.hwh/.ltx into package/qick_216_nn_replay/"
+	@echo "package-zcu216-nn-replay-ila collect top_216_nn_replay_ila .bit/.hwh/.ltx into package/qick_216_nn_replay_ila/"
 	@echo "copy-zcu216                 copy the packaged builds to the board (BUILD=nn or BUILD=\"nn nn_ila\" for some;"
 	@echo "                            REMOTE=user@host:path to override the destination)"
 	@echo "                            uses SSH key/agent; export SSHPASS to use a password"
@@ -24,6 +30,8 @@ help:
 	@echo "distclean-zcu216-orig-ila   remove the top_216_orig_ila project dir"
 	@echo "distclean-zcu216-nn         remove the top_216_nn project dir"
 	@echo "distclean-zcu216-nn-ila     remove the top_216_nn_ila project dir"
+	@echo "distclean-zcu216-nn-replay  remove the top_216_nn_replay project dir"
+	@echo "distclean-zcu216-nn-replay-ila remove the top_216_nn_replay_ila project dir"
 	@echo "distclean                   clean + remove all top_216* project dirs and packages"
 .PHONY: help
 
@@ -50,8 +58,9 @@ check_license:
 .PHONY: check_license
 
 # Generated Vivado project directories: top_216 plus any top_216_<suffix>
-# (orig, orig_ila, nn, nn_ila). Globbed so distclean needs no per-project
-# target and works even if proj_216.mk is missing.
+# (orig, orig_ila, nn, nn_ila, nn_replay, nn_replay_ila). Globbed so
+# distclean needs no per-project target and works even if proj_216.mk is
+# missing.
 PROJ_DIRS = $(wildcard top_216 top_216_*)
 
 # Vivado litter left in this directory: logs, journals, reports, pid files

@@ -43,6 +43,24 @@ else
 endif
 .PHONY: syn-zcu216-nn-ila
 
+# Batch/GUI mode: create Vivado project with the NN IP and the readout replay buffer and run implementation
+syn-zcu216-nn-replay: check_license
+ifeq ($(GUI),1)
+	vivado -mode gui $(call vivado_out,nn_replay) -source proj_216_nn_replay.tcl
+else
+	bash -c 'TIMEFORMAT="Elapsed time: %0lR"; time vivado -mode batch $(call vivado_out,nn_replay) -source proj_216_nn_replay.tcl'
+endif
+.PHONY: syn-zcu216-nn-replay
+
+# Batch/GUI mode: create Vivado project with the NN IP, the readout replay buffer and ILAs and run implementation
+syn-zcu216-nn-replay-ila: check_license
+ifeq ($(GUI),1)
+	vivado -mode gui $(call vivado_out,nn_replay_ila) -source proj_216_nn_replay_ila.tcl
+else
+	bash -c 'TIMEFORMAT="Elapsed time: %0lR"; time vivado -mode batch $(call vivado_out,nn_replay_ila) -source proj_216_nn_replay_ila.tcl'
+endif
+.PHONY: syn-zcu216-nn-replay-ila
+
 # Open GUI of the top_216 Vivado project created by syn-zcu216
 gui-zcu216:
 	vivado top_216/top_216.xpr
@@ -67,6 +85,16 @@ gui-zcu216-nn:
 gui-zcu216-nn-ila:
 	vivado top_216_nn_ila/top_216.xpr
 .PHONY: gui-zcu216-nn-ila
+
+# Open GUI of the top_216_nn_replay Vivado project created by syn-zcu216-nn-replay
+gui-zcu216-nn-replay:
+	vivado top_216_nn_replay/top_216.xpr
+.PHONY: gui-zcu216-nn-replay
+
+# Open GUI of the top_216_nn_replay_ila Vivado project created by syn-zcu216-nn-replay-ila
+gui-zcu216-nn-replay-ila:
+	vivado top_216_nn_replay_ila/top_216.xpr
+.PHONY: gui-zcu216-nn-replay-ila
 
 # Package BIT, HWH, and LTX files of top_216_orig into package/qick_216_orig/ (recreated on every run)
 package-zcu216-orig:
@@ -104,6 +132,24 @@ package-zcu216-nn-ila:
 		qick_216_nn_ila
 .PHONY: package-zcu216-nn-ila
 
+# Package BIT, HWH, and LTX files of top_216_nn_replay into package/qick_216_nn_replay/ (recreated on every run)
+package-zcu216-nn-replay:
+	@./package.sh \
+		top_216 \
+		d_1 \
+		top_216_nn_replay \
+		qick_216_nn_replay
+.PHONY: package-zcu216-nn-replay
+
+# Package BIT, HWH, and LTX files of top_216_nn_replay_ila into package/qick_216_nn_replay_ila/ (recreated on every run)
+package-zcu216-nn-replay-ila:
+	@./package.sh \
+		top_216 \
+		d_1 \
+		top_216_nn_replay_ila \
+		qick_216_nn_replay_ila
+.PHONY: package-zcu216-nn-replay-ila
+
 # Git branch this checkout is on, with / replaced by - (used in REMOTE)
 BRANCH ?= $(shell git rev-parse --abbrev-ref HEAD | tr / -)
 
@@ -111,7 +157,8 @@ BRANCH ?= $(shell git rev-parse --abbrev-ref HEAD | tr / -)
 REMOTE ?= xilinx@rfsoc216-ml01.dhcp.fnal.gov:~/jupyter_notebooks/qick-$(BRANCH)/qick_ml/216/$(BRANCH)
 
 # Packaged builds copied by copy-zcu216: all of them (empty), or a list of
-# orig, orig_ila, nn, nn_ila (e.g. make copy-zcu216 BUILD=nn or BUILD="nn nn_ila")
+# orig, orig_ila, nn, nn_ila, nn_replay, nn_replay_ila
+# (e.g. make copy-zcu216 BUILD=nn or BUILD="nn nn_ila")
 BUILD ?=
 
 # Copy the packaged builds in package/ (created by package-zcu216-*) to REMOTE
@@ -144,3 +191,13 @@ distclean-zcu216-nn:
 distclean-zcu216-nn-ila:
 	@rm -rf top_216_nn_ila
 .PHONY: distclean-zcu216-nn-ila
+
+# Remove top_216_nn_replay project directory created by syn-zcu216-nn-replay
+distclean-zcu216-nn-replay:
+	@rm -rf top_216_nn_replay
+.PHONY: distclean-zcu216-nn-replay
+
+# Remove top_216_nn_replay_ila project directory created by syn-zcu216-nn-replay-ila
+distclean-zcu216-nn-replay-ila:
+	@rm -rf top_216_nn_replay_ila
+.PHONY: distclean-zcu216-nn-replay-ila
